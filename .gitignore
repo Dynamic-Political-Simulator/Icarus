@@ -365,7 +365,7 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-PythonScripts/Lib/*
-PythonScripts/Scripts/*
-PythonScripts/share/*
-PythonScripts/pyvenv.cfg
+/PythonScripts/Lib/
+/PythonScripts/Scripts/
+/PythonScripts/share/
+/PythonScripts/pyvenv.cfg
