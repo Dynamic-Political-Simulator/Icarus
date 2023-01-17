@@ -372,3 +372,6 @@ FodyWeavers.xsd
 
 # VS Code generated files
 .vscode/
+
+# EF Core Migrations
+Migrations/
