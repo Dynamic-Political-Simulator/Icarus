@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -17,7 +18,7 @@ namespace Icarus
 
         public static IConfigurationRoot Configuration { get; set; }
 
-        static void Main(string[] args) => new Program().Start().GetAwaiter().GetResult();
+		static Task Main(string[] args) => new Program().Start();
 
         public async Task Start()
         {
@@ -29,6 +30,16 @@ namespace Icarus
             _client.Log += Log;
 
             _services = BuildServiceProvider();
+
+			var icarusConfig = new IcarusConfig();
+			Configuration.GetSection("IcarusConfig").Bind(icarusConfig);
+
+			await _client.LoginAsync(TokenType.Bot, icarusConfig.Token);
+			await _client.StartAsync();
+
+			await _client.SetGameAsync(icarusConfig.Version);
+
+			await Task.Delay(-1);
         }
 
         private Task Log(LogMessage msg)
