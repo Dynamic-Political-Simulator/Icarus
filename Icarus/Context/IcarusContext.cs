@@ -16,5 +16,7 @@ namespace Icarus.Context
                 + $"Password={config.SqlPassword};"
                 + "MultipleActiveResultSets=true");
         }
+
+		public DbSet<GameState> GameStates;
     }
 }
