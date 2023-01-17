@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace Icarus.Context
@@ -30,9 +31,23 @@ namespace Icarus.Context
                 + $"Database={config.DatabaseName};"
                 + $"User Id={config.SqlUsername};"
                 + $"Password={config.SqlPassword};"
+				+ "Trusted_Connection=false;"
                 + "MultipleActiveResultSets=true");
         }
 
 		public DbSet<GameState> GameStates { get; set; }
+
+		// Default Data
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			modelBuilder.Entity<GameState>().HasData(
+				new GameState
+				{
+					GameStateId = 1,
+					TickInterval = 3600000,
+					LastTickEpoch = 0
+				}
+			);
+		}
     }
 }

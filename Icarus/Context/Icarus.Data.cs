@@ -7,7 +7,7 @@ namespace Icarus.Context
 	{
 		[Key]
 		public int GameStateId { get; set; } = 1;
-		public int TickInterval { get; set; }
+		public long TickInterval { get; set; }
 		public long LastTickEpoch { get; set; }
 	}
 }
