@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Icarus.Context.Models;
 
 namespace Icarus.Context
 {
@@ -15,6 +16,16 @@ namespace Icarus.Context
                 + $"User Id={config.SqlUsername};"
                 + $"Password={config.SqlPassword};"
                 + "MultipleActiveResultSets=true");
+        }
+
+        public DbSet<Value> Values { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ValueModifier>()
+                .HasOne(vm => vm.Value)
+                .WithMany(v => v.Modifiers)
+                .HasForeignKey(vm => vm.ValueId);
         }
     }
 }
