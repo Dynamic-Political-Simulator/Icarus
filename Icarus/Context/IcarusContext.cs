@@ -19,6 +19,8 @@ namespace Icarus.Context
         }
 
         public DbSet<Value> Values { get; set; }
+        public DbSet<ValueModifier> Modifiers { get; set; }
+        public DbSet<ValueRelationship> Relationships { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -26,6 +28,10 @@ namespace Icarus.Context
                 .HasOne(vm => vm.Value)
                 .WithMany(v => v.Modifiers)
                 .HasForeignKey(vm => vm.ValueId);
+            modelBuilder.Entity<ValueRelationship>()
+                .HasOne(vr => vr.Origin);
+            modelBuilder.Entity<ValueRelationship>()
+                .HasOne(vr => vr.Target);
         }
     }
 }

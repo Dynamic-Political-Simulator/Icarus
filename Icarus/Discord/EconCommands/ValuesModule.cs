@@ -26,7 +26,7 @@ namespace Icarus.Discord.EconCommands
         [SlashCommand("setValue","Set the specified Value to a certain Number.")]
         public async Task SetValue(string Value, float Number)
         {
-            Value _Value = _icarusContext.Values.FirstOrDefault(v => v.Name== Value);
+            Value _Value = _icarusContext.Values.FirstOrDefault(v => v.Name == Value);
             if (_Value == null)
             {
                 await RespondAsync($"{Value} is not a Valid Value");
