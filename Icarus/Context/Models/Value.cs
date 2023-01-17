@@ -12,7 +12,7 @@ namespace Icarus.Context.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public float _Value { get; set; }
-        public float _Change { get; set; }
+        public float RelationInducedChange { get; set; }
         public List<ValueModifier> Modifiers { get; set; }
     }
 }
