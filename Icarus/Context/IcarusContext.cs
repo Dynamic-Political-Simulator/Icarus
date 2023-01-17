@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Icarus.Context.Models;
 
 namespace Icarus.Context
 {
@@ -36,9 +37,10 @@ namespace Icarus.Context
         }
 
 		public DbSet<GameState> GameStates { get; set; }
+        public DbSet<Value> Values { get; set; }
 
-		// Default Data
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
+        // Default Data
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<GameState>().HasData(
 				new GameState
@@ -48,6 +50,11 @@ namespace Icarus.Context
 					LastTickEpoch = 0
 				}
 			);
-		}
+
+            modelBuilder.Entity<ValueModifier>()
+                .HasOne(vm => vm.Value)
+                .WithMany(v => v.Modifiers)
+                .HasForeignKey(vm => vm.ValueId);
+        }
     }
 }
