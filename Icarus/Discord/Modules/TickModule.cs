@@ -51,6 +51,12 @@ namespace Bailiff.Discord.Modules
 				long interval = (((hours * 60) + minutes) * 60 + seconds) * 1000 + milliseconds; // Sum up all the defined time units
 				await DeferAsync();
 
+				if (interval <= 0)
+				{
+					await ModifyOriginalResponseAsync(x => x.Content = "Tick interval cannot be negative or zero!");
+					return;
+				}
+
 				// Retrieve the GameState object, update the TickInterval and save it.
 				GameState state = _dbcontext.GameStates.FirstOrDefault();
 				state.TickInterval = interval;
