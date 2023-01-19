@@ -57,16 +57,17 @@ namespace Icarus
 			Configuration.GetSection("IcarusConfig").Bind(icarusConfig);
 
 			InteractionService interactionService = new InteractionService(_client.Rest);
+			// Register slash commands defined in modules
 			await interactionService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), _services);
-			await interactionService.RegisterCommandsToGuildAsync(icarusConfig.GuildId);
+			await interactionService.RegisterCommandsToGuildAsync(icarusConfig.GuildId); // TODO: Register commands globally when this reaches production (otherwise they will not be usable in DMs)
 
+			// Register a callback to handle commands when they are run.
 			_client.InteractionCreated += async (SocketInteraction socketInteraction) =>
 			{
 				try
 				{
 					var context = new SocketInteractionContext(_client, socketInteraction);
 					await interactionService.ExecuteCommandAsync(context, _services);
-					// The '_serviceProvider' belongs to the IServiceProvider class, you need to initialize it
 				}
 				catch (Exception e)
 				{

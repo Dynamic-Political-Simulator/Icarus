@@ -11,12 +11,17 @@ using System.Timers;
 
 namespace Icarus.Services
 {
+	/// <summary>
+	/// A service that manages the tick system. Fires a tick event at a specific interval defined in the GameState stored in the DB.
+	/// </summary>
 	public class TickService
 	{
 		private readonly IConfiguration Configuration;
-		// TODO: Copied this from Babel, was this the right way of working with the Database Context?
 		private readonly IcarusContext _dbcontext;
 
+		/// <summary>
+		/// The function delegate for the TickEvent handler.
+		/// </summary>
 		public delegate void TickHandler();
 
 		/// <summary>
@@ -37,32 +42,44 @@ namespace Icarus.Services
 			StartTickCheck();
 		}
 
+		/// <summary>
+		/// Starts the timer that calls the tick checking function.
+		/// </summary>
 		private void StartTickCheck()
 		{
 			var icarusConfig = new IcarusConfig();
 			Configuration.GetSection("IcarusConfig").Bind(icarusConfig);
 
-			TickEvent += CallSingleTickHandlers;
+			TickEvent += CallSingleTickHandlers; // Subscribe the NextTickEvent invoker to the TickEvent
 
-			var timer = new Timer(icarusConfig.TickResolution);
+			var timer = new Timer(icarusConfig.TickResolution); // The timer will fire every N ms (defined in config)
 			timer.Elapsed += TickCheck;
-			timer.AutoReset = true;
+			timer.AutoReset = true; // Loop the timer once it elapses
 			timer.Enabled = true;
 		}
 
+		/// <summary>
+		/// Fires the NextTickEvent event and clears all of its listeners.
+		/// </summary>
 		private void CallSingleTickHandlers()
 		{
 			NextTickEvent?.Invoke();
 			NextTickEvent = null; // Clear all subscribers as the event has passed
 		}
 
-		private void TickCheck(Object source, ElapsedEventArgs e)
+		/// <summary>
+		/// Checks whether enough time has elapsed for an another tick, called every time the Timer defined in StartTickCheck elapses.
+		/// </summary>
+		/// <param name="source"></param>
+		/// <param name="e"></param>
+		private void TickCheck(object source, ElapsedEventArgs e)
 		{
 			GameState state = _dbcontext.GameStates.FirstOrDefault();
 
 			if (state.TickInterval >= 0)
 			{
 				long currentEpoch = DateTime.Now.ToFileTimeUtc();
+				// If the difference between current epoch and saved epoch exceeds the interval (defined in ms), a tick has ocurred.
 				if (currentEpoch - state.LastTickEpoch >= state.TickInterval)
 				{
 					TickEvent?.Invoke();
@@ -74,6 +91,9 @@ namespace Icarus.Services
 			}
 		}
 
+		/// <summary>
+		/// Forces a tick without checking whether the interval has passed.
+		/// </summary>
 		public void ForceTick()
 		{
 			GameState state = _dbcontext.GameStates.FirstOrDefault();
