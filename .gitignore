@@ -369,3 +369,9 @@ FodyWeavers.xsd
 /PythonScripts/Scripts/
 /PythonScripts/share/
 /PythonScripts/pyvenv.cfg
+
+# VS Code generated files
+.vscode/
+
+# EF Core Migrations
+Migrations/
