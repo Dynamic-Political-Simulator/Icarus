@@ -36,6 +36,9 @@ namespace Icarus.Context
                 + "MultipleActiveResultSets=true");
         }
 
+        public DbSet<CharacterToken> Tokens { get; set; }
+        public DbSet<DiscordUser> Users { get; set; }
+        public DbSet<PlayerCharacter> Characters { get; set; }
 		public DbSet<GameState> GameStates { get; set; }
         public DbSet<Value> Values { get; set; }
         public DbSet<ValueModifier> Modifiers { get; set; }
@@ -61,6 +64,9 @@ namespace Icarus.Context
                 .HasOne(vr => vr.Origin);
             modelBuilder.Entity<ValueRelationship>()
                 .HasOne(vr => vr.Target);
+
+            modelBuilder.Entity<CharacterToken>()
+                .HasKey(ct => new { ct.PlayerCharacterId, ct.TokenTypeId });
         }
     }
 }
