@@ -67,6 +67,16 @@ namespace Icarus.Context
 
             modelBuilder.Entity<CharacterToken>()
                 .HasKey(ct => new { ct.PlayerCharacterId, ct.TokenTypeId });
+
+            modelBuilder.Entity<CharacterToken>()
+                .HasOne(ct => ct.Character)
+                .WithMany(c => c.Tokens)
+                .HasForeignKey(ct => ct.PlayerCharacterId);
+
+            modelBuilder.Entity<PlayerCharacter>()
+                .HasOne(pc => pc.DiscordUser)
+                .WithMany(du => du.Characters)
+                .HasForeignKey(pc => pc.DiscordUserId);
         }
     }
 }

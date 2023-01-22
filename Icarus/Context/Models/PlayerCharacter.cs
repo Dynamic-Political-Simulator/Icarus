@@ -11,6 +11,9 @@ namespace Icarus.Context.Models
         public string CharacterId { get; set; } = Guid.NewGuid().ToString();
         public string CharacterName { get; set; }
 
+        public string DiscordUserId { get; set; }
+        public DiscordUser DiscordUser { get; set; }
+
         public int YearOfBirth { get; set; }
         public int YearOfDeath { get; set; } = -1;
 
