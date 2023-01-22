@@ -1,6 +1,7 @@
 ﻿using Discord.Interactions;
 using Discord.WebSocket;
 using Icarus.Context;
+using Icarus.Discord.CustomPreconditions;
 using Icarus.Services;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,7 @@ namespace Icarus.Discord.Modules
         }
 
         [SlashCommand("action example", "action example please ignore")]
+        [RequireTokenAmount(ActionTokenType.TestToken, 5, true)]
         public async Task ExampleAction()
         {
             var player = _dbContext.Users.First(u => u.DiscordId == Context.User.Id.ToString());
@@ -31,14 +33,7 @@ namespace Icarus.Discord.Modules
 
             var result = _actionService.ExampleAction(character);
 
-            if (result) 
-            {
-                await RespondAsync($"Sufficient Kromer.");
-            }
-            else
-            {
-                await RespondAsync($"Insufficient Kromer.");
-            }
+            await RespondAsync(result);
         }
     }
 }

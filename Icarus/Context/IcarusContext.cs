@@ -66,7 +66,7 @@ namespace Icarus.Context
                 .HasOne(vr => vr.Target);
 
             modelBuilder.Entity<CharacterToken>()
-                .HasKey(ct => new { ct.PlayerCharacterId, ct.TokenTypeId });
+                .HasKey(ct => new { ct.PlayerCharacterId, ct.TokenType });
 
             modelBuilder.Entity<CharacterToken>()
                 .HasOne(ct => ct.Character)

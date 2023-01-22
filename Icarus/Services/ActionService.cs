@@ -19,18 +19,13 @@ namespace Icarus.Services
             _dbcontext = dbcontext;
         }
 
-        public bool ExampleAction(PlayerCharacter character)
+        public string ExampleAction(PlayerCharacter character)
         {
-            if (character.Tokens.Single(t => t.TokenType == TokenType.TestToken).Amount >= 5)
-            {
-                return true;
-            }
-
-            return false;
+            return "Example aciton.";
         }
     }
 
-    public enum TokenType
+    public enum ActionTokenType
     {
         TestToken = 0,
         OtherTestToken = 1
