@@ -375,3 +375,6 @@ FodyWeavers.xsd
 
 # EF Core Migrations
 Migrations/
+
+# Google API Key
+gapiKey.json

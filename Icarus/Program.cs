@@ -99,6 +99,7 @@ namespace Icarus
 
 			services.AddSingleton(_client)
 				.AddSingleton<TickService>()
+				.AddSingleton<GoogleSheetsService>()
 				.AddDbContext<IcarusContext>(ServiceLifetime.Transient);
 
             return services.BuildServiceProvider();

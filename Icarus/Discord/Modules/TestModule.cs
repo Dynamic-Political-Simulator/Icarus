@@ -14,18 +14,34 @@ namespace Bailiff.Discord.Modules
 		private readonly DiscordSocketClient _client;
 		private readonly IcarusContext _dbcontext;
 		private readonly TickService _tickService;
+		private readonly GoogleSheetsService _gsheetsService;
 
-		public TestModule(DiscordSocketClient client, IcarusContext dbcontext, TickService tickService)
+		public TestModule(DiscordSocketClient client, IcarusContext dbcontext, TickService tickService, GoogleSheetsService gsheetsService)
 		{
 			_client = client;
 			_dbcontext = dbcontext;
 			_tickService = tickService;
+			_gsheetsService = gsheetsService;
 		}
 
 		[SlashCommand("test", "Test command please ignore")]
 		public async Task GetTest()
 		{
 			await RespondAsync($"Tower was here");
+		}
+
+		[SlashCommand("get-cell-test", "get a cell in google sheets")]
+		public async Task GetCellTest(string spreadsheetID, string cellID)
+		{
+			await RespondAsync($"{_gsheetsService.GetCell(spreadsheetID, cellID)}");
+		}
+
+		[SlashCommand("update-cell-test", "get a cell in google sheets")]
+		public async Task UpdateCellTest(string spreadsheetID, string cellID, string newVal)
+		{
+			await DeferAsync();
+			_gsheetsService.UpdateCell(spreadsheetID, cellID, newVal);
+			await ModifyOriginalResponseAsync(x => x.Content = "Update made!");
 		}
 	}
 }

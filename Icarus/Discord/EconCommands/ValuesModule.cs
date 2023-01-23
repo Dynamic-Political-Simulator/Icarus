@@ -23,7 +23,7 @@ namespace Icarus.Discord.EconCommands
             _client = client;
         }
 
-        [SlashCommand("setValue","Set the specified Value to a certain Number.")]
+		[SlashCommand("set-value", "Set the specified Value to a certain Number.")]
         public async Task SetValue(string Value, float Number)
         {
             Value _Value = _icarusContext.Values.FirstOrDefault(v => v.Name == Value);
