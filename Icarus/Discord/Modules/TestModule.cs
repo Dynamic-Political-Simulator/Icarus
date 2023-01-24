@@ -6,6 +6,7 @@ using Icarus.Services;
 using System.Linq;
 using System;
 using Discord;
+using System.Collections.Generic;
 
 namespace Bailiff.Discord.Modules
 {
@@ -33,14 +34,14 @@ namespace Bailiff.Discord.Modules
 		[SlashCommand("get-cell-test", "get a cell in google sheets")]
 		public async Task GetCellTest(string spreadsheetID, string cellID)
 		{
-			await RespondAsync($"{_gsheetsService.GetCell(spreadsheetID, cellID)}");
+			await RespondAsync($"{_gsheetsService.GenerateContext(spreadsheetID).Get(cellID)[0][0]}");
 		}
 
 		[SlashCommand("update-cell-test", "get a cell in google sheets")]
 		public async Task UpdateCellTest(string spreadsheetID, string cellID, string newVal)
 		{
 			await DeferAsync();
-			_gsheetsService.UpdateCell(spreadsheetID, cellID, newVal);
+			_gsheetsService.GenerateContext(spreadsheetID).Update(cellID, new List<List<string>> { new List<string> { newVal } });
 			await ModifyOriginalResponseAsync(x => x.Content = "Update made!");
 		}
 	}
