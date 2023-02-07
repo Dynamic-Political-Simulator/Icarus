@@ -31,7 +31,7 @@ namespace Icarus.Discord.CustomPreconditions
 
             if(character.Tokens.First(t => t.TokenType == _tokenType).Amount < _amount)
             {
-                return await Task.FromResult(PreconditionResult.FromError($"You need {_amount} of {nameof(_tokenType)} to do this."));
+                return PreconditionResult.FromError($"You need {_amount} of {nameof(_tokenType)} to do this.");
             }
 
             if (_removeTokens)
@@ -44,7 +44,7 @@ namespace Icarus.Discord.CustomPreconditions
                 await db.SaveChangesAsync();
             }
             
-            return await Task.FromResult(PreconditionResult.FromSuccess());
+            return PreconditionResult.FromSuccess();
         }
     }
 }
