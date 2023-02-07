@@ -21,6 +21,8 @@ namespace Icarus.Context
         public DbSet<Value> Values { get; set; }
         public DbSet<ValueModifier> Modifiers { get; set; }
         public DbSet<ValueRelationship> Relationships { get; set; }
+        public DbSet<Nation> Nations { get; set; }
+        public DbSet<Province> Provinces { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,6 +34,14 @@ namespace Icarus.Context
                 .HasOne(vr => vr.Origin);
             modelBuilder.Entity<ValueRelationship>()
                 .HasOne(vr => vr.Target);
+            modelBuilder.Entity<Value>()
+                .HasOne(v => v.Province)
+                .WithMany(p => p.Values)
+                .HasForeignKey(v => v.ProvinceId);
+            modelBuilder.Entity<Province>()
+                .HasOne(p => p.Nation)
+                .WithMany(n => n.Provinces)
+                .HasForeignKey(p => p.NationId);
         }
     }
 }

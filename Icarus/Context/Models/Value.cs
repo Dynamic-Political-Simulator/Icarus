@@ -14,5 +14,8 @@ namespace Icarus.Context.Models
         public float _Value { get; set; }
         public float RelationInducedChange { get; set; }
         public List<ValueModifier> Modifiers { get; set; }
+
+        public string ProvinceId { get; set; }
+        public Province Province { get; set; }
     }
 }

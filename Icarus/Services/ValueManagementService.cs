@@ -38,6 +38,11 @@ namespace Icarus.Services
             await _icarusContext.SaveChangesAsync();
         }
 
+        public float GetValueChange(Value value)
+        {
+            return AggregateModifiers(value) + value.RelationInducedChange;
+        }
+
         public float CalculateNewValue(Value Value)
         {
             float TotalModifier = AggregateModifiers(Value);
