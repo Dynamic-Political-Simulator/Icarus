@@ -18,7 +18,7 @@ namespace Icarus.Context.Models
         public ModifierType Type { get; set; }
 
         public string ValueId { get; set; }
-        public Value Value { get; set; }
+        public virtual Value Value { get; set; }
     }
 
     public enum ModifierType
