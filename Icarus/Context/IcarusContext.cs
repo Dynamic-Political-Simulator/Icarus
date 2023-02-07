@@ -28,7 +28,9 @@ namespace Icarus.Context
             var config = new IcarusConfig();
 			Configuration.GetSection("IcarusConfig").Bind(config);
 
-            optionsBuilder.UseSqlServer($"Server={config.DatabaseIp};"
+            optionsBuilder
+                .UseLazyLoadingProxies()
+                .UseSqlServer($"Server={config.DatabaseIp};"
                 + $"Database={config.DatabaseName};"
                 + $"User Id={config.SqlUsername};"
                 + $"Password={config.SqlPassword};"
