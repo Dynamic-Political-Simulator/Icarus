@@ -99,6 +99,7 @@ namespace Icarus
 
 			services.AddSingleton(_client)
 				.AddSingleton<TickService>()
+				.AddSingleton<ActionService>()
 				.AddDbContext<IcarusContext>(ServiceLifetime.Transient);
 
             return services.BuildServiceProvider();
