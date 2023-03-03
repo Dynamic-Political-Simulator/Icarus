@@ -375,3 +375,5 @@ FodyWeavers.xsd
 
 # EF Core Migrations
 Migrations/
+
+.env

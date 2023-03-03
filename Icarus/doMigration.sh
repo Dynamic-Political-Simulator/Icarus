@@ -8,20 +8,10 @@
 # Haha this totally didn't nuke the folder you're in if it didn't contain a folder called "Migrations"
 # Anyways fixed it haha so it's back and better than ever!
 # - Tower 2023
-sudo docker ps | grep 'sql1' &> /dev/null
-if [ $? != 0 ]; then
-    echo "MSSQL docker instance not running!"
-else
-	if [[ -d ./Migrations ]]; then
-    	echo "Deleting existing migrations..."
-    	cd ./Migrations
-    	rm -rf * # Delete all migrations
-    	cd ..
-	fi
-    echo "Creating a new migration..."
-    dotnet ef migrations add initial &> /dev/null
-    echo "Updating the database..."
-    yes "y" | dotnet ef database drop &> /dev/null
-    dotnet ef database update &> /dev/null
-    echo "Done."
-fi
+# This is an updated version for the docker container - the main difference is that it won't nuke the DB nor existing Migrations, making it usable on prod (hopefully). Also skips the check for the MSSQL container, since docker compose should ensure that.
+# - Tower 03/03/2023
+echo "Creating a new migration..."
+dotnet ef migrations add Automated &> /dev/null
+echo "Updating the database..."
+dotnet ef database update &> /dev/null
+echo "Done."
