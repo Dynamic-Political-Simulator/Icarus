@@ -21,9 +21,10 @@ if [ $commits_behind != "0" ]; then
 	# If we are behind any commits, run git pull, rebuild the docker images and update the docker containers
 	echo "Update found, rebuilding docker containers!"
 	git pull
+	./Icarus/doMigration.sh
 	docker compose build
 	docker compose up -d --remove-orphans
-	docker image prune # Prune the images, this is optional but I think it's better to run it since idk if docker compose build prunes previous images of Icarus
+	yes | docker image prune # Prune the images, this is optional but I think it's better to run it since idk if docker compose build prunes previous images of Icarus
 else
 	# No updates found, so we do nothing
 	echo "No updates found."

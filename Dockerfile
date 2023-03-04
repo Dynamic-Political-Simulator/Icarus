@@ -2,16 +2,17 @@
 
 # Set up the build environment
 FROM mcr.microsoft.com/dotnet/sdk:3.1 as build-env
+
+# Specify the work directory
 WORKDIR /Icarus
+
 # Restore the project
 COPY Icarus/*.csproj .
-COPY Icarus/doMigration.sh .
 RUN dotnet restore
-
-RUN ./doMigration.sh
+# Copy all of the other files to the workdir
+COPY Icarus .
 
 # Build the project
-COPY Icarus .
 RUN dotnet publish -c Release -o /publish
 
 # Set up the runtime environment

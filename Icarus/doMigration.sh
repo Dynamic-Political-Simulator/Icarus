@@ -10,6 +10,7 @@
 # - Tower 2023
 # This is an updated version for the docker container - the main difference is that it won't nuke the DB nor existing Migrations, making it usable on prod (hopefully). Also skips the check for the MSSQL container, since docker compose should ensure that.
 # - Tower 03/03/2023
+cd Icarus
 echo "Creating a new migration..."
 dotnet ef migrations add Automated &> /dev/null
 echo "Updating the database..."
