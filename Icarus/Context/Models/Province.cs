@@ -12,7 +12,7 @@ namespace Icarus.Context.Models
         public string Name { get; set; }
         public string Description { get; set; }
 
-        public List<Value> Values { get; set; }
+        public List<Value> Values { get; set; } = new List<Value>();
 
         public int NationId { get; set; }
         public Nation Nation { get; set; }

@@ -20,6 +20,7 @@ namespace Icarus.Services
             _icarusContext = context;
             Values = _icarusContext.Values.ToList();
             Modifiers = _icarusContext.Modifiers.ToList();
+
         }
 
         //This will need to be executed every Tick
@@ -66,7 +67,7 @@ namespace Icarus.Services
             foreach (Value Value in Values)
             {
                 Value.RelationInducedChange = 0;
-                List<ValueRelationship> Relationships = _icarusContext.Relationships.Where(vr => vr.Target == Value);
+                List<ValueRelationship> Relationships = _icarusContext.Relationships.AsQueryable().Where(vr => vr.Target == Value).ToList();
                 foreach(ValueRelationship relationship in Relationships)
                 {
                     float change = Math.Clamp(relationship.Factor * relationship.Origin._Value, relationship.Min, relationship.Max);
@@ -112,11 +113,88 @@ namespace Icarus.Services
                         break;
                 }
             }
-            //How To Best do This
-            //Ideally avoid hard coding this in
-            //Maybe some XML Format?
-            //Maybe Hardcoding... not sure.
             await _icarusContext.SaveChangesAsync();
+        }
+
+        //These are the values used. Initial Values will need to be subject to later balancing
+        //Maybe have some better way than them being hardcoded?
+        public List<Value> GenerateValueTemplate()
+        {
+            Values = new List<Value>();
+            Value StandardOfLiving = new Value() {
+                Name= "StandardOfLiving",
+                _Value = 10,
+            };
+            Values.Add(StandardOfLiving);
+            Value Literacy = new Value()
+            {
+                Name = "Literacy",
+                _Value = 10,
+            };
+            Values.Add(Literacy);
+            Value Security = new Value()
+            {
+                Name = "Security",
+                _Value = 10,
+            };
+            Values.Add(Security);
+            Value Health = new Value()
+            {
+                Name = "Health",
+                _Value = 10,
+            };
+            Values.Add(Health);
+            Value Housing = new Value()
+            {
+                Name = "Housing",
+                _Value = 10,
+            };
+            Values.Add(Housing);
+            Value Urbanization = new Value()
+            {
+                Name = "Urbanization",
+                _Value = 10,
+            };
+            Values.Add(Urbanization);
+            Value EconomicStrength = new Value()
+            {
+                Name = "Economic Strength",
+                _Value = 10,
+            };
+            Values.Add(EconomicStrength);
+            Value Mechanisation = new Value()
+            {
+                Name = "Mechanisation",
+                _Value = 10,
+            };
+            Values.Add(Mechanisation);
+            Value IndustrialOutput = new Value()
+            {
+                Name = "IndustrialOutput",
+                _Value = 10,
+            };
+            Values.Add(Mechanisation);
+            Value Infrastructure = new Value()
+            {
+                Name = "Infrastructure",
+                _Value = 10,
+            };
+            Values.Add(Infrastructure);
+            Value Destitution = new Value()
+            {
+                Name = "Destitution",
+                _Value = 10,
+            };
+            Values.Add(Destitution);
+
+
+            return Values;
+        }
+
+        //What we wanna do here is 
+        public List<ValueRelationship> GenerateValueRelationships(List<Value> Values)
+        {
+            return null;
         }
 
     }

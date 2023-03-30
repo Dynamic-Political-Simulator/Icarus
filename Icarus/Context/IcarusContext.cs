@@ -42,6 +42,8 @@ namespace Icarus.Context
                 .HasOne(p => p.Nation)
                 .WithMany(n => n.Provinces)
                 .HasForeignKey(p => p.NationId);
+            modelBuilder.Entity<Gamestate>()
+                .HasOne(g => g.Nation);
         }
     }
 }

@@ -74,6 +74,7 @@ namespace Icarus.Discord.EconCommands
                     stringBuilder.AppendLine($"{v.Name} : {v._Value}({_valueManagementService.GetValueChange(v)})");
                 }
             }
+            await RespondAsync(stringBuilder.ToString());
         }
     }
 }

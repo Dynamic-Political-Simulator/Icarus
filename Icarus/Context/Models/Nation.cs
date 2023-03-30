@@ -10,6 +10,6 @@ namespace Icarus.Context.Models
         public string Name { get; set; }
         public string Description { get; set; }
 
-        public List<Province> Provinces { get; set; }
+        public List<Province> Provinces { get; set; } = new List<Province>();
     }
 }
