@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Icarus.Context;
+using Icarus.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -47,6 +49,8 @@ namespace Icarus
 
             services.AddSingleton(_client)
                 .AddSingleton(_commands)
+                .AddSingleton<ValueManagementService>()
+                .AddDbContext<IcarusContext>(ServiceLifetime.Transient)
             //.AddSingleton<RollService>()
             //.AddSingleton<ActivityService>()
             //.AddSingleton<DeathService>()

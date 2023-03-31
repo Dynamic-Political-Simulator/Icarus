@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using Icarus.Context;
 using Icarus.Context.Models;
 
@@ -12,15 +13,10 @@ namespace Icarus.Services
     public class ValueManagementService
     {
         private readonly IcarusContext _icarusContext;
-        public List<Value> Values;
-        public List<ValueModifier> Modifiers;
 
         public ValueManagementService(IcarusContext context)
         {
             _icarusContext = context;
-            Values = _icarusContext.Values.ToList();
-            Modifiers = _icarusContext.Modifiers.ToList();
-
         }
 
         //This will need to be executed every Tick
@@ -32,7 +28,7 @@ namespace Icarus.Services
         }
         public async Task UpdateValues()
         {
-            foreach (Value Value in Values)
+            foreach (Value Value in _icarusContext.Values)
             {
                 CalculateNewValue(Value);
             }
@@ -54,9 +50,18 @@ namespace Icarus.Services
         public float AggregateModifiers(Value Value)
         {
             float Total = 0f;
-            foreach (ValueModifier Modifier in Value.Modifiers)
+            ValueModifier vm;
+            //Aggregate the local Modifiers
+            foreach (Modifier modifier in Value.Province.Modifiers.Where(m => m.Modifiers.FirstOrDefault(vm => vm.ValueName == Value.Name) != null)) 
             {
-                Total += Modifier.Modifier;
+                vm = modifier.Modifiers.FirstOrDefault(vm => vm.ValueName == Value.Name);
+                Total += vm.Modifier;
+            }
+            //Aggregate the global Modifiers
+            foreach (Modifier modifier in Value.Province.Nation.Modifiers.Where(m => m.Modifiers.FirstOrDefault(vm => vm.ValueName == Value.Name) != null))
+            {
+                vm = modifier.Modifiers.FirstOrDefault(vm => vm.ValueName == Value.Name);
+                Total += vm.Modifier;
             }
 
             return Total;
@@ -64,7 +69,7 @@ namespace Icarus.Services
 
         public async Task ReEvaluateRelations()
         {
-            foreach (Value Value in Values)
+            foreach (Value Value in _icarusContext.Values)
             {
                 Value.RelationInducedChange = 0;
                 List<ValueRelationship> Relationships = _icarusContext.Relationships.AsQueryable().Where(vr => vr.Target == Value).ToList();
@@ -82,7 +87,7 @@ namespace Icarus.Services
 
         public async Task ReEvaluteModifiers()
         {
-            foreach (ValueModifier modifier in Modifiers)
+            foreach (Modifier modifier in _icarusContext.Modifiers)
             {
                 switch (modifier.Type)
                 {
@@ -94,21 +99,31 @@ namespace Icarus.Services
                         }
                         break;
                     case ModifierType.Decaying:
-                        if (modifier.Modifier > 0)
+                        
+                        foreach(ValueModifier vm in modifier.Modifiers)
                         {
-                            modifier.Modifier -= modifier.Decay;
-                            if (modifier.Modifier < 0)
+                            if (vm.Decay > 0)
                             {
-                                _icarusContext.Modifiers.Remove(modifier);
+                                vm.Modifier += vm.Decay;
+                                if (vm.Modifier > 0)
+                                {
+                                    modifier.Modifiers.Remove(vm);
+                                    _icarusContext.ValueModifiers.Remove(vm);
+                                }
+                            }
+                            else
+                            {
+                                vm.Modifier -= vm.Decay;
+                                if (vm.Modifier < 0)
+                                {
+                                    modifier.Modifiers.Remove(vm);
+                                    _icarusContext.ValueModifiers.Remove(vm);
+                                }
                             }
                         }
-                        else
+                        if (modifier.Modifiers.Count == 0)
                         {
-                            modifier.Modifier += modifier.Decay;
-                            if (modifier.Modifier > 0)
-                            {
-                                _icarusContext.Modifiers.Remove(modifier);
-                            }
+                            _icarusContext.Modifiers.Remove(modifier);
                         }
                         break;
                 }
@@ -120,7 +135,7 @@ namespace Icarus.Services
         //Maybe have some better way than them being hardcoded?
         public List<Value> GenerateValueTemplate()
         {
-            Values = new List<Value>();
+            List<Value> Values = new List<Value>();
             Value StandardOfLiving = new Value() {
                 Name= "StandardOfLiving",
                 _Value = 10,
@@ -192,10 +207,65 @@ namespace Icarus.Services
         }
 
         //What we wanna do here is 
-        public List<ValueRelationship> GenerateValueRelationships(List<Value> Values)
+        public async Task GenerateValueRelationships(List<Value> Values)
         {
-            return null;
+            string DataPath = "D:\\SeasonDPS\\Icarus\\Icarus\\Context\\ValueRelationShips.xml";
+            XmlDocument Xmldata = new XmlDocument();
+            Xmldata.Load(DataPath);
+            List<RelationShipDTO> RelationShipDTOs = new List<RelationShipDTO>();
+            foreach (XmlNode relationship in Xmldata.FirstChild.ChildNodes)
+            {
+                RelationShipDTOs.Add(new RelationShipDTO()
+                {
+                    Origin = relationship.SelectSingleNode("/Origin").InnerText,
+                    Target = relationship.SelectSingleNode("/Target").InnerText,
+                    Factor = float.Parse(relationship.SelectSingleNode("/Factor").InnerText),
+                    Max = float.Parse(relationship.SelectSingleNode("/Max").InnerText),
+                    Min = float.Parse(relationship.SelectSingleNode("/Min").InnerText)
+                });
+            }
+
+            List<ValueRelationship> Relationships = new List<ValueRelationship>();
+
+            foreach(Value Value in Values)
+            {
+                List<RelationShipDTO> ValidDTOs = RelationShipDTOs.Where(v=> v.Origin == Value.Name).ToList();
+                foreach (RelationShipDTO DTO in ValidDTOs)
+                {
+                    Value Target = Values.FirstOrDefault(v => v.Name == DTO.Target);
+                    if (Target != null)
+                    {
+                        Relationships.Add(new ValueRelationship()
+                        {
+                            Origin = Value,
+                            Target = Target,
+                            Factor = DTO.Factor,
+                            Max = DTO.Max,
+                            Min = DTO.Min
+                        });
+                    }
+                    else
+                    {
+                        //Crash
+                        Console.WriteLine("SOMETHING HAS GONE WRONG. THERE WAS A RELATIONSHIP FOUND WITH AN EXISTING ORIGIN VALUE BUT A MISSING TARGET VALUE");
+                    }
+                }
+            }
+
+            _icarusContext.Relationships.AddRange(Relationships);
+
+            await _icarusContext.SaveChangesAsync();
         }
 
+
+    }
+
+    public class RelationShipDTO
+    {
+        public string Origin { get; set; }
+        public string Target { get; set; }
+        public float Factor { get; set; }
+        public float Max { get; set; }
+        public float Min { get; set; }
     }
 }

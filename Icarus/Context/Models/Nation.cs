@@ -11,5 +11,6 @@ namespace Icarus.Context.Models
         public string Description { get; set; }
 
         public List<Province> Provinces { get; set; } = new List<Province>();
+        public List<Modifier> Modifiers { get; set; } = new List<Modifier>();
     }
 }

@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Icarus.Discord.EconCommands
@@ -76,5 +77,90 @@ namespace Icarus.Discord.EconCommands
             }
             await RespondAsync(stringBuilder.ToString());
         }
+
+        /*
+        //Local Modifiers
+        [SlashCommand("CreateLocalStaticModifier", "Creates a new permanent Modifier in a specific Province")]
+        public async Task CreateLocalStaticModifier(string ProvinceName, string ValueName, string ModifierName, string Description, string Modifier)
+        {
+            ValueModifier valueModifier = new ValueModifier()
+            {
+                Name = ModifierName,
+                Description = Description,
+                Modifier = float.Parse(Modifier),
+                Type = ModifierType.Permanent,
+                Locality = Locality.Local
+            };
+            Province p = _icarusContext.Provinces.FirstOrDefault(p=>p.Name == ProvinceName);
+            if (p == null)
+            {
+                await RespondAsync("Province not Found");
+            }
+            Value v = p.Values.FirstOrDefault(v=>v.Name == ValueName);
+            if (v == null)
+            {
+                await RespondAsync("Value not Found");
+            }
+            v.Modifiers.Add(valueModifier);
+            await _icarusContext.SaveChangesAsync();
+            await RespondAsync($"Created new permanent local Modifier at {p.Name} affecting {v.Name} by {valueModifier.Modifier}");
+        }
+
+        [SlashCommand("CreateLocalTemporaryModifier", "Creates a new temporary Modifier in a specific Province")]
+        public async Task CreateLocalTemporaryModifier(string ProvinceName, string ValueName, string ModifierName, string Description, string Modifier, string Ticks)
+        {
+            ValueModifier valueModifier = new ValueModifier()
+            {
+                Name = ModifierName,
+                Description = Description,
+                Modifier = float.Parse(Modifier),
+                Type = ModifierType.Temporary,
+                Duration = int.Parse(Ticks),
+                Locality = Locality.Local
+            };
+            Province p = _icarusContext.Provinces.FirstOrDefault(p => p.Name == ProvinceName);
+            if (p == null)
+            {
+                await RespondAsync("Province not Found");
+            }
+            Value v = p.Values.FirstOrDefault(v => v.Name == ValueName);
+            if (v == null)
+            {
+                await RespondAsync("Value not Found");
+            }
+            v.Modifiers.Add(valueModifier);
+            _icarusContext.Modifiers.Add(valueModifier);
+            await _icarusContext.SaveChangesAsync();
+            await RespondAsync($"Created new temporary local Modifier at {p.Name} affecting {v.Name} by {valueModifier.Modifier} lasting {valueModifier.Duration} Ticks");
+        }
+
+        [SlashCommand("CreateLocalDecayingModifier", "Creates a new decaying Modifier in a specific Province")]
+        public async Task CreateLocalDecayingModifier(string ProvinceName, string ValueName, string ModifierName, string Description, string Modifier, string Decay)
+        {
+            ValueModifier valueModifier = new ValueModifier()
+            {
+                Name = ModifierName,
+                Description = Description,
+                Modifier = float.Parse(Modifier),
+                Type = ModifierType.Temporary,
+                Decay = float.Parse(Decay),
+                Locality = Locality.Local
+            };
+            Province p = _icarusContext.Provinces.FirstOrDefault(p => p.Name == ProvinceName);
+            if (p == null)
+            {
+                await RespondAsync("Province not Found");
+            }
+            Value v = p.Values.FirstOrDefault(v => v.Name == ValueName);
+            if (v == null)
+            {
+                await RespondAsync("Value not Found");
+            }
+            v.Modifiers.Add(valueModifier);
+            _icarusContext.Modifiers.Add(valueModifier);
+            await _icarusContext.SaveChangesAsync();
+            await RespondAsync($"Created new decaying local Modifier at {p.Name} affecting {v.Name} by {valueModifier.Modifier} decaying by {valueModifier.Decay} each Tick");
+        }
+        */
     }
 }

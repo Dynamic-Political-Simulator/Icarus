@@ -18,18 +18,20 @@ namespace Icarus.Context
                 + "MultipleActiveResultSets=true");
         }
 
+        public DbSet<Gamestate> Gamestates { get; set; }
         public DbSet<Value> Values { get; set; }
-        public DbSet<ValueModifier> Modifiers { get; set; }
+        public DbSet<ValueModifier> ValueModifiers { get; set; }
         public DbSet<ValueRelationship> Relationships { get; set; }
         public DbSet<Nation> Nations { get; set; }
         public DbSet<Province> Provinces { get; set; }
+        public DbSet<Modifier> Modifiers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ValueModifier>()
-                .HasOne(vm => vm.Value)
-                .WithMany(v => v.Modifiers)
-                .HasForeignKey(vm => vm.ValueId);
+                .HasOne(m => m.ModifierWrapper)
+                .WithMany(m => m.Modifiers)
+                .HasForeignKey(m => m.ModifierWrapperId);
             modelBuilder.Entity<ValueRelationship>()
                 .HasOne(vr => vr.Origin);
             modelBuilder.Entity<ValueRelationship>()

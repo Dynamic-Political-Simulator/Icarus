@@ -13,6 +13,7 @@ namespace Icarus.Context.Models
         public string Description { get; set; }
 
         public List<Value> Values { get; set; } = new List<Value>();
+        public List<Modifier> Modifiers { get; set;} = new List<Modifier>();
 
         public int NationId { get; set; }
         public Nation Nation { get; set; }
