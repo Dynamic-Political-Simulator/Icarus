@@ -369,3 +369,4 @@ FodyWeavers.xsd
 /PythonScripts/Scripts/
 /PythonScripts/share/
 /PythonScripts/pyvenv.cfg
+/Icarus/Properties/launchSettings.json
