@@ -7,12 +7,14 @@ using System.Threading.Tasks;
 using System.Xml;
 using Icarus.Context;
 using Icarus.Context.Models;
+using Icarus.Discord.EconCommands;
 
 namespace Icarus.Services
 {
     public class ValueManagementService
     {
         private readonly IcarusContext _icarusContext;
+        public List<ModifierCreationDTO> Modifiers { get; set; } = new List<ModifierCreationDTO>();
 
         public ValueManagementService(IcarusContext context)
         {
@@ -188,7 +190,7 @@ namespace Icarus.Services
                 Name = "IndustrialOutput",
                 _Value = 10,
             };
-            Values.Add(Mechanisation);
+            Values.Add(IndustrialOutput);
             Value Infrastructure = new Value()
             {
                 Name = "Infrastructure",
@@ -256,6 +258,8 @@ namespace Icarus.Services
 
             await _icarusContext.SaveChangesAsync();
         }
+
+
 
 
     }

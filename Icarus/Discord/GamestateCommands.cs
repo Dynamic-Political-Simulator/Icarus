@@ -26,7 +26,7 @@ namespace Icarus.Discord
             _valueManagementService = valueManagementService;
         }
 
-        [SlashCommand("startTestGame","Starts a new Game")]
+        [SlashCommand("starttestgame","Starts a new Game")]
         public async Task startTestGame()
         {
             //Some Code here to clean up the prior gameState
@@ -54,7 +54,9 @@ namespace Icarus.Discord
                 gamestate.Nation.Provinces.Add(province);
                 await _valueManagementService.GenerateValueRelationships(province.Values);
             }
+            _icarusContext.Gamestates.Add(gamestate);
 
+            await _icarusContext.SaveChangesAsync();
             await RespondAsync("Success!");
         }
     }

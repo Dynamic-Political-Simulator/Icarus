@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Icarus": {
+      "commandName": "Project",
+      "remoteDebugEnabled": false,
+      "nativeDebugging": true,
+      "sqlDebugging": true
+    }
+  }
+}

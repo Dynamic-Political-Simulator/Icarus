@@ -12,5 +12,6 @@ namespace Icarus
 		public string SqlUsername { get; set; }
 		public string DatabaseName { get; set; }
 		public string Token { get; set; }
+		public ulong GuildId { get; set; }
 	}
 }

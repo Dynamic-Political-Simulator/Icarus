@@ -27,7 +27,7 @@ namespace Icarus.Discord.EconCommands
             _valueManagementService = valueManagementService;
         }
 
-        [SlashCommand("setValue","Set the specified Value to a certain Number.")]
+        [SlashCommand("setvalue","Set the specified Value to a certain Number.")]
         public async Task SetValue(string ProvinceName,string ValueName, float Number)
         {
             if (Number < 0)
@@ -53,7 +53,7 @@ namespace Icarus.Discord.EconCommands
 
         }
 
-        [SlashCommand("showValues", "Show Values of a Province")]
+        [SlashCommand("showvalues", "Show Values of a Province")]
         public async Task ShowValues(string ProvinceName)
         {
             Province province = _icarusContext.Provinces.FirstOrDefault(p => p.Name == ProvinceName);

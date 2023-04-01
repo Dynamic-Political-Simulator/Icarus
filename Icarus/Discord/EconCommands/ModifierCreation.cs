@@ -1,12 +1,14 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.Interactions;
+using Discord.Net;
 using Discord.WebSocket;
 using Icarus.Context;
 using Icarus.Context.Models;
 using Icarus.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
@@ -20,13 +22,14 @@ namespace Icarus.Discord.EconCommands
         private readonly IcarusContext _icarusContext;
         private readonly DiscordSocketClient _client;
         private readonly ValueManagementService _valueManagementService;
-        public List<ModifierCreationDTO> Modifiers { get; set; } = new List<ModifierCreationDTO>();
 
         public ModifierCreation(IcarusContext icarusContext, DiscordSocketClient client, ValueManagementService valueManagementService)
         {
             _icarusContext = icarusContext;
             _client = client;
             _valueManagementService = valueManagementService;
+
+            _client.ModalSubmitted += ModifierHeightHandling;
         }
 
         //Creation of Modifier Steps
@@ -46,12 +49,16 @@ namespace Icarus.Discord.EconCommands
             Dictionary<string,string> result = new Dictionary<string,string>();
             List<string> data = Id.Split('_').ToList();
             result.Add("modifier", data[0]);
+            if(data.Count < 2 ) 
+            {
+                return result;
+            }
             result.Add("stage", data[1]);
             //If the stage is "amount" the compound key will also contain info about the type of value
-            if (data[1] == "Amount")
-            {
-                result.Add("value", data[2]);
-            }
+            //if (data[1] == "Amount")
+            //{
+            //    result.Add("value", data[2]);
+            //}
 
             return result;
         }
@@ -59,15 +66,12 @@ namespace Icarus.Discord.EconCommands
         public string GenerateCompoundId(string modifier, string stage, string value = "")
         {
             string id = modifier + "_" + stage;
-            if (stage == "Amount")
-            {
-                id += "_" + value;
-            }
             return id;
         }
 
         public SelectMenuBuilder CreateSelectMenu(string ModifierName, string Stage, List<string> Options, string Placeholder = "Select Option")
         {
+            Debug.WriteLine("Creating Dropdown!");
             SelectMenuBuilder builder = new SelectMenuBuilder()
                 .WithPlaceholder(Placeholder)
                 .WithCustomId(GenerateCompoundId(ModifierName,Stage));
@@ -76,7 +80,7 @@ namespace Icarus.Discord.EconCommands
             {
                 builder.AddOption(option, option);
             }
-
+            Debug.WriteLine("Returning Select Menu");
             return builder;
         }
 
@@ -98,7 +102,7 @@ namespace Icarus.Discord.EconCommands
         }
         public class TemporaryModal : IModal
         {
-            public string Title => "Set the Time the Modifier will last!";
+            public string Title => "Modifier Time";
             // Strings with the ModalTextInput attribute will automatically become components.
             [InputLabel("Tick Amount")]
             [ModalTextInput(customId: "ModifierName", placeholder: "Enter Tick Amount", maxLength: 20)]
@@ -106,19 +110,20 @@ namespace Icarus.Discord.EconCommands
         }
         public class DecayModal : IModal
         {
-            public string Title => "Set Decay Rate of the Modifier";
+            public string Title => "Decay Rate";
             // Strings with the ModalTextInput attribute will automatically become components.
-            [InputLabel("Decay Rate (Percentage of Initial Modifier lost every Tick)")]
-            [ModalTextInput(customId: "ModifierName", placeholder: "Enter Decay as e.g. 0.1,0.5,0.25 etc", maxLength: 20)]
+            [InputLabel("Decay Rate")]
+            [ModalTextInput(customId: "ModifierName", placeholder: "Enter Decay as 0.1,0.25 etc", maxLength: 20)]
             public string Decay { get; set; }
         }
 
         //First Command
-        [SlashCommand("CreateModifier", "Starts the Process of Adding a Modifier")]
+        [SlashCommand("createmodifier", "Starts the Process of Adding a Modifier")]
         public async Task CreateModifer()
         {
             await Context.Interaction.RespondWithModalAsync<NameModal>("ModifierNameDescMenu");
         }
+
 
         //Handlers
         [ModalInteraction("ModifierNameDescMenu")]
@@ -130,7 +135,7 @@ namespace Icarus.Discord.EconCommands
                 Description = modal.Description,
                 Step = ModifierCreationStep.Province
             };
-            Modifiers.Add(modifier);
+            _valueManagementService.Modifiers.Add(modifier);
 
             //On to the next stage
             List<string> provinces = new List<string>();
@@ -138,11 +143,13 @@ namespace Icarus.Discord.EconCommands
             foreach(Province province in _icarusContext.Provinces)
             {
                 provinces.Add(province.Name);
+                Debug.WriteLine(province.Name);
             }
+            
             SelectMenuBuilder sm = CreateSelectMenu(modifier.Name, modifier.Step.ToString(), provinces, "Select Provinces");
             sm.MinValues = 1;
-            sm.MaxValues = 100;
-
+            sm.MaxValues = sm.Options.Count();
+            Console.WriteLine("Building Menu");
             ComponentBuilder builder = new ComponentBuilder()
                 .WithSelectMenu(sm);
 
@@ -154,8 +161,8 @@ namespace Icarus.Discord.EconCommands
         [ComponentInteraction("*_Province")]
         public async Task ModifierProvinceHandling(string id, string[] selectedProvinces)
         {
-            string ModifierName = ReadCompoundId(id)["modifier"];
-            ModifierCreationDTO modifier = Modifiers.FirstOrDefault(x => x.Name == ModifierName);
+            string ModifierName = id;
+            ModifierCreationDTO modifier = _valueManagementService.Modifiers.FirstOrDefault(x => x.Name == ModifierName);
             modifier.Provinces = selectedProvinces.ToList();
 
             //Next Step
@@ -168,26 +175,43 @@ namespace Icarus.Discord.EconCommands
             }
             SelectMenuBuilder sm = CreateSelectMenu(modifier.Name, modifier.Step.ToString(), ValueNames, "Select Values");
             sm.MinValues = 1;
-            sm.MaxValues = 100;
+            sm.MaxValues = sm.Options.Count();
 
-            ComponentBuilder builder = new ComponentBuilder()
+            
+
+
+
+            var builder = new ComponentBuilder()
                 .WithSelectMenu(sm);
 
 
-            // Respond to the modal.
-            await RespondAsync("Choose Values to apply Modifier to", components: builder.Build());
+            Debug.WriteLine("Sending Value Dropdown");
+            await DeferAsync();
+            await DeleteOriginalResponseAsync();
+            Debug.WriteLine("Response Sent!");
+            try
+            {
+                await FollowupAsync("Choose Values to apply Modifier to", components: builder.Build());
+            }
+            catch(HttpException ex)
+            {
+                Debug.WriteLine(ex.Reason);
+                throw ex;
+            }
+            
         }
 
         [ComponentInteraction("*_Values")]
         public async Task ModifierValuesHandling(string id, string[] selectedValues)
         {
-            string ModifierName = ReadCompoundId(id)["modifier"];
-            ModifierCreationDTO modifier = Modifiers.FirstOrDefault(x => x.Name == ModifierName);
+            string ModifierName = id;
+            ModifierCreationDTO modifier = _valueManagementService.Modifiers.FirstOrDefault(x => x.Name == ModifierName);
 
             List<string> values = selectedValues.ToList();
             foreach (string Value in values)
             {
-                modifier.ValueSizePairs.Add(Value, 0.0f);
+                string h = Value.Replace("_", " ");
+                modifier.ValueSizePairs.Add(h, 0.0f);
             }
             modifier.Step = ModifierCreationStep.Amount;
 
@@ -202,40 +226,48 @@ namespace Icarus.Discord.EconCommands
                     .WithCustomId(Value);
                 mb.AddTextInput(tb);
             }
-
+            //await DeleteOriginalResponseAsync();
             await Context.Interaction.RespondWithModalAsync(mb.Build());
         }
 
-        [ModalInteraction("*_Amount")]
+        //[ModalInteraction("*_Amount")]
         public async Task ModifierHeightHandling(SocketModal modal)
         {
-            string ModifierName = ReadCompoundId(modal.Data.CustomId)["modifier"];
-            ModifierCreationDTO modifier = Modifiers.FirstOrDefault(m => m.Name == ModifierName);
-            foreach(var Component in modal.Data.Components)
+            Dictionary<string,string> CompoundIdData = ReadCompoundId(modal.Data.CustomId);
+            if (CompoundIdData.ContainsKey("stage") && CompoundIdData["stage"] == "Amount")
             {
-                modifier.ValueSizePairs[Component.CustomId] = float.Parse(Component.Value, System.Globalization.CultureInfo.InvariantCulture);
+                string ModifierName = CompoundIdData["modifier"];
+                ModifierCreationDTO modifier = _valueManagementService.Modifiers.FirstOrDefault(m => m.Name == ModifierName);
+                foreach (var Component in modal.Data.Components)
+                {
+                    Debug.WriteLine(Component.CustomId + ": " + Component.Value);
+                    modifier.ValueSizePairs[Component.CustomId] = float.Parse(Component.Value, System.Globalization.CultureInfo.InvariantCulture);
+
+                }
+                modifier.Step = ModifierCreationStep.Type;
+
+                var menuBuilder = new SelectMenuBuilder()
+                   .WithPlaceholder("Select Type")
+                   .WithCustomId(GenerateCompoundId(modifier.Name, modifier.Step.ToString()))
+                   .WithMinValues(1)
+                   .WithMaxValues(1)
+                   .AddOption(ModifierType.Permanent.ToString(), ModifierType.Permanent.ToString())
+                   .AddOption(ModifierType.Temporary.ToString(), ModifierType.Temporary.ToString())
+                   .AddOption(ModifierType.Decaying.ToString(), ModifierType.Decaying.ToString());
+                var builder = new ComponentBuilder()
+                    .WithSelectMenu(menuBuilder);
+
+                await modal.RespondAsync("Choose Values", components: builder.Build());
             }
-            modifier.Step = ModifierCreationStep.Type;
-
-            var menuBuilder = new SelectMenuBuilder()
-               .WithPlaceholder("Select Type")
-               .WithCustomId(GenerateCompoundId(modifier.Name, modifier.Step.ToString()))
-               .WithMinValues(1)
-               .WithMaxValues(1)
-               .AddOption(ModifierType.Permanent.ToString(), ModifierType.Permanent.ToString())
-               .AddOption(ModifierType.Temporary.ToString(), ModifierType.Temporary.ToString())
-               .AddOption(ModifierType.Decaying.ToString(), ModifierType.Decaying.ToString());
-            var builder = new ComponentBuilder()
-                .WithSelectMenu(menuBuilder);
-
-            await FollowupAsync("Choose Values", components: builder.Build());
         }
+
+        
 
         [ComponentInteraction("*_Type")]
         public async Task ModifierTypeHandler(string id, string[] selectedType)
         {
-            string ModifierName = ReadCompoundId(id)["modifier"];
-            ModifierCreationDTO modifier = Modifiers.FirstOrDefault(m => m.Name == ModifierName);
+            string ModifierName = id;
+            ModifierCreationDTO modifier = _valueManagementService.Modifiers.FirstOrDefault(m => m.Name == ModifierName);
             modifier.ModifierType = Enum.Parse<ModifierType>(selectedType[0]);
 
             if (modifier.ModifierType == ModifierType.Permanent)
@@ -253,8 +285,16 @@ namespace Icarus.Discord.EconCommands
                 }
                 else
                 {
-                    modifier.Step = ModifierCreationStep.Decay;
-                    await Context.Interaction.RespondWithModalAsync<DecayModal>(GenerateCompoundId(modifier.Name, modifier.Step.ToString()));
+                    try
+                    {
+                        modifier.Step = ModifierCreationStep.Decay;
+                        await Context.Interaction.RespondWithModalAsync<DecayModal>(GenerateCompoundId(modifier.Name, modifier.Step.ToString()));
+                    }
+                    catch (HttpException ex)
+                    {
+                        Console.WriteLine(ex.Reason);
+                    }
+                    
                 }
             }
         }
@@ -262,9 +302,9 @@ namespace Icarus.Discord.EconCommands
         [ModalInteraction("*_Temporary")]
         public async Task ModifierTempHandler(string id, TemporaryModal modal)
         {
-            string ModifierName = ReadCompoundId(id)["modifier"];
-            ModifierCreationDTO modifier = Modifiers.FirstOrDefault(m => m.Name == ModifierName);
-            modifier.DurationOrDecay = int.Parse(modal.Time);
+            string ModifierName = id;
+            ModifierCreationDTO modifier = _valueManagementService.Modifiers.FirstOrDefault(m => m.Name == ModifierName);
+            modifier.DurationOrDecay = int.Parse(modal.Time, System.Globalization.CultureInfo.InvariantCulture);
             modifier.Step = ModifierCreationStep.Finalization;
             //Finalize
             await ModifierFinalization(modifier);
@@ -273,9 +313,9 @@ namespace Icarus.Discord.EconCommands
         [ModalInteraction("*_Decay")]
         public async Task ModifierDecayHandler(string id, DecayModal modal)
         {
-            string ModifierName = ReadCompoundId(id)["modifier"];
-            ModifierCreationDTO modifier = Modifiers.FirstOrDefault(m => m.Name == ModifierName);
-            modifier.DurationOrDecay = int.Parse(modal.Decay);
+            string ModifierName = id;
+            ModifierCreationDTO modifier = _valueManagementService.Modifiers.FirstOrDefault(m => m.Name == ModifierName);
+            modifier.DurationOrDecay = float.Parse(modal.Decay, System.Globalization.CultureInfo.InvariantCulture);
             modifier.Step = ModifierCreationStep.Finalization;
             //Finalize
             await ModifierFinalization(modifier);
@@ -283,47 +323,52 @@ namespace Icarus.Discord.EconCommands
 
         public async Task ModifierFinalization(ModifierCreationDTO modifier)
         {
-            Modifier Modifier = new Modifier() 
-            {
-                Name = modifier.Name,
-                Description = modifier.Description,
-                Type = modifier.ModifierType
-            };
-            if (modifier.ModifierType == ModifierType.Temporary)
-            {
-                Modifier.Duration = (int)(modifier.DurationOrDecay);
-            }
-
-            foreach(KeyValuePair<string, float> ValueAmountPair in modifier.ValueSizePairs)
-            {
-                ValueModifier valueModifier = new ValueModifier() 
-                {
-                    ValueName = ValueAmountPair.Key,
-                    Modifier = ValueAmountPair.Value,
-                };
-                if (modifier.ModifierType == ModifierType.Decaying)
-                {
-                    valueModifier.Decay = modifier.DurationOrDecay * ValueAmountPair.Value;
-                }
-                Modifier.Modifiers.Add(valueModifier);
-            }
+            
 
             if (modifier.Provinces[0] == "Global")
             {
-                _icarusContext.Nations.First().Modifiers.Add(Modifier);
+                _icarusContext.Nations.First().Modifiers.Add(CreateModifier(modifier));
             }
             else
             {
                 foreach(string province in modifier.Provinces)
                 {
                     Province Province = _icarusContext.Provinces.FirstOrDefault(p => p.Name == province);
-                    Province.Modifiers.Add(Modifier);
+                    Province.Modifiers.Add(CreateModifier(modifier));
                 }
             }
             await _icarusContext.SaveChangesAsync();
+            await RespondAsync("Modifier created");
         }
 
+        public Modifier CreateModifier(ModifierCreationDTO modifierDTO)
+        {
+            Modifier Modifier = new Modifier()
+            {
+                Name = modifierDTO.Name,
+                Description = modifierDTO.Description,
+                Type = modifierDTO.ModifierType
+            };
+            if (modifierDTO.ModifierType == ModifierType.Temporary)
+            {
+                Modifier.Duration = (int)(modifierDTO.DurationOrDecay);
+            }
 
+            foreach (KeyValuePair<string, float> ValueAmountPair in modifierDTO.ValueSizePairs)
+            {
+                ValueModifier valueModifier = new ValueModifier()
+                {
+                    ValueName = ValueAmountPair.Key,
+                    Modifier = ValueAmountPair.Value,
+                };
+                if (modifierDTO.ModifierType == ModifierType.Decaying)
+                {
+                    valueModifier.Decay = modifierDTO.DurationOrDecay * ValueAmountPair.Value;
+                }
+                Modifier.Modifiers.Add(valueModifier);
+            }
+            return Modifier;
+        }
     }
 
     public class ModifierCreationDTO
@@ -332,8 +377,8 @@ namespace Icarus.Discord.EconCommands
         public string Description { get; set;}
         public float DurationOrDecay { get; set;}
         public ModifierType ModifierType { get; set;}
-        public Dictionary<string, float> ValueSizePairs { get; set;}
-        public List<string> Provinces { get; set;}
+        public Dictionary<string, float> ValueSizePairs { get; set;} = new Dictionary<string, float>();
+        public List<string> Provinces { get; set; } = new List<string>();
         public ModifierCreationStep Step { get; set;}
     }
 
