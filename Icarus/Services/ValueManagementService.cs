@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Icarus.Context;
@@ -74,6 +72,8 @@ namespace Icarus.Services
             foreach (Value Value in _icarusContext.Values)
             {
                 Value.RelationInducedChange = 0;
+                
+                // Added AsQueryable here because it bitched about the Where being ambiguous
                 List<ValueRelationship> Relationships = _icarusContext.Relationships.AsQueryable().Where(vr => vr.Target == Value).ToList();
                 foreach(ValueRelationship relationship in Relationships)
                 {

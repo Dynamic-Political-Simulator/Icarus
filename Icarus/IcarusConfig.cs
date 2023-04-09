@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Icarus
 {
-    internal class IcarusConfig
+	public class IcarusConfig
     {
 		public string Version { get; set; }
 		public string DatabaseIp { get; set; }
@@ -13,5 +13,6 @@ namespace Icarus
 		public string DatabaseName { get; set; }
 		public string Token { get; set; }
 		public ulong GuildId { get; set; }
+		public int TickResolution { get; set; }
 	}
 }

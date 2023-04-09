@@ -370,3 +370,6 @@ FodyWeavers.xsd
 /PythonScripts/share/
 /PythonScripts/pyvenv.cfg
 /Icarus/Properties/launchSettings.json
+
+# VS Code generated files
+.vscode/
