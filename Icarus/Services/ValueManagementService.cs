@@ -12,11 +12,15 @@ namespace Icarus.Services
     public class ValueManagementService
     {
         private readonly IcarusContext _icarusContext;
+        private readonly TickService _tickService;
         public List<ModifierCreationDTO> Modifiers { get; set; } = new List<ModifierCreationDTO>();
 
-        public ValueManagementService(IcarusContext context)
+        public ValueManagementService(IcarusContext context, TickService tickService)
         {
             _icarusContext = context;
+            _tickService = tickService;
+
+            _tickService.TickEvent += ValueTick;
         }
 
         //This will need to be executed every Tick
