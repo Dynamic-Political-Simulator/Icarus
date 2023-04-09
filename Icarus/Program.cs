@@ -80,13 +80,10 @@ namespace Icarus
             
 			_services.ToString();
 
-			var icarusConfig = new IcarusConfig();
-			Configuration.GetSection("IcarusConfig").Bind(icarusConfig);
-
 			await _client.LoginAsync(TokenType.Bot, icarusConfig.Token);
 			await _client.StartAsync();
 
-			_client.Ready += OnReady;
+			_client.Ready += OnReadyIcarus;
 
 			// new CommandHandler(_services, _commands, _client);
 
@@ -95,7 +92,7 @@ namespace Icarus
 			await Task.Delay(-1);
         }
 
-		private async Task OnReady()
+		private async Task OnReadyIcarus()
 		{
 			var icarusConfig = new IcarusConfig();
 			Configuration.GetSection("IcarusConfig").Bind(icarusConfig);
@@ -141,7 +138,7 @@ namespace Icarus
             services.Configure<IcarusConfig>(Configuration.GetSection("IcarusConfig"));
 
             services.AddSingleton(_client)
-                .AddSingleton(_commands)
+                //.AddSingleton(_commands)
                 .AddSingleton<ValueManagementService>()
                 .AddDbContext<IcarusContext>(ServiceLifetime.Transient)
             .BuildServiceProvider();

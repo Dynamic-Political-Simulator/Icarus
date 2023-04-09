@@ -6,6 +6,7 @@ using Icarus.Services;
 using System.Linq;
 using System;
 using Discord;
+using Icarus.Context.Models;
 
 namespace Bailiff.Discord.Modules
 {

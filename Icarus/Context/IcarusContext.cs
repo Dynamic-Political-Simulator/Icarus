@@ -38,7 +38,7 @@ namespace Icarus.Context
                 + "MultipleActiveResultSets=true");
         }
 
-        public DbSet<Gamestate> Gamestates { get; set; }
+        public DbSet<GameState> GameStates { get; set; }
         public DbSet<CharacterToken> Tokens { get; set; }
         public DbSet<DiscordUser> Users { get; set; }
         public DbSet<PlayerCharacter> Characters { get; set; }
@@ -83,7 +83,7 @@ namespace Icarus.Context
                 .WithMany(n => n.Provinces)
                 .HasForeignKey(p => p.NationId);
                 
-            modelBuilder.Entity<Gamestate>()
+            modelBuilder.Entity<GameState>()
                 .HasOne(g => g.Nation);
 
             modelBuilder.Entity<CharacterToken>()
