@@ -10,9 +10,9 @@ namespace Icarus.Context.Models
         [Key]
         public int ValueRelationShipId { get; set; }
         public Value Origin { get; set; }
-        public int OriginId { get; set; }
+        public string OriginId { get; set; }
         public Value Target { get; set; }
-        public int TargetId { get; set; }
+        public string TargetId { get; set; }
 
         public float Factor { get; set; }
         public float Max { get; set; }

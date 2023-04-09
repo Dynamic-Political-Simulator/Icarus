@@ -369,9 +369,7 @@ FodyWeavers.xsd
 /PythonScripts/Scripts/
 /PythonScripts/share/
 /PythonScripts/pyvenv.cfg
+/Icarus/Properties/launchSettings.json
 
 # VS Code generated files
 .vscode/
-
-# EF Core Migrations
-Migrations/
