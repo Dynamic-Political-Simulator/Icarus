@@ -86,6 +86,10 @@ namespace Icarus.Context
             modelBuilder.Entity<GameState>()
                 .HasOne(g => g.Nation);
 
+            modelBuilder.Entity<GameState>()
+                .Property(g => g.GameStateId)
+                .ValueGeneratedOnAdd();
+
             modelBuilder.Entity<CharacterToken>()
                 .HasKey(ct => new { ct.PlayerCharacterId, ct.TokenType });
 
