@@ -12,7 +12,7 @@ namespace Icarus.Services
 	/// </summary>
 	public class TickService
 	{
-		private readonly IConfiguration Configuration;
+		private readonly IcarusConfig Configuration;
 		private readonly IcarusContext _dbcontext;
 
 		/// <summary>
@@ -31,9 +31,9 @@ namespace Icarus.Services
 		/// </summary>
 		public event TickHandler NextTickEvent;
 
-		public TickService(IConfiguration configuration, IcarusContext dbcontext)
+		public TickService(IcarusConfig config, IcarusContext dbcontext)
 		{
-			Configuration = configuration;
+			Configuration = config;
 			_dbcontext = dbcontext;
 			StartTickCheck();
 		}
@@ -43,12 +43,9 @@ namespace Icarus.Services
 		/// </summary>
 		private void StartTickCheck()
 		{
-			var icarusConfig = new IcarusConfig();
-			Configuration.GetSection("IcarusConfig").Bind(icarusConfig);
-
 			TickEvent += CallSingleTickHandlers; // Subscribe the NextTickEvent invoker to the TickEvent
 
-			var timer = new Timer(icarusConfig.TickResolution); // The timer will fire every N ms (defined in config)
+			var timer = new Timer(Configuration.TickResolution); // The timer will fire every N ms (defined in config)
 			timer.Elapsed += TickCheck;
 			timer.AutoReset = true; // Loop the timer once it elapses
 			timer.Enabled = true;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Castle.Core.Configuration;
 using Discord;
 using Discord.Commands;
 using Discord.Interactions;
@@ -135,7 +136,9 @@ namespace Icarus
 
             services.AddOptions();
 
-            services.Configure<IcarusConfig>(Configuration.GetSection("IcarusConfig"));
+            //services.Configure<IcarusConfig>(Configuration.GetSection("IcarusConfig"));
+            var icarusConfig = new IcarusConfig();
+            Configuration.GetSection("IcarusConfig").Bind(icarusConfig);
 
             services.AddSingleton(_client)
                 //.AddSingleton(_commands)
@@ -143,6 +146,7 @@ namespace Icarus
                 .AddSingleton<TickService>()
                 .AddSingleton<ActionService>()
                 .AddDbContext<IcarusContext>(ServiceLifetime.Transient)
+                .AddScoped<IcarusConfig>(_ => icarusConfig)
             .BuildServiceProvider();
 
 
