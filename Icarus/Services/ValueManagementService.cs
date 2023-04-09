@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Icarus.Context;
 using Icarus.Context.Models;
@@ -61,7 +59,8 @@ namespace Icarus.Services
             foreach (Value Value in Values)
             {
                 Value.RelationInducedChange = 0;
-                List<ValueRelationship> Relationships = _icarusContext.Relationships.Where(vr => vr.Target == Value);
+                // Added AsQueryable here because it bitched about the Where being ambiguous
+                List<ValueRelationship> Relationships = _icarusContext.Relationships.AsQueryable().Where(vr => vr.Target == Value).ToList();
                 foreach(ValueRelationship relationship in Relationships)
                 {
                     float change = Math.Clamp(relationship.Factor * relationship.Origin._Value, relationship.Min, relationship.Max);

@@ -28,7 +28,9 @@ namespace Icarus.Context
             var config = new IcarusConfig();
 			Configuration.GetSection("IcarusConfig").Bind(config);
 
-            optionsBuilder.UseSqlServer($"Server={config.DatabaseIp};"
+            optionsBuilder
+                .UseLazyLoadingProxies()
+                .UseSqlServer($"Server={config.DatabaseIp};"
                 + $"Database={config.DatabaseName};"
                 + $"User Id={config.SqlUsername};"
                 + $"Password={config.SqlPassword};"
@@ -36,6 +38,9 @@ namespace Icarus.Context
                 + "MultipleActiveResultSets=true");
         }
 
+        public DbSet<CharacterToken> Tokens { get; set; }
+        public DbSet<DiscordUser> Users { get; set; }
+        public DbSet<PlayerCharacter> Characters { get; set; }
 		public DbSet<GameState> GameStates { get; set; }
         public DbSet<Value> Values { get; set; }
         public DbSet<ValueModifier> Modifiers { get; set; }
@@ -61,6 +66,19 @@ namespace Icarus.Context
                 .HasOne(vr => vr.Origin);
             modelBuilder.Entity<ValueRelationship>()
                 .HasOne(vr => vr.Target);
+
+            modelBuilder.Entity<CharacterToken>()
+                .HasKey(ct => new { ct.PlayerCharacterId, ct.TokenType });
+
+            modelBuilder.Entity<CharacterToken>()
+                .HasOne(ct => ct.Character)
+                .WithMany(c => c.Tokens)
+                .HasForeignKey(ct => ct.PlayerCharacterId);
+
+            modelBuilder.Entity<PlayerCharacter>()
+                .HasOne(pc => pc.DiscordUser)
+                .WithMany(du => du.Characters)
+                .HasForeignKey(pc => pc.DiscordUserId);
         }
     }
 }
