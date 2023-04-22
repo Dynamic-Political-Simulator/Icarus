@@ -22,7 +22,7 @@ namespace Icarus.Discord.Modules
             _actionService = actionService;
         }
 
-        [SlashCommand("action example", "action example please ignore")]
+        [SlashCommand("action-example", "action example please ignore")]
         [RequireTokenAmount(ActionTokenType.TestToken, 5, true)]
         public async Task ExampleAction()
         {
