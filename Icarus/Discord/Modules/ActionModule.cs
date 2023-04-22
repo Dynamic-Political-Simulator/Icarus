@@ -14,7 +14,6 @@ namespace Icarus.Discord.Modules
     public class ActionModule : InteractionModuleBase<SocketInteractionContext>
     {
         private readonly DiscordSocketClient _client;
-        private readonly IcarusContext _dbContext;
         private readonly ActionService _actionService;
 
         public ActionModule(DiscordSocketClient client, ActionService actionService)
@@ -27,7 +26,9 @@ namespace Icarus.Discord.Modules
         [RequireTokenAmount(ActionTokenType.TestToken, 5, true)]
         public async Task ExampleAction()
         {
-            var player = _dbContext.Users.First(u => u.DiscordId == Context.User.Id.ToString());
+            using var db = new IcarusContext();
+
+            var player = db.Users.First(u => u.DiscordId == Context.User.Id.ToString());
 
             var character = player.Characters.First(c => c.YearOfDeath == -1);
 

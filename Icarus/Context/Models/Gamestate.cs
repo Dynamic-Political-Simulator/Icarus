@@ -12,7 +12,7 @@ namespace Icarus.Context.Models
         public long TickInterval { get; set; }
         public long LastTickEpoch { get; set; }
 
-        public int NationId { get; set; }
-        public Nation Nation { get; set; }
+        public int? NationId { get; set; }
+        public virtual Nation? Nation { get; set; }
     }
 }

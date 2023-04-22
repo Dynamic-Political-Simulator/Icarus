@@ -13,7 +13,6 @@ namespace Icarus.Services
 	public class TickService
 	{
 		private readonly IcarusConfig Configuration;
-		private readonly IcarusContext _dbcontext;
 
 		/// <summary>
 		/// The function delegate for the TickEvent handler.
@@ -31,10 +30,9 @@ namespace Icarus.Services
 		/// </summary>
 		public event TickHandler NextTickEvent;
 
-		public TickService(IcarusConfig config, IcarusContext dbcontext)
+		public TickService(IcarusConfig config)
 		{
 			Configuration = config;
-			_dbcontext = dbcontext;
 			StartTickCheck();
 		}
 
@@ -67,7 +65,8 @@ namespace Icarus.Services
 		/// <param name="e"></param>
 		private void TickCheck(object source, ElapsedEventArgs e)
 		{
-			GameState state = _dbcontext.GameStates.FirstOrDefault();
+			using var db = new IcarusContext();
+			var state = db.GameStates.FirstOrDefault();
 
 			if (state.TickInterval >= 0)
 			{
@@ -79,8 +78,8 @@ namespace Icarus.Services
 					state.LastTickEpoch = currentEpoch;
 				}
 
-				_dbcontext.GameStates.Update(state);
-				_dbcontext.SaveChanges();
+				db.GameStates.Update(state);
+				db.SaveChanges();
 			}
 		}
 
@@ -89,14 +88,15 @@ namespace Icarus.Services
 		/// </summary>
 		public void ForceTick()
 		{
-			GameState state = _dbcontext.GameStates.FirstOrDefault();
+            using var db = new IcarusContext();
+            GameState state = db.GameStates.FirstOrDefault();
 
 			long currentEpoch = DateTime.Now.ToFileTimeUtc();
 			TickEvent?.Invoke();
 			state.LastTickEpoch = currentEpoch;
 
-			_dbcontext.GameStates.Update(state);
-			_dbcontext.SaveChanges();
+			db.GameStates.Update(state);
+			db.SaveChanges();
 		}
 	}
 }

@@ -11,18 +11,17 @@ namespace Icarus.Discord.Modules
 {
     public class GamestateModule : InteractionModuleBase<SocketInteractionContext>
     {
-        private readonly IcarusContext _icarusContext;
         private readonly ValueManagementService _valueManagementService;
 
-        public GamestateModule(IcarusContext icarusContext, ValueManagementService valueManagementService)
+        public GamestateModule(ValueManagementService valueManagementService)
         {
-            _icarusContext = icarusContext;
             _valueManagementService = valueManagementService;
         }
 
         [SlashCommand("starttestgame", "Starts a new Game")]
         public async Task StartTestGame()
         {
+            using var db = new IcarusContext();
             //Some Code here to clean up the prior gameState
 
             GameState gameState = new()
@@ -49,9 +48,9 @@ namespace Icarus.Discord.Modules
                 gameState.Nation.Provinces.Add(province);
                 await _valueManagementService.GenerateValueRelationships(province.Values);
             }
-            _icarusContext.GameStates.Add(gameState);
+            db.GameStates.Add(gameState);
 
-            await _icarusContext.SaveChangesAsync();
+            await db.SaveChangesAsync();
             await RespondAsync("Success!");
         }
     }

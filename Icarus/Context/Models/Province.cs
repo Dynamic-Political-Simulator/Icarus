@@ -12,10 +12,10 @@ namespace Icarus.Context.Models
         public string Name { get; set; }
         public string Description { get; set; }
 
-        public List<Value> Values { get; set; } = new List<Value>();
-        public List<Modifier> Modifiers { get; set;} = new List<Modifier>();
+        public virtual List<Value> Values { get; set; } = new List<Value>();
+        public virtual List<Modifier> Modifiers { get; set;} = new List<Modifier>();
 
         public int NationId { get; set; }
-        public Nation Nation { get; set; }
+        public virtual Nation Nation { get; set; }
     }
 }

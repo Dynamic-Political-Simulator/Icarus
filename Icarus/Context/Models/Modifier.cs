@@ -15,7 +15,7 @@ namespace Icarus.Context.Models
         public int Duration { get; set; }
         //public float Decay { get; set; }
         public ModifierType Type { get; set; }
-        public List<ValueModifier> Modifiers { get; set; } = new List<ValueModifier>();
+        public virtual List<ValueModifier> Modifiers { get; set; } = new List<ValueModifier>();
 
     }
 

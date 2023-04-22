@@ -16,13 +16,11 @@ namespace Icarus.Discord.EconCommands
 {
     public class ValuesModule : InteractionModuleBase<SocketInteractionContext>
     {
-        private readonly IcarusContext _icarusContext;
         private readonly DiscordSocketClient _client;
         private readonly ValueManagementService _valueManagementService;
 
-        public ValuesModule(IcarusContext icarusContext, DiscordSocketClient client, ValueManagementService valueManagementService)
+        public ValuesModule(DiscordSocketClient client, ValueManagementService valueManagementService)
         {
-            _icarusContext = icarusContext;
             _client = client;
             _valueManagementService = valueManagementService;
         }
@@ -30,11 +28,13 @@ namespace Icarus.Discord.EconCommands
         [SlashCommand("setvalue","Set the specified Value to a certain Number.")]
         public async Task SetValue(string ProvinceName,string ValueName, float Number)
         {
+            using var db = new IcarusContext();
+
             if (Number < 0)
             {
                 await RespondAsync("A Value can not be smaller than Zero");
             }
-            Province province = _icarusContext.Provinces.FirstOrDefault(p => p.Name == ProvinceName);
+            Province province = db.Provinces.FirstOrDefault(p => p.Name == ProvinceName);
             if (province == null)
             {
                 await RespondAsync($"{ProvinceName} was not found!");
@@ -48,7 +48,7 @@ namespace Icarus.Discord.EconCommands
 
             Value._Value = Number;
 
-            await _icarusContext.SaveChangesAsync();
+            await db.SaveChangesAsync();
             await RespondAsync("Success!");
 
         }
@@ -56,7 +56,9 @@ namespace Icarus.Discord.EconCommands
         [SlashCommand("showvalues", "Show Values of a Province")]
         public async Task ShowValues(string ProvinceName)
         {
-            Province province = _icarusContext.Provinces.FirstOrDefault(p => p.Name == ProvinceName);
+            using var db = new IcarusContext();
+
+            Province province = db.Provinces.FirstOrDefault(p => p.Name == ProvinceName);
             if (province == null)
             {
                 await RespondAsync($"{ProvinceName} was not found!");
