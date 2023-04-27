@@ -221,7 +221,7 @@ namespace Icarus.Services
         {
             using var db = new IcarusContext();
 
-            string DataPath = "../Context/ValueRelationShips.xml";
+            string DataPath = "../../ValueRelationShips.xml";
             XmlDocument Xmldata = new XmlDocument();
             Xmldata.Load(DataPath);
             List<RelationShipDTO> RelationShipDTOs = new List<RelationShipDTO>();
