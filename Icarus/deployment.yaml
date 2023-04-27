@@ -15,5 +15,5 @@ spec:
     spec:
       containers:
       - name: icarus
-        image: localhost:32000/icarus:v0.2
+        image: localhost:32000/icarus:v0.3
       restartPolicy: Always
