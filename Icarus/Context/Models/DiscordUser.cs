@@ -10,7 +10,7 @@ namespace Icarus.Context.Models
         [Key]
         public string DiscordId { get; set; }
 
-        public List<PlayerCharacter> Characters { get; set; }
+        public virtual List<PlayerCharacter> Characters { get; set; }
         public bool CanUseAdminCommands { get; set; }
     }
 }

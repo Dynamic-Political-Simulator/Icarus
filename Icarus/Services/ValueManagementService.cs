@@ -11,12 +11,14 @@ namespace Icarus.Services
 {
     public class ValueManagementService
     {
-        private readonly IcarusContext _icarusContext;
+        private readonly TickService _tickService;
         public List<ModifierCreationDTO> Modifiers { get; set; } = new List<ModifierCreationDTO>();
 
-        public ValueManagementService(IcarusContext context)
+        public ValueManagementService(TickService tickService)
         {
-            _icarusContext = context;
+            _tickService = tickService;
+
+            _tickService.TickEvent += ValueTick;
         }
 
         //This will need to be executed every Tick
@@ -28,11 +30,13 @@ namespace Icarus.Services
         }
         public async Task UpdateValues()
         {
-            foreach (Value Value in _icarusContext.Values)
+            using var db = new IcarusContext();
+
+            foreach (Value Value in db.Values)
             {
                 CalculateNewValue(Value);
             }
-            await _icarusContext.SaveChangesAsync();
+            await db.SaveChangesAsync();
         }
 
         public float GetValueChange(Value value)
@@ -69,12 +73,14 @@ namespace Icarus.Services
 
         public async Task ReEvaluateRelations()
         {
-            foreach (Value Value in _icarusContext.Values)
+            using var db = new IcarusContext();
+
+            foreach (Value Value in db.Values)
             {
                 Value.RelationInducedChange = 0;
                 
                 // Added AsQueryable here because it bitched about the Where being ambiguous
-                List<ValueRelationship> Relationships = _icarusContext.Relationships.AsQueryable().Where(vr => vr.Target == Value).ToList();
+                List<ValueRelationship> Relationships = db.Relationships.AsQueryable().Where(vr => vr.Target == Value).ToList();
                 foreach(ValueRelationship relationship in Relationships)
                 {
                     float change = Math.Clamp(relationship.Factor * relationship.Origin._Value, relationship.Min, relationship.Max);
@@ -82,14 +88,16 @@ namespace Icarus.Services
                 }
 
             }
-            await _icarusContext.SaveChangesAsync();
+            await db.SaveChangesAsync();
         }
 
 
 
         public async Task ReEvaluteModifiers()
         {
-            foreach (Modifier modifier in _icarusContext.Modifiers)
+            using var db = new IcarusContext();
+
+            foreach (Modifier modifier in db.Modifiers)
             {
                 switch (modifier.Type)
                 {
@@ -97,7 +105,7 @@ namespace Icarus.Services
                         modifier.Duration -= 1;
                         if (modifier.Duration == 0)
                         {
-                            _icarusContext.Modifiers.Remove(modifier);
+                            db.Modifiers.Remove(modifier);
                         }
                         break;
                     case ModifierType.Decaying:
@@ -110,7 +118,7 @@ namespace Icarus.Services
                                 if (vm.Modifier > 0)
                                 {
                                     modifier.Modifiers.Remove(vm);
-                                    _icarusContext.ValueModifiers.Remove(vm);
+                                    db.ValueModifiers.Remove(vm);
                                 }
                             }
                             else
@@ -119,18 +127,18 @@ namespace Icarus.Services
                                 if (vm.Modifier < 0)
                                 {
                                     modifier.Modifiers.Remove(vm);
-                                    _icarusContext.ValueModifiers.Remove(vm);
+                                    db.ValueModifiers.Remove(vm);
                                 }
                             }
                         }
                         if (modifier.Modifiers.Count == 0)
                         {
-                            _icarusContext.Modifiers.Remove(modifier);
+                            db.Modifiers.Remove(modifier);
                         }
                         break;
                 }
             }
-            await _icarusContext.SaveChangesAsync();
+            await db.SaveChangesAsync();
         }
 
         //These are the values used. Initial Values will need to be subject to later balancing
@@ -211,6 +219,8 @@ namespace Icarus.Services
         //What we wanna do here is 
         public async Task GenerateValueRelationships(List<Value> Values)
         {
+            using var db = new IcarusContext();
+
             string DataPath = "D:\\SeasonDPS\\Icarus\\Icarus\\Context\\ValueRelationShips.xml";
             XmlDocument Xmldata = new XmlDocument();
             Xmldata.Load(DataPath);
@@ -254,14 +264,10 @@ namespace Icarus.Services
                 }
             }
 
-            _icarusContext.Relationships.AddRange(Relationships);
+            db.Relationships.AddRange(Relationships);
 
-            await _icarusContext.SaveChangesAsync();
+            await db.SaveChangesAsync();
         }
-
-
-
-
     }
 
     public class RelationShipDTO

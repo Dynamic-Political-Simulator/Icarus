@@ -5,11 +5,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Icarus.Context.Models
 {
-    public class Gamestate
+    public class GameState
     {
         [Key]
-        public int Id { get; set; }
-        public Nation Nation { get; set; }
-        //public string NationID { get; set; }
+        public int GameStateId { get; set; }
+        public long TickInterval { get; set; }
+        public long LastTickEpoch { get; set; }
+
+        public int? NationId { get; set; }
+        public virtual Nation? Nation { get; set; }
     }
 }

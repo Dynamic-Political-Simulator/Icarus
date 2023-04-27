@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
+#nullable disable
+
 namespace Icarus.Migrations
 {
     [DbContext(typeof(IcarusContext))]
@@ -15,33 +17,82 @@ namespace Icarus.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.31")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "7.0.4")
+                .HasAnnotation("Proxies:ChangeTracking", false)
+                .HasAnnotation("Proxies:CheckEquality", false)
+                .HasAnnotation("Proxies:LazyLoading", true)
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            modelBuilder.Entity("Icarus.Context.Models.Gamestate", b =>
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Icarus.Context.Models.CharacterToken", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<string>("PlayerCharacterId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("TokenType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
+
+                    b.HasKey("PlayerCharacterId", "TokenType");
+
+                    b.ToTable("Tokens");
+                });
+
+            modelBuilder.Entity("Icarus.Context.Models.DiscordUser", b =>
+                {
+                    b.Property<string>("DiscordId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("CanUseAdminCommands")
+                        .HasColumnType("bit");
+
+                    b.HasKey("DiscordId");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Icarus.Context.Models.GameState", b =>
+                {
+                    b.Property<int>("GameStateId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GameStateId"));
+
+                    b.Property<long>("LastTickEpoch")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("NationId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<long>("TickInterval")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("GameStateId");
 
                     b.HasIndex("NationId");
 
-                    b.ToTable("Gamestates");
+                    b.ToTable("GameStates");
+
+                    b.HasData(
+                        new
+                        {
+                            GameStateId = 1,
+                            LastTickEpoch = 0L,
+                            TickInterval = 3600000L
+                        });
                 });
 
             modelBuilder.Entity("Icarus.Context.Models.Modifier", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -74,8 +125,9 @@ namespace Icarus.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -88,12 +140,37 @@ namespace Icarus.Migrations
                     b.ToTable("Nations");
                 });
 
+            modelBuilder.Entity("Icarus.Context.Models.PlayerCharacter", b =>
+                {
+                    b.Property<string>("CharacterId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CharacterName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DiscordUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("YearOfBirth")
+                        .HasColumnType("int");
+
+                    b.Property<int>("YearOfDeath")
+                        .HasColumnType("int");
+
+                    b.HasKey("CharacterId");
+
+                    b.HasIndex("DiscordUserId");
+
+                    b.ToTable("Characters");
+                });
+
             modelBuilder.Entity("Icarus.Context.Models.Province", b =>
                 {
                     b.Property<int>("ProvinceId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProvinceId"));
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -115,8 +192,9 @@ namespace Icarus.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -141,8 +219,9 @@ namespace Icarus.Migrations
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<float>("Decay")
                         .HasColumnType("real");
@@ -167,8 +246,9 @@ namespace Icarus.Migrations
                 {
                     b.Property<int>("ValueRelationShipId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ValueRelationShipId"));
 
                     b.Property<float>("Factor")
                         .HasColumnType("real");
@@ -200,11 +280,24 @@ namespace Icarus.Migrations
                     b.ToTable("Relationships");
                 });
 
-            modelBuilder.Entity("Icarus.Context.Models.Gamestate", b =>
+            modelBuilder.Entity("Icarus.Context.Models.CharacterToken", b =>
+                {
+                    b.HasOne("Icarus.Context.Models.PlayerCharacter", "Character")
+                        .WithMany("Tokens")
+                        .HasForeignKey("PlayerCharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
+            modelBuilder.Entity("Icarus.Context.Models.GameState", b =>
                 {
                     b.HasOne("Icarus.Context.Models.Nation", "Nation")
                         .WithMany()
                         .HasForeignKey("NationId");
+
+                    b.Navigation("Nation");
                 });
 
             modelBuilder.Entity("Icarus.Context.Models.Modifier", b =>
@@ -218,6 +311,15 @@ namespace Icarus.Migrations
                         .HasForeignKey("ProvinceId");
                 });
 
+            modelBuilder.Entity("Icarus.Context.Models.PlayerCharacter", b =>
+                {
+                    b.HasOne("Icarus.Context.Models.DiscordUser", "DiscordUser")
+                        .WithMany("Characters")
+                        .HasForeignKey("DiscordUserId");
+
+                    b.Navigation("DiscordUser");
+                });
+
             modelBuilder.Entity("Icarus.Context.Models.Province", b =>
                 {
                     b.HasOne("Icarus.Context.Models.Nation", "Nation")
@@ -225,6 +327,8 @@ namespace Icarus.Migrations
                         .HasForeignKey("NationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Nation");
                 });
 
             modelBuilder.Entity("Icarus.Context.Models.Value", b =>
@@ -234,6 +338,8 @@ namespace Icarus.Migrations
                         .HasForeignKey("ProvinceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Province");
                 });
 
             modelBuilder.Entity("Icarus.Context.Models.ValueModifier", b =>
@@ -243,6 +349,8 @@ namespace Icarus.Migrations
                         .HasForeignKey("ModifierWrapperId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ModifierWrapper");
                 });
 
             modelBuilder.Entity("Icarus.Context.Models.ValueRelationship", b =>
@@ -254,6 +362,39 @@ namespace Icarus.Migrations
                     b.HasOne("Icarus.Context.Models.Value", "Target")
                         .WithMany()
                         .HasForeignKey("TargetId1");
+
+                    b.Navigation("Origin");
+
+                    b.Navigation("Target");
+                });
+
+            modelBuilder.Entity("Icarus.Context.Models.DiscordUser", b =>
+                {
+                    b.Navigation("Characters");
+                });
+
+            modelBuilder.Entity("Icarus.Context.Models.Modifier", b =>
+                {
+                    b.Navigation("Modifiers");
+                });
+
+            modelBuilder.Entity("Icarus.Context.Models.Nation", b =>
+                {
+                    b.Navigation("Modifiers");
+
+                    b.Navigation("Provinces");
+                });
+
+            modelBuilder.Entity("Icarus.Context.Models.PlayerCharacter", b =>
+                {
+                    b.Navigation("Tokens");
+                });
+
+            modelBuilder.Entity("Icarus.Context.Models.Province", b =>
+                {
+                    b.Navigation("Modifiers");
+
+                    b.Navigation("Values");
                 });
 #pragma warning restore 612, 618
         }

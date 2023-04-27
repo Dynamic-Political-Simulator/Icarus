@@ -19,13 +19,11 @@ namespace Icarus.Discord.EconCommands
 {
     public class ModifierCreation : InteractionModuleBase<SocketInteractionContext>
     {
-        private readonly IcarusContext _icarusContext;
         private readonly DiscordSocketClient _client;
         private readonly ValueManagementService _valueManagementService;
 
-        public ModifierCreation(IcarusContext icarusContext, DiscordSocketClient client, ValueManagementService valueManagementService)
+        public ModifierCreation(DiscordSocketClient client, ValueManagementService valueManagementService)
         {
-            _icarusContext = icarusContext;
             _client = client;
             _valueManagementService = valueManagementService;
 
@@ -129,6 +127,8 @@ namespace Icarus.Discord.EconCommands
         [ModalInteraction("ModifierNameDescMenu")]
         public async Task ModifierNameHandling(NameModal modal)
         {
+            using var db = new IcarusContext();
+
             ModifierCreationDTO modifier = new ModifierCreationDTO()
             {
                 Name = modal.Name,
@@ -140,7 +140,7 @@ namespace Icarus.Discord.EconCommands
             //On to the next stage
             List<string> provinces = new List<string>();
             provinces.Add("Global");
-            foreach(Province province in _icarusContext.Provinces)
+            foreach(Province province in db.Provinces)
             {
                 provinces.Add(province.Name);
                 Debug.WriteLine(province.Name);
@@ -323,21 +323,21 @@ namespace Icarus.Discord.EconCommands
 
         public async Task ModifierFinalization(ModifierCreationDTO modifier)
         {
-            
+            using var db = new IcarusContext();
 
             if (modifier.Provinces[0] == "Global")
             {
-                _icarusContext.Nations.First().Modifiers.Add(CreateModifier(modifier));
+                db.Nations.First().Modifiers.Add(CreateModifier(modifier));
             }
             else
             {
                 foreach(string province in modifier.Provinces)
                 {
-                    Province Province = _icarusContext.Provinces.FirstOrDefault(p => p.Name == province);
+                    Province Province = db.Provinces.FirstOrDefault(p => p.Name == province);
                     Province.Modifiers.Add(CreateModifier(modifier));
                 }
             }
-            await _icarusContext.SaveChangesAsync();
+            await db.SaveChangesAsync();
             await RespondAsync("Modifier created");
         }
 

@@ -1,12 +1,8 @@
-using Discord;
-using Discord.WebSocket;
 using Icarus.Context;
+using Icarus.Context.Models;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Timers;
 
 namespace Icarus.Services
@@ -16,8 +12,7 @@ namespace Icarus.Services
 	/// </summary>
 	public class TickService
 	{
-		private readonly IConfiguration Configuration;
-		private readonly IcarusContext _dbcontext;
+		private readonly IcarusConfig Configuration;
 
 		/// <summary>
 		/// The function delegate for the TickEvent handler.
@@ -35,10 +30,9 @@ namespace Icarus.Services
 		/// </summary>
 		public event TickHandler NextTickEvent;
 
-		public TickService(IConfiguration configuration, IcarusContext dbcontext)
+		public TickService(IcarusConfig config)
 		{
-			Configuration = configuration;
-			_dbcontext = dbcontext;
+			Configuration = config;
 			StartTickCheck();
 		}
 
@@ -47,12 +41,9 @@ namespace Icarus.Services
 		/// </summary>
 		private void StartTickCheck()
 		{
-			var icarusConfig = new IcarusConfig();
-			Configuration.GetSection("IcarusConfig").Bind(icarusConfig);
-
 			TickEvent += CallSingleTickHandlers; // Subscribe the NextTickEvent invoker to the TickEvent
 
-			var timer = new Timer(icarusConfig.TickResolution); // The timer will fire every N ms (defined in config)
+			var timer = new Timer(Configuration.TickResolution); // The timer will fire every N ms (defined in config)
 			timer.Elapsed += TickCheck;
 			timer.AutoReset = true; // Loop the timer once it elapses
 			timer.Enabled = true;
@@ -74,7 +65,8 @@ namespace Icarus.Services
 		/// <param name="e"></param>
 		private void TickCheck(object source, ElapsedEventArgs e)
 		{
-			GameState state = _dbcontext.GameStates.FirstOrDefault();
+			using var db = new IcarusContext();
+			var state = db.GameStates.FirstOrDefault();
 
 			if (state.TickInterval >= 0)
 			{
@@ -86,8 +78,8 @@ namespace Icarus.Services
 					state.LastTickEpoch = currentEpoch;
 				}
 
-				_dbcontext.GameStates.Update(state);
-				_dbcontext.SaveChanges();
+				db.GameStates.Update(state);
+				db.SaveChanges();
 			}
 		}
 
@@ -96,14 +88,15 @@ namespace Icarus.Services
 		/// </summary>
 		public void ForceTick()
 		{
-			GameState state = _dbcontext.GameStates.FirstOrDefault();
+            using var db = new IcarusContext();
+            GameState state = db.GameStates.FirstOrDefault();
 
 			long currentEpoch = DateTime.Now.ToFileTimeUtc();
 			TickEvent?.Invoke();
 			state.LastTickEpoch = currentEpoch;
 
-			_dbcontext.GameStates.Update(state);
-			_dbcontext.SaveChanges();
+			db.GameStates.Update(state);
+			db.SaveChanges();
 		}
 	}
 }

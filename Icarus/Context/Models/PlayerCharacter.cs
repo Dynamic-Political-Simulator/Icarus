@@ -12,11 +12,11 @@ namespace Icarus.Context.Models
         public string CharacterName { get; set; }
 
         public string DiscordUserId { get; set; }
-        public DiscordUser DiscordUser { get; set; }
+        public virtual DiscordUser DiscordUser { get; set; }
 
         public int YearOfBirth { get; set; }
         public int YearOfDeath { get; set; } = -1;
 
-        public List<CharacterToken> Tokens { get; set; }
+        public virtual List<CharacterToken> Tokens { get; set; }
     }
 }

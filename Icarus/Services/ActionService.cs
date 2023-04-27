@@ -10,13 +10,11 @@ namespace Icarus.Services
 {
     public class ActionService
     {
-        private readonly IConfiguration Configuration;
-        private readonly IcarusContext _dbcontext;
+        private readonly IcarusConfig Configuration;
 
-        public ActionService(IConfiguration configuration, IcarusContext dbcontext)
+        public ActionService(IcarusConfig config)
         {
-            Configuration = configuration;
-            _dbcontext = dbcontext;
+            Configuration = config;
         }
 
         public string ExampleAction(PlayerCharacter character)

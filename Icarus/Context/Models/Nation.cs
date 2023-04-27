@@ -10,7 +10,7 @@ namespace Icarus.Context.Models
         public string Name { get; set; }
         public string Description { get; set; }
 
-        public List<Province> Provinces { get; set; } = new List<Province>();
-        public List<Modifier> Modifiers { get; set; } = new List<Modifier>();
+        public virtual List<Province> Provinces { get; set; } = new List<Province>();
+        public virtual List<Modifier> Modifiers { get; set; } = new List<Modifier>();
     }
 }
