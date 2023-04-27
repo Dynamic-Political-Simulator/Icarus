@@ -373,3 +373,8 @@ FodyWeavers.xsd
 
 # VS Code generated files
 .vscode/
+
+
+.env
+=======
+.vscode/
