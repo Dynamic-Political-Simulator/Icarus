@@ -76,8 +76,6 @@ namespace Icarus
                     }
                 }
             };
-            
-			_services.ToString();
 
 			await Task.Delay(-1);
         }
@@ -104,7 +102,7 @@ namespace Icarus
                 .AddSingleton<TickService>()
                 .AddSingleton<ActionService>()
                 .AddDbContext<IcarusContext>(ServiceLifetime.Transient)
-                .AddScoped<IcarusConfig>(_ => icarusConfig)
+                .AddScoped(_ => icarusConfig)
             .BuildServiceProvider();
 
 
