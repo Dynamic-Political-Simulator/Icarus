@@ -27,7 +27,9 @@ namespace Icarus
         public async Task Start()
         {
             var configBuilder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+            var envVariables = Environment.GetEnvironmentVariables();
 
             Configuration = configBuilder.Build();
 
@@ -39,7 +41,7 @@ namespace Icarus
             Configuration.GetSection("IcarusConfig").Bind(icarusConfig);
             _client.Ready += OnReady;
 
-            await _client.LoginAsync(TokenType.Bot, icarusConfig.Token);
+            await _client.LoginAsync(TokenType.Bot, envVariables["Token"].ToString());
             await _client.StartAsync();
 
             await _client.SetGameAsync(icarusConfig.Version);
