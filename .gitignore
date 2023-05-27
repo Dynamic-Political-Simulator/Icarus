@@ -357,3 +357,5 @@ MigrationBackup/
 .env
 =======
 .vscode/
+/Icarus/deployment-staging.yaml
+/Icarus/deployment.yaml

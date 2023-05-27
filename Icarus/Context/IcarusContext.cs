@@ -27,11 +27,12 @@ namespace Icarus.Context
             var config = new IcarusConfig();
             Configuration.GetSection("IcarusConfig").Bind(config);
 
+            var envVariables = Environment.GetEnvironmentVariables();
 
             optionsBuilder
                 .UseLazyLoadingProxies()
                 .UseSqlServer($"Server={config.DatabaseIp};"
-                + $"Database={config.DatabaseName};"
+                + $"Database={envVariables["DatabaseName"]};"
                 + $"User Id={config.SqlUsername};"
                 + $"Password={config.SqlPassword};"
                 + "Trusted_Connection=false;"
