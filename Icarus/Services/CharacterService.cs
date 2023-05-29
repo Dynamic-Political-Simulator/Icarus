@@ -1,4 +1,5 @@
-﻿using Icarus.Context;
+﻿using Discord.API;
+using Icarus.Context;
 using Icarus.Context.Models;
 using Icarus.Exceptions;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,38 @@ namespace Icarus.Services
             }
 
             return active;
+        }
+
+        public async Task CreateNewCharacter(string discordId, string characterName, int startingAge)
+        {
+            using var db = new IcarusContext();
+
+            var active = await GetActiveCharacter(discordId);
+
+            if (active != null)
+            {
+                throw new ExistingActiveCharacterException(discordId);
+            }
+
+            if (characterName.Length > 64)
+            {
+                throw new ArgumentException();
+            }
+
+            var rand = new Random();
+
+            var gameState = db.GameStates.First();
+
+            var newChar = new PlayerCharacter()
+            {
+                DiscordUserId= discordId,
+                CharacterName= characterName,
+                YearOfBirth = (int)(gameState.Year - (startingAge + rand.NextInt64(-2, 3)))
+            };
+
+            db.Characters.Add(newChar);
+
+            await db.SaveChangesAsync();
         }
 
         public async Task UpdateCharacterBio(string discordId, string bio)

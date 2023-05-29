@@ -23,12 +23,25 @@ namespace Icarus.Discord.Modules
             _characterService = characterService;
         }
 
-        public async Task CreateCharacter(string characterName)
+        [SlashCommand("create-character", "Creates a new character.")]
+        public async Task CreateCharacter(string characterName, [Choice("20", 20), Choice("35", 35), Choice("50", 50)] int startingAge)
         {
-
+            try
+            {
+                await _characterService.CreateNewCharacter(Context.User.Id.ToString(), characterName, startingAge);
+                await ReplyAsync($"Character {characterName} has been created.");
+            }
+            catch(ExistingActiveCharacterException)
+            {
+                await ReplyAsync("Character could not be created as you still have an active character.");
+            }
+            catch(ArgumentException)
+            {
+                await ReplyAsync($"Character names may not be longer than 64 characters.");
+            }
         }
 
-        [SlashCommand("Me", "Shows your active character or the active character of a person you ping.")]
+        [SlashCommand("me", "Shows your active character or the active character of a person you ping.")]
         public async Task Me([Remainder]SocketGuildUser mention = null)
         {
             SocketGuildUser user = (SocketGuildUser)(mention ?? Context.User);
