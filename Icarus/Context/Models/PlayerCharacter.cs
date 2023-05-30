@@ -13,6 +13,8 @@ namespace Icarus.Context.Models
 
         public string CharacterDescription { get; set; }
 
+        public string Career { get; set; }
+
         public string DiscordUserId { get; set; }
         public virtual DiscordUser DiscordUser { get; set; }
 

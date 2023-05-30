@@ -79,5 +79,19 @@ namespace Icarus.Discord.Modules
 
             await ReplyAsync($"Bio updated.");
         }
+
+        public async Task SetCareer(string career)
+        {
+            try
+            {
+                await _characterService.UpdateCharacterCareer(Context.User.Id.ToString(), career);
+            }
+            catch(ArgumentException)
+            {
+                await ReplyAsync("Career may not be longer than 64 characters.");
+            }
+            
+            await ReplyAsync("Career set.");
+        }
     }
 }

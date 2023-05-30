@@ -66,6 +66,24 @@ namespace Icarus.Services
             var active = await GetActiveCharacter(discordId);
 
             active.CharacterDescription = bio;
+
+            await db.SaveChangesAsync();
+        }
+
+        public async Task UpdateCharacterCareer(string discordId, string career)
+        {
+            if (career.Length > 64)
+            {
+                throw new ArgumentException();
+            }
+
+            using var db = new IcarusContext();
+
+            var active = await GetActiveCharacter(discordId);
+
+            active.Career = career;
+
+            await db.SaveChangesAsync();
         }
     }
 }
