@@ -5,7 +5,7 @@
 namespace Icarus.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -44,6 +44,7 @@ namespace Icarus.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     TickInterval = table.Column<long>(type: "bigint", nullable: false),
                     LastTickEpoch = table.Column<long>(type: "bigint", nullable: false),
+                    Year = table.Column<int>(type: "int", nullable: false),
                     NationId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -83,6 +84,10 @@ namespace Icarus.Migrations
                 {
                     CharacterId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CharacterName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CharacterDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Career = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Culture = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AssemblyRepresentation = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DiscordUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     YearOfBirth = table.Column<int>(type: "int", nullable: false),
                     YearOfDeath = table.Column<int>(type: "int", nullable: false)
@@ -219,8 +224,8 @@ namespace Icarus.Migrations
 
             migrationBuilder.InsertData(
                 table: "GameStates",
-                columns: new[] { "GameStateId", "LastTickEpoch", "NationId", "TickInterval" },
-                values: new object[] { 1, 0L, null, 3600000L });
+                columns: new[] { "GameStateId", "LastTickEpoch", "NationId", "TickInterval", "Year" },
+                values: new object[] { 1, 0L, null, 3600000L, 0 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Characters_DiscordUserId",

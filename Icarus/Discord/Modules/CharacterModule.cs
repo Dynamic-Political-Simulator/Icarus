@@ -96,19 +96,19 @@ namespace Icarus.Discord.Modules
             await ReplyAsync("Career set.");
         }
 
-        [SlashCommand("set-culture", "Sets your own culture.")]
-        public async Task SetCulture(string culture)
+        [SlashCommand("set-assembly-rep", "Sets which group you represent in the assembly.")]
+        public async Task SetCulture(string assembly)
         {
             try
             {
-                await _characterService.UpdateCharacterCulture(Context.User.Id.ToString(), culture);
+                await _characterService.UpdateCharacterAssembly(Context.User.Id.ToString(), assembly);
             }
             catch (ArgumentException)
             {
-                await ReplyAsync("Culture may not be longer than 64 characters.");
+                await ReplyAsync("Assembly representation may not be longer than 64 characters.");
             }
 
-            await ReplyAsync("Culture set.");
+            await ReplyAsync("Assembly representation set.");
         }
     }
 }

@@ -16,6 +16,8 @@ namespace Icarus.Context.Models
         public string Career { get; set; }
         public string Culture { get; set; }
 
+        public string AssemblyRepresentation { get; set; }
+
         public string DiscordUserId { get; set; }
         public virtual DiscordUser DiscordUser { get; set; }
 
