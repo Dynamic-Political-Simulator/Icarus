@@ -85,5 +85,21 @@ namespace Icarus.Services
 
             await db.SaveChangesAsync();
         }
+
+        public async Task UpdateCharacterCulture(string discordId, string culture)
+        {
+            if (culture.Length > 64)
+            {
+                throw new ArgumentException();
+            }
+
+            using var db = new IcarusContext();
+
+            var active = await GetActiveCharacter(discordId);
+
+            active.Culture = culture;
+
+            await db.SaveChangesAsync();
+        }
     }
 }

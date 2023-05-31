@@ -29,7 +29,8 @@ namespace Icarus.Discord.Modules
             try
             {
                 await _characterService.CreateNewCharacter(Context.User.Id.ToString(), characterName, startingAge);
-                await ReplyAsync($"Character {characterName} has been created.");
+                await ReplyAsync($"Character {characterName} has been created. Remember there are also commands for setting" +
+                    $"your culture and career.");
             }
             catch(ExistingActiveCharacterException)
             {
@@ -80,6 +81,7 @@ namespace Icarus.Discord.Modules
             await ReplyAsync($"Bio updated.");
         }
 
+        [SlashCommand("set-career", "Sets your own career.")]
         public async Task SetCareer(string career)
         {
             try
@@ -92,6 +94,21 @@ namespace Icarus.Discord.Modules
             }
             
             await ReplyAsync("Career set.");
+        }
+
+        [SlashCommand("set-culture", "Sets your own culture.")]
+        public async Task SetCulture(string culture)
+        {
+            try
+            {
+                await _characterService.UpdateCharacterCulture(Context.User.Id.ToString(), culture);
+            }
+            catch (ArgumentException)
+            {
+                await ReplyAsync("Culture may not be longer than 64 characters.");
+            }
+
+            await ReplyAsync("Culture set.");
         }
     }
 }
