@@ -5,6 +5,7 @@ using Discord.WebSocket;
 using Icarus.Context;
 using Icarus.Context.Models;
 using Icarus.Services;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Icarus.Discord.Modules
@@ -23,32 +24,10 @@ namespace Icarus.Discord.Modules
         {
             using var db = new IcarusContext();
             //Some Code here to clean up the prior gameState
+            
 
-            GameState gameState = new()
-            {
-                //Propably wanna make this command parameters later
-                Nation = new Nation()
-                {
-                    Name = "TestNation",
-                    Description = "The Nation of TestNation is a wonderours place of testing"
-                }
-            };
-
-            //For now just generating 10 dummy provinces called 0,1,2,3... eventually this should propably be read in from somewhere. Either an XML or maybe a google sheet
-            for (int i = 0; i < 10; i++)
-            {
-                Province province = new Province()
-                {
-                    Name = i.ToString(),
-                    Description = i.ToString(),
-                    Nation = gameState.Nation
-                };
-
-                province.Values = _valueManagementService.GenerateValueTemplate();
-                gameState.Nation.Provinces.Add(province);
-                await _valueManagementService.GenerateValueRelationships(province.Values);
-            }
-            db.GameStates.Add(gameState);
+            GameState state = db.GameStates.FirstOrDefault();
+            await _valueManagementService.ReadGameStateConfig(state);
 
             await db.SaveChangesAsync();
             await RespondAsync("Success!");
