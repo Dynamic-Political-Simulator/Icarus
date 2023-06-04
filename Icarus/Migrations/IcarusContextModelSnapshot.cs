@@ -212,17 +212,23 @@ namespace Icarus.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<float>("BaseBalue")
+                        .HasColumnType("real");
+
+                    b.Property<float>("CurrentValue")
+                        .HasColumnType("real");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ProvinceId")
                         .HasColumnType("int");
 
-                    b.Property<float>("RelationInducedChange")
-                        .HasColumnType("real");
-
-                    b.Property<float>("_Value")
-                        .HasColumnType("real");
+                    b.Property<string>("TAG")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -248,7 +254,7 @@ namespace Icarus.Migrations
                     b.Property<int>("ModifierWrapperId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ValueName")
+                    b.Property<string>("ValueTag")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
@@ -266,15 +272,6 @@ namespace Icarus.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ValueRelationShipId"));
 
-                    b.Property<float>("Factor")
-                        .HasColumnType("real");
-
-                    b.Property<float>("Max")
-                        .HasColumnType("real");
-
-                    b.Property<float>("Min")
-                        .HasColumnType("real");
-
                     b.Property<string>("OriginId")
                         .HasColumnType("nvarchar(max)");
 
@@ -286,6 +283,9 @@ namespace Icarus.Migrations
 
                     b.Property<int?>("TargetId1")
                         .HasColumnType("int");
+
+                    b.Property<float>("Weight")
+                        .HasColumnType("real");
 
                     b.HasKey("ValueRelationShipId");
 

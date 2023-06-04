@@ -137,8 +137,10 @@ namespace Icarus.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    _Value = table.Column<float>(type: "real", nullable: false),
-                    RelationInducedChange = table.Column<float>(type: "real", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TAG = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CurrentValue = table.Column<float>(type: "real", nullable: false),
+                    BaseBalue = table.Column<float>(type: "real", nullable: false),
                     ProvinceId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -179,7 +181,7 @@ namespace Icarus.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Modifier = table.Column<float>(type: "real", nullable: false),
                     Decay = table.Column<float>(type: "real", nullable: false),
-                    ValueName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ValueTag = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ModifierWrapperId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -203,9 +205,7 @@ namespace Icarus.Migrations
                     OriginId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TargetId1 = table.Column<int>(type: "int", nullable: true),
                     TargetId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Factor = table.Column<float>(type: "real", nullable: false),
-                    Max = table.Column<float>(type: "real", nullable: false),
-                    Min = table.Column<float>(type: "real", nullable: false)
+                    Weight = table.Column<float>(type: "real", nullable: false)
                 },
                 constraints: table =>
                 {
