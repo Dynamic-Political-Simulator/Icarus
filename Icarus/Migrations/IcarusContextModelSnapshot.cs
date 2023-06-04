@@ -71,6 +71,9 @@ namespace Icarus.Migrations
                     b.Property<long>("TickInterval")
                         .HasColumnType("bigint");
 
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
                     b.HasKey("GameStateId");
 
                     b.HasIndex("NationId");
@@ -82,7 +85,8 @@ namespace Icarus.Migrations
                         {
                             GameStateId = 1,
                             LastTickEpoch = 0L,
-                            TickInterval = 3600000L
+                            TickInterval = 3600000L,
+                            Year = 0
                         });
                 });
 
@@ -145,7 +149,19 @@ namespace Icarus.Migrations
                     b.Property<string>("CharacterId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("AssemblyRepresentation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Career")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CharacterDescription")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CharacterName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Culture")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DiscordUserId")
