@@ -25,7 +25,7 @@ namespace Icarus
 
         public async Task Start()
         {
-            _client.Log += Log;
+            _client.Log += LogAsync;
 
             _services = BuildServiceProvider();
 
@@ -73,7 +73,7 @@ namespace Icarus
 			await Task.Delay(-1);
         }
 
-		private Task Log(LogMessage msg)
+		private Task LogAsync(LogMessage msg)
         {
             Console.WriteLine(msg.ToString());
             return Task.CompletedTask;
@@ -93,7 +93,6 @@ namespace Icarus
                 .AddSingleton<CharacterService>()
                 .AddDbContext<IcarusContext>(ServiceLifetime.Transient)
             .BuildServiceProvider();
-
 
             return services.BuildServiceProvider();
         }

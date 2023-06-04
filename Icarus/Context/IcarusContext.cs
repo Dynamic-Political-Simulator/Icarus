@@ -58,7 +58,8 @@ namespace Icarus.Context
 				{
 					GameStateId = 1,
 					TickInterval = 3600000,
-					LastTickEpoch = 0
+					LastTickEpoch = 0,
+                    Year = 0
 				}
 			);
 
@@ -66,13 +67,19 @@ namespace Icarus.Context
                 .HasOne(m => m.ModifierWrapper)
                 .WithMany(m => m.Modifiers)
                 .HasForeignKey(m => m.ModifierWrapperId);
+
+            modelBuilder.Entity<ValueRelationship>()
+                .HasOne(vr => vr.Origin)
+                .WithMany()
+                .HasForeignKey(vr => vr.OriginId)
+                .OnDelete(DeleteBehavior.NoAction);
                 
             modelBuilder.Entity<ValueRelationship>()
-                .HasOne(vr => vr.Origin);
-                
-            modelBuilder.Entity<ValueRelationship>()
-                .HasOne(vr => vr.Target);
-                
+                .HasOne(vr => vr.Target)
+                .WithMany()
+                .HasForeignKey(vr => vr.TargetId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             modelBuilder.Entity<Value>()
                 .HasOne(v => v.Province)
                 .WithMany(p => p.Values)

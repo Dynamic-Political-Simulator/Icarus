@@ -3,6 +3,7 @@ using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Icarus.Context;
+using Icarus.Discord.CustomPreconditions;
 using Icarus.Exceptions;
 using Icarus.Services;
 using System;
@@ -24,24 +25,26 @@ namespace Icarus.Discord.Modules
         }
 
         [SlashCommand("create-character", "Creates a new character.")]
+        [RequireProfile]
         public async Task CreateCharacter(string characterName, [Choice("20", 20), Choice("35", 35), Choice("50", 50)] int startingAge)
         {
             try
             {
                 await _characterService.CreateNewCharacter(Context.User.Id.ToString(), characterName, startingAge);
-                await ReplyAsync($"Character {characterName} has been created. Remember there are also commands for setting" +
-                    $"your culture and career.");
+                await RespondAsync($"Character {characterName} has been created. Remember there are also commands for setting" +
+                    $" your culture and career.");
             }
             catch(ExistingActiveCharacterException)
             {
-                await ReplyAsync("Character could not be created as you still have an active character.");
+                await RespondAsync("Character could not be created as you still have an active character.");
             }
             catch(ArgumentException)
             {
-                await ReplyAsync($"Character names may not be longer than 64 characters.");
+                await RespondAsync($"Character names may not be longer than 64 characters.");
             }
         }
 
+        [RequireProfile]
         [SlashCommand("me", "Shows your active character or the active character of a person you ping.")]
         public async Task Me([Remainder]SocketGuildUser mention = null)
         {
@@ -54,16 +57,34 @@ namespace Icarus.Discord.Modules
 
                 embedBuilder.WithThumbnailUrl(user.GetDisplayAvatarUrl());
                 embedBuilder.WithTitle(character.CharacterName);
-                embedBuilder.AddField("Character Biography", character.CharacterDescription);
 
-                await ReplyAsync(embed: embedBuilder.Build());
+                if (character.CharacterDescription!= null)
+                {
+                    embedBuilder.AddField("Character Biography", character.CharacterDescription);
+                }
+                if (character.Culture != null)
+                {
+                    embedBuilder.AddField("Culture", character.Culture);
+                }
+                if (character.Career != null)
+                {
+                    embedBuilder.AddField("Career", character.Career);
+                }
+                if (character.AssemblyRepresentation != null)
+                {
+                    embedBuilder.AddField("Assembly Representation", character.AssemblyRepresentation);
+                }
+
+
+                await RespondAsync(embed: embedBuilder.Build());
             }
             catch (NoActiveCharacterException)
             {
-                await ReplyAsync($"Could not find an active character for {user.DisplayName}.");
+                await RespondAsync($"Could not find an active character for {user.DisplayName}.");
             }
         }
 
+        [RequireProfile]
         [SlashCommand("set-bio", "Sets your own bio.")]
         public async Task SetBio(string bio)
         {
@@ -75,12 +96,13 @@ namespace Icarus.Discord.Modules
             }
             catch (NoActiveCharacterException)
             {
-                await ReplyAsync($"Could not find an active character for {user.DisplayName}.");
+                await RespondAsync($"Could not find an active character for {user.DisplayName}.");
             }
 
-            await ReplyAsync($"Bio updated.");
+            await RespondAsync($"Bio updated.");
         }
 
+        [RequireProfile]
         [SlashCommand("set-career", "Sets your own career.")]
         public async Task SetCareer(string career)
         {
@@ -90,12 +112,13 @@ namespace Icarus.Discord.Modules
             }
             catch(ArgumentException)
             {
-                await ReplyAsync("Career may not be longer than 64 characters.");
+                await RespondAsync("Career may not be longer than 64 characters.");
             }
             
-            await ReplyAsync("Career set.");
+            await RespondAsync("Career set.");
         }
 
+        [RequireProfile]
         [SlashCommand("set-assembly-rep", "Sets which group you represent in the assembly.")]
         public async Task SetCulture(string assembly)
         {
@@ -105,10 +128,10 @@ namespace Icarus.Discord.Modules
             }
             catch (ArgumentException)
             {
-                await ReplyAsync("Assembly representation may not be longer than 64 characters.");
+                await RespondAsync("Assembly representation may not be longer than 64 characters.");
             }
 
-            await ReplyAsync("Assembly representation set.");
+            await RespondAsync("Assembly representation set.");
         }
     }
 }

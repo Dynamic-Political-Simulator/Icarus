@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Icarus.Migrations
 {
     [DbContext(typeof(IcarusContext))]
-    [Migration("20230604114004_initial")]
+    [Migration("20230604183407_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -275,16 +275,10 @@ namespace Icarus.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ValueRelationShipId"));
 
-                    b.Property<string>("OriginId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("OriginId1")
+                    b.Property<int>("OriginId")
                         .HasColumnType("int");
 
-                    b.Property<string>("TargetId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("TargetId1")
+                    b.Property<int>("TargetId")
                         .HasColumnType("int");
 
                     b.Property<float>("Weight")
@@ -292,9 +286,9 @@ namespace Icarus.Migrations
 
                     b.HasKey("ValueRelationShipId");
 
-                    b.HasIndex("OriginId1");
+                    b.HasIndex("OriginId");
 
-                    b.HasIndex("TargetId1");
+                    b.HasIndex("TargetId");
 
                     b.ToTable("Relationships");
                 });
@@ -376,11 +370,15 @@ namespace Icarus.Migrations
                 {
                     b.HasOne("Icarus.Context.Models.Value", "Origin")
                         .WithMany()
-                        .HasForeignKey("OriginId1");
+                        .HasForeignKey("OriginId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("Icarus.Context.Models.Value", "Target")
                         .WithMany()
-                        .HasForeignKey("TargetId1");
+                        .HasForeignKey("TargetId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("Origin");
 

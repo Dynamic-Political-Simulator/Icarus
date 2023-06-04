@@ -73,7 +73,7 @@ namespace Icarus.Services
 
         public float GetValueGoal(Value value)
         {
-            return AggregateModifiers(value) + ReEvaluateRelations(value);
+            return AggregateModifiers(value) + ReEvaluateRelations(value) + value.BaseBalue;
         }
 
         public float CalculateNewValue(Value Value)
@@ -269,6 +269,8 @@ namespace Icarus.Services
 
             await ReadNation(gameState, Xmldata.LastChild.SelectSingleNode("Nation"), Xmldata.LastChild.SelectSingleNode("ValueTemplates"));
             await GenerateValueRelationships(Xmldata.LastChild.SelectSingleNode("ValueRelationShips"));
+
+            return;
         }
 
         public async Task ReadNation(GameState gameState, XmlNode NationXml, XmlNode ValueTemplatesXml)
@@ -338,6 +340,7 @@ namespace Icarus.Services
             }
 
             gameState.Nation= NewNation;
+            db.Update(gameState);
             await db.SaveChangesAsync();
         }
 

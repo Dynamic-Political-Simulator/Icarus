@@ -31,7 +31,7 @@ namespace Icarus.Services
         {
             using var db = new IcarusContext();
 
-            var active = await GetActiveCharacter(discordId);
+            var active = await db.Characters.SingleOrDefaultAsync(c => c.DiscordUserId == discordId && c.YearOfDeath == -1);
 
             if (active != null)
             {
@@ -49,14 +49,15 @@ namespace Icarus.Services
 
             var newChar = new PlayerCharacter()
             {
-                DiscordUserId= discordId,
-                CharacterName= characterName,
+                DiscordUserId = discordId,
+                CharacterName = characterName,
                 YearOfBirth = (int)(gameState.Year - (startingAge + rand.NextInt64(-2, 3)))
             };
 
             db.Characters.Add(newChar);
 
             await db.SaveChangesAsync();
+            
         }
 
         public async Task UpdateCharacterBio(string discordId, string bio)
@@ -67,6 +68,7 @@ namespace Icarus.Services
 
             active.CharacterDescription = bio;
 
+            db.Update(active);
             await db.SaveChangesAsync();
         }
 
@@ -83,6 +85,7 @@ namespace Icarus.Services
 
             active.Career = career;
 
+            db.Update(active);
             await db.SaveChangesAsync();
         }
 
@@ -99,6 +102,7 @@ namespace Icarus.Services
 
             active.Culture = culture;
 
+            db.Update(active);
             await db.SaveChangesAsync();
         }
 
@@ -115,6 +119,7 @@ namespace Icarus.Services
 
             active.AssemblyRepresentation = assembly;
 
+            db.Update(active);
             await db.SaveChangesAsync();
         }
     }

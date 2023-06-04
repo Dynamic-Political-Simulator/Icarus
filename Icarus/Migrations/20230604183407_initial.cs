@@ -201,23 +201,21 @@ namespace Icarus.Migrations
                 {
                     ValueRelationShipId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    OriginId1 = table.Column<int>(type: "int", nullable: true),
-                    OriginId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    TargetId1 = table.Column<int>(type: "int", nullable: true),
-                    TargetId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OriginId = table.Column<int>(type: "int", nullable: false),
+                    TargetId = table.Column<int>(type: "int", nullable: false),
                     Weight = table.Column<float>(type: "real", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Relationships", x => x.ValueRelationShipId);
                     table.ForeignKey(
-                        name: "FK_Relationships_Values_OriginId1",
-                        column: x => x.OriginId1,
+                        name: "FK_Relationships_Values_OriginId",
+                        column: x => x.OriginId,
                         principalTable: "Values",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Relationships_Values_TargetId1",
-                        column: x => x.TargetId1,
+                        name: "FK_Relationships_Values_TargetId",
+                        column: x => x.TargetId,
                         principalTable: "Values",
                         principalColumn: "Id");
                 });
@@ -253,14 +251,14 @@ namespace Icarus.Migrations
                 column: "NationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Relationships_OriginId1",
+                name: "IX_Relationships_OriginId",
                 table: "Relationships",
-                column: "OriginId1");
+                column: "OriginId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Relationships_TargetId1",
+                name: "IX_Relationships_TargetId",
                 table: "Relationships",
-                column: "TargetId1");
+                column: "TargetId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ValueModifiers_ModifierWrapperId",

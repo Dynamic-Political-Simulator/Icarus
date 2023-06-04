@@ -5,6 +5,7 @@ using Discord.WebSocket;
 using Icarus.Context;
 using Icarus.Context.Models;
 using Icarus.Services;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -27,9 +28,8 @@ namespace Icarus.Discord.Modules
             
 
             GameState state = db.GameStates.FirstOrDefault();
-            await _valueManagementService.ReadGameStateConfig(state);
+            await _valueManagementService.ReadGameStateConfig(state);\
 
-            await db.SaveChangesAsync();
             await RespondAsync("Success!");
         }
     }
