@@ -28,7 +28,7 @@ namespace Icarus.Discord.Modules
             
 
             GameState state = db.GameStates.FirstOrDefault();
-            await _valueManagementService.ReadGameStateConfig(state);\
+            await _valueManagementService.ReadGameStateConfig(state);
 
             await RespondAsync("Success!");
         }
