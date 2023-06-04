@@ -6,6 +6,7 @@
 # Icarus
 appsettings.json
 appsettings.staging.json
+appsettings.*.json
 
 # User-specific files
 *.rsuser

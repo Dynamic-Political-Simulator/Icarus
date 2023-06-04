@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Icarus.Context.Models;
+using Icarus.Utils;
 
 namespace Icarus.Context
 {
@@ -24,15 +25,12 @@ namespace Icarus.Context
         
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var config = new IcarusConfig();
-            Configuration.GetSection("IcarusConfig").Bind(config);
-
-            var envVariables = Environment.GetEnvironmentVariables();
+            var config = ConfigFactory.GetConfig();
 
             optionsBuilder
                 .UseLazyLoadingProxies()
                 .UseSqlServer($"Server={config.DatabaseIp};"
-                + $"Database={envVariables["DatabaseName"]};"
+                + $"Database={config.DatabaseName};"
                 + $"User Id={config.SqlUsername};"
                 + $"Password={config.SqlPassword};"
                 + "Trusted_Connection=false;"

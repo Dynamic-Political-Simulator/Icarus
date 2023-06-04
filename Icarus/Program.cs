@@ -8,6 +8,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Icarus.Context;
 using Icarus.Services;
+using Icarus.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,28 +21,19 @@ namespace Icarus
 
 		private IServiceProvider _services;
 
-        public static IConfigurationRoot Configuration { get; set; }
-
 		static Task Main(string[] args) => new Program().Start();
 
         public async Task Start()
         {
-            var configBuilder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
-            var envVariables = Environment.GetEnvironmentVariables();
-
-            Configuration = configBuilder.Build();
-
             _client.Log += Log;
 
             _services = BuildServiceProvider();
 
-            var icarusConfig = new IcarusConfig();
-            Configuration.GetSection("IcarusConfig").Bind(icarusConfig);
+            var icarusConfig = ConfigFactory.GetConfig();
+
             _client.Ready += OnReady;
 
-            await _client.LoginAsync(TokenType.Bot, envVariables["Token"].ToString());
+            await _client.LoginAsync(TokenType.Bot, icarusConfig.Token.ToString());
             await _client.StartAsync();
 
             await _client.SetGameAsync(icarusConfig.Version);
@@ -51,8 +43,7 @@ namespace Icarus
 
         private async Task OnReady()
         {
-            var icarusConfig = new IcarusConfig();
-            Configuration.GetSection("IcarusConfig").Bind(icarusConfig);
+            var icarusConfig = ConfigFactory.GetConfig();
 
             InteractionService interactionService = new InteractionService(_client.Rest);
             // Register slash commands defined in modules
@@ -94,17 +85,12 @@ namespace Icarus
 
             services.AddOptions();
 
-            //services.Configure<IcarusConfig>(Configuration.GetSection("IcarusConfig"));
-            var icarusConfig = new IcarusConfig();
-            Configuration.GetSection("IcarusConfig").Bind(icarusConfig);
-
             services.AddSingleton(_client)
                 //.AddSingleton(_commands)
                 .AddSingleton<ValueManagementService>()
                 .AddSingleton<TickService>()
                 .AddSingleton<ActionService>()
                 .AddDbContext<IcarusContext>(ServiceLifetime.Transient)
-                .AddScoped(_ => icarusConfig)
             .BuildServiceProvider();
 
 
