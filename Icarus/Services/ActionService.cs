@@ -10,13 +10,6 @@ namespace Icarus.Services
 {
     public class ActionService
     {
-        private readonly IcarusConfig Configuration;
-
-        public ActionService(IcarusConfig config)
-        {
-            Configuration = config;
-        }
-
         public string ExampleAction(PlayerCharacter character)
         {
             return "Example aciton.";

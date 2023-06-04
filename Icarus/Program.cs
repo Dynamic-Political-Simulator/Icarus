@@ -90,6 +90,7 @@ namespace Icarus
                 .AddSingleton<ValueManagementService>()
                 .AddSingleton<TickService>()
                 .AddSingleton<ActionService>()
+                .AddSingleton<CharacterService>()
                 .AddDbContext<IcarusContext>(ServiceLifetime.Transient)
             .BuildServiceProvider();
 

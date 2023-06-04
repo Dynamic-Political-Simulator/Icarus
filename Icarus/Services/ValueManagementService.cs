@@ -6,6 +6,7 @@ using System.Xml;
 using Icarus.Context;
 using Icarus.Context.Models;
 using Icarus.Discord.EconCommands;
+using Icarus.Utils;
 using Microsoft.Identity.Client;
 
 namespace Icarus.Services
@@ -15,12 +16,9 @@ namespace Icarus.Services
         private readonly TickService _tickService;
         public List<ModifierCreationDTO> Modifiers { get; set; } = new List<ModifierCreationDTO>();
 
-        private readonly IcarusConfig Config;
-
-        public ValueManagementService(TickService tickService, IcarusConfig config)
+        public ValueManagementService(TickService tickService)
         {
             _tickService = tickService;
-            Config = config;
 
             _tickService.TickEvent += ValueTick;
         }
@@ -45,11 +43,13 @@ namespace Icarus.Services
 
         public float GetValueChange(Value value)
         {
+            var config = ConfigFactory.GetConfig();
+
             float ValueGoal = GetValueGoal(value);
             float Change;
             if (value.CurrentValue < ValueGoal)
             {
-                Change = 0.5f + ((value.CurrentValue - ValueGoal) * Config.ValueChangeRatio);
+                Change = 0.5f + ((value.CurrentValue - ValueGoal) * config.ValueChangeRatio);
                 //If the change would move us above the goal then just change by enough to give us the exact Goal
                 if ((value.CurrentValue + Change) > ValueGoal)
                 { 
@@ -58,7 +58,7 @@ namespace Icarus.Services
             }
             else
             {
-                Change = (0.5f + ((value.CurrentValue - ValueGoal) * Config.ValueChangeRatio))*-1;
+                Change = (0.5f + ((value.CurrentValue - ValueGoal) * config.ValueChangeRatio))*-1;
                 //If the change would move us below the goal then just change by enough to give us the exact Goal
                 if ((value.CurrentValue + Change) < ValueGoal)
                 {
