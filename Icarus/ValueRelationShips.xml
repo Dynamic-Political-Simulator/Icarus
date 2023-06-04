@@ -1,80 +1,43 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ValueRelationShips>
   <RelationShip>
-    <Origin>Industrial Output</Origin>
-    <Target>Economic Strength</Target>
-    <Factor>0.1</Factor>
-    <Max>50</Max>
-    <Min>0</Min>
+    <Origin>IND</Origin>
+    <Target>ES</Target>
+    <Weight>1</Weight>
   </RelationShip>
   <RelationShip>
-    <Origin>Industrial Output</Origin>
-    <Target>Health</Target>
-    <Factor>-0.1</Factor>
-    <Max>0</Max>
-    <Min>-50</Min>
+    <Origin>IND</Origin>
+    <Target>H</Target>
+    <Weight>1</Weight>
   </RelationShip>
   <RelationShip>
-    <Origin>Infrastructure</Origin>
-    <Target>Industrial Output</Target>
-    <Factor>0.1</Factor>
-    <Max>50</Max>
-    <Min>0</Min>
+    <Origin>I</Origin>
+    <Target>IND</Target>
+    <Weight>1</Weight>
   </RelationShip>
   <RelationShip>
-    <Origin>Infrastructure</Origin>
-    <Target>Mechanisation</Target>
-    <Factor>0.1</Factor>
-    <Max>50</Max>
-    <Min>0</Min>
+    <Origin>I</Origin>
+    <Target>M</Target>
+    <Weight>1</Weight>
   </RelationShip>
   <RelationShip>
-    <Origin>Urbanization</Origin>
-    <Target>Industrial Output</Target>
-    <Factor>0.1</Factor>
-    <Max>50</Max>
-    <Min>0</Min>
+    <Origin>U</Origin>
+    <Target>IND</Target>
+    <Weight>1</Weight>
   </RelationShip>
   <RelationShip>
-    <Origin>Urbanization</Origin>
+    <Origin>U</Origin>
     <Target>Housing</Target>
-    <Factor>0.1</Factor>
-    <Max>50</Max>
-    <Min>0</Min>
+    <Weight>1</Weight>
   </RelationShip>
   <RelationShip>
-    <Origin>Housing</Origin>
-    <Target>Health</Target>
-    <Factor>0.1</Factor>
-    <Max>50</Max>
-    <Min>0</Min>
+    <Origin>SEC</Origin>
+    <Target>LIT</Target>
+    <Weight>1</Weight>
   </RelationShip>
   <RelationShip>
-    <Origin>Housing</Origin>
-    <Target>Security</Target>
-    <Factor>0.1</Factor>
-    <Max>50</Max>
-    <Min>0</Min>
-  </RelationShip>
-  <RelationShip>
-    <Origin>Security</Origin>
-    <Target>Literacy</Target>
-    <Factor>0.1</Factor>
-    <Max>50</Max>
-    <Min>0</Min>
-  </RelationShip>
-  <RelationShip>
-    <Origin>Health</Origin>
-    <Target>Literacy</Target>
-    <Factor>0.1</Factor>
-    <Max>50</Max>
-    <Min>0</Min>
-  </RelationShip>
-  <RelationShip>
-    <Origin>Literacy</Origin>
-    <Target>Standard of Living</Target>
-    <Factor>0.1</Factor>
-    <Max>50</Max>
-    <Min>0</Min>
+    <Origin>H</Origin>
+    <Target>LIT</Target>
+    <Weight>1</Weight>
   </RelationShip>
 </ValueRelationShips>

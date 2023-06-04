@@ -46,7 +46,7 @@ namespace Icarus.Discord.EconCommands
             }
             
 
-            Value._Value = Number;
+            Value.CurrentValue = Number;
 
             await db.SaveChangesAsync();
             await RespondAsync("Success!");
@@ -68,13 +68,13 @@ namespace Icarus.Discord.EconCommands
             stringBuilder.AppendLine($"Value Name : Value");
             foreach (Value v in province.Values)
             {   
-                if (_valueManagementService.GetValueChange(v) > 0)
+                if (_valueManagementService.GetValueChange(v) >= 0)
                 {
-                    stringBuilder.AppendLine($"{v.Name} : {v._Value}(+{_valueManagementService.GetValueChange(v)})");
+                    stringBuilder.AppendLine($"{v.Name} : {v.CurrentValue}(+{_valueManagementService.GetValueChange(v)};{_valueManagementService.GetValueGoal(v)})");
                 }
                 else
                 {
-                    stringBuilder.AppendLine($"{v.Name} : {v._Value}({_valueManagementService.GetValueChange(v)})");
+                    stringBuilder.AppendLine($"{v.Name} : {v.CurrentValue}(-{_valueManagementService.GetValueChange(v)};{_valueManagementService.GetValueGoal(v)})");
                 }
             }
             await RespondAsync(stringBuilder.ToString());

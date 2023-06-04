@@ -13,9 +13,6 @@ namespace Icarus.Context.Models
         public string OriginId { get; set; }
         public virtual Value Target { get; set; }
         public string TargetId { get; set; }
-
-        public float Factor { get; set; }
-        public float Max { get; set; }
-        public float Min { get; set; }
+        public float Weight { get; set; }
     }
 }

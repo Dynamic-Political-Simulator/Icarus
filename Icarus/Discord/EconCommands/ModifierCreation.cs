@@ -358,7 +358,7 @@ namespace Icarus.Discord.EconCommands
             {
                 ValueModifier valueModifier = new ValueModifier()
                 {
-                    ValueName = ValueAmountPair.Key,
+                    ValueTag = ValueAmountPair.Key,
                     Modifier = ValueAmountPair.Value,
                 };
                 if (modifierDTO.ModifierType == ModifierType.Decaying)

@@ -14,5 +14,6 @@ namespace Icarus
 		public string Token { get; set; }
 		public ulong GuildId { get; set; }
 		public int TickResolution { get; set; }
+		public float ValueChangeRatio { get; set; }
 	}
 }

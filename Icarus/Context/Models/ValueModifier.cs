@@ -14,7 +14,7 @@ namespace Icarus.Context.Models
         public float Modifier { get; set; }
         public float Decay { get; set; }
 
-        public string ValueName { get; set; }
+        public string ValueTag { get; set; }
         public virtual Modifier ModifierWrapper { get; set; }
         public int ModifierWrapperId { get; set; }
     }
