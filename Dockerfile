@@ -20,5 +20,7 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine as runtime
 WORKDIR /publish
 COPY --from=build-env /publish .
 COPY ./Icarus/appsettings.json /publish
+COPY ./Icarus/appsettings.staging.json /publish
+COPY ./Icarus/appsettings.prod.json /publish
 COPY ./Icarus/ValueRelationShips.xml /publish
 ENTRYPOINT ["dotnet", "Icarus.dll"]
