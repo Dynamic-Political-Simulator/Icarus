@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Set up the build environment
-FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine as build-env
+FROM mcr.microsoft.com/dotnet/sdk:7.0 as build-env
 
 # Specify the work directory
 WORKDIR /Icarus
@@ -20,4 +20,5 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine as runtime
 WORKDIR /publish
 COPY --from=build-env /publish .
 COPY ./Icarus/appsettings.json /publish
+COPY ./Icarus/ValueRelationShips.xml /publish
 ENTRYPOINT ["dotnet", "Icarus.dll"]
