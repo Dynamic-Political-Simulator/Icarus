@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
@@ -37,6 +38,7 @@ namespace Icarus.Services
             foreach (Value Value in db.Values)
             {
                 CalculateNewValue(Value);
+                //Console.WriteLine($"{Value.Name}:{Value.CurrentValue}");
             }
             await db.SaveChangesAsync();
         }
@@ -49,7 +51,7 @@ namespace Icarus.Services
             float Change;
             if (value.CurrentValue < ValueGoal)
             {
-                Change = 0.5f + ((value.CurrentValue - ValueGoal) * config.ValueChangeRatio);
+                Change = 0.5f + ((ValueGoal - value.CurrentValue) * config.ValueChangeRatio);
                 //If the change would move us above the goal then just change by enough to give us the exact Goal
                 if ((value.CurrentValue + Change) > ValueGoal)
                 { 
@@ -58,7 +60,7 @@ namespace Icarus.Services
             }
             else
             {
-                Change = (0.5f + ((value.CurrentValue - ValueGoal) * config.ValueChangeRatio))*-1;
+                Change = (-0.5f - ((ValueGoal - value.CurrentValue) * config.ValueChangeRatio));
                 //If the change would move us below the goal then just change by enough to give us the exact Goal
                 if ((value.CurrentValue + Change) < ValueGoal)
                 {
@@ -73,13 +75,14 @@ namespace Icarus.Services
 
         public float GetValueGoal(Value value)
         {
-            return AggregateModifiers(value) + ReEvaluateRelations(value) + value.BaseBalue;
+            return (float)Math.Round(AggregateModifiers(value) + ReEvaluateRelations(value) + value.BaseBalue,2);
         }
 
         public float CalculateNewValue(Value Value)
         {
             float ValueChange = GetValueChange(Value);
             Value.CurrentValue += ValueChange;
+            if (Value.CurrentValue < 0) { Value.CurrentValue = 0; }
             return Value.CurrentValue;
         }
 
@@ -116,10 +119,15 @@ namespace Icarus.Services
 
             // Added AsQueryable here because it bitched about the Where being ambiguous
             //List of every relationship where the current Value is the Target
-            List<ValueRelationship> Relationships = db.Relationships.AsQueryable().Where(vr => vr.Target == value).ToList();
+            List<ValueRelationship> Relationships = db.Relationships.AsQueryable().Where(vr => vr.TargetTag == value.TAG).ToList();
+            if (Relationships.Count == 0) 
+            {
+                return 0f;
+            }
             foreach(ValueRelationship relationship in Relationships)
             {
-                ValueWeightPair.Add(new Tuple<float, float>(relationship.Origin.CurrentValue, relationship.Weight));
+                Value origin = value.Province.Values.FirstOrDefault(v => v.TAG == relationship.OriginTag);
+                ValueWeightPair.Add(new Tuple<float, float>(origin.CurrentValue, relationship.Weight));
                 TotalWeight += Math.Abs(relationship.Weight);
             }
 
@@ -127,7 +135,7 @@ namespace Icarus.Services
             {
                 NewGoal += (tuple.Item1 * tuple.Item2) / TotalWeight;
             }
-
+            string name = value.Name;
             return NewGoal;
         }
 
@@ -360,11 +368,18 @@ namespace Icarus.Services
                     Target = relationship.SelectSingleNode("Target").InnerText,
                     Weight = float.Parse(relationship.SelectSingleNode("Weight").InnerText),
                 });
+
+                db.Relationships.Add(new ValueRelationship()
+                {
+                    OriginTag = relationship.SelectSingleNode("Origin").InnerText,
+                    TargetTag = relationship.SelectSingleNode("Target").InnerText,
+                    Weight = float.Parse(relationship.SelectSingleNode("Weight").InnerText),
+                });
             }
 
             List<ValueRelationship> Relationships = new List<ValueRelationship>();
 
-            foreach(Value Value in Values)
+            /*foreach(Value Value in Values)
             {
                 List<RelationShipDTO> ValidDTOs = RelationShipDTOs.Where(v=> v.Origin == Value.TAG).ToList();
                 foreach (RelationShipDTO DTO in ValidDTOs)
@@ -387,7 +402,7 @@ namespace Icarus.Services
                 }
             }
 
-            db.Relationships.AddRange(Relationships);
+            db.Relationships.AddRange(Relationships);*/
 
             await db.SaveChangesAsync();
         }
