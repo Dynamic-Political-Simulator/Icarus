@@ -49,6 +49,8 @@ namespace Icarus.Context
         public DbSet<Nation> Nations { get; set; }
         public DbSet<Province> Provinces { get; set; }
         public DbSet<Modifier> Modifiers { get; set; }
+        public DbSet<Good> Goods { get; set; }
+        public DbSet<GoodValueModifier> GoodValueModifiers { get; set; }
 
         // Default Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -62,6 +64,11 @@ namespace Icarus.Context
                     Year = 0
 				}
 			);
+
+            modelBuilder.Entity<GoodValueModifier>()
+                .HasOne(m => m.GoodWrapper)
+                .WithMany(g => g.ValueModifiers)
+                .HasForeignKey(m => m.GoodWrapperId);
 
             modelBuilder.Entity<ValueModifier>()
                 .HasOne(m => m.ModifierWrapper)

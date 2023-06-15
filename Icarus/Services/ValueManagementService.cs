@@ -258,6 +258,31 @@ namespace Icarus.Services
             await db.SaveChangesAsync();
         }
 
+        public Province AddGoodToProvince(Good good, Province province)
+        {
+            Modifier GoodModifier = new Modifier()
+            {
+                Name = good.Name,
+                Description = good.Description,
+                Type = ModifierType.Permanent,
+                isGood = true
+            };
+
+            foreach (GoodValueModifier vm in good.ValueModifiers)
+            {
+                GoodModifier.Modifiers.Add(new ValueModifier()
+                {
+                    Modifier = vm.Modifier,
+                    ValueTag = vm.ValueTag,
+                    Decay = vm.Decay
+                });
+            }
+
+            province.Modifiers.Add(GoodModifier);
+
+            return province;
+        }
+
         /// <summary>
         /// Depreceated Function to generate Values. DO NOT USE!
         /// </summary>
@@ -351,7 +376,7 @@ namespace Icarus.Services
             Xmldata.Load(DataPath);
             XmlNode xmlNode = Xmldata.LastChild.SelectSingleNode("Nation");
 
-
+            await ReadGoodXml(Xmldata.LastChild.SelectSingleNode("Goods"));
             await ReadNation(gameState, Xmldata.LastChild.SelectSingleNode("Nation"), Xmldata.LastChild.SelectSingleNode("ValueTemplates"));
             await GenerateValueRelationships(Xmldata.LastChild.SelectSingleNode("ValueRelationShips"));
         }
@@ -426,6 +451,20 @@ namespace Icarus.Services
                     NewProvince.Modifiers.Add(NewModifier);
                 }
 
+                foreach(XmlNode GoodTag in province.SelectSingleNode("Goods").ChildNodes)
+                {
+                    Good GoodTemplate = db.Goods.FirstOrDefault(g => g.TAG == GoodTag.InnerText);
+                    if (GoodTemplate == null)
+                    {
+                        throw new Exception("Province contains Good Tag that can not be found in db.");
+                    }
+                    else
+                    {
+                        AddGoodToProvince(GoodTemplate, NewProvince);
+                    }
+                }
+
+
                 NewNation.Provinces.Add(NewProvince);
             }
 
@@ -490,6 +529,39 @@ namespace Icarus.Services
 
             db.Relationships.AddRange(Relationships);*/
 
+            await db.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Read Goods from XML
+        /// </summary>
+        /// <param name="GoodsXml">XML Node containing Good data</param>
+        /// <returns>Nothing</returns>
+        public async Task ReadGoodXml(XmlNode GoodsXml)
+        {
+            using var db = new IcarusContext();
+
+            foreach (XmlNode Modifier in GoodsXml.ChildNodes)
+            {
+                Good NewGood = new Good()
+                {
+                    Name = Modifier.SelectSingleNode("Name").InnerText,
+                    Description = Modifier.SelectSingleNode("Description").InnerText,
+                    TAG = Modifier.SelectSingleNode("TAG").InnerText
+                };
+
+                foreach (XmlNode ValueModifier in Modifier.SelectSingleNode("Values").ChildNodes)
+                {
+                    NewGood.ValueModifiers.Add(new Context.Models.GoodValueModifier()
+                    {
+                        ValueTag = ValueModifier.SelectSingleNode("Tag").InnerText,
+                        Modifier = float.Parse(ValueModifier.SelectSingleNode("Modifier").InnerText),
+                        Decay = 0
+                    });
+                }
+
+                db.Goods.Add(NewGood);
+            }
             await db.SaveChangesAsync();
         }
     }

@@ -15,6 +15,6 @@ namespace Icarus.Context.Models
         public string TAG { get; set; }
         public string Description { get; set; }
 
-        public List<ValueModifier> ValueModifiers { get; set; }
+        public virtual List<GoodValueModifier> ValueModifiers { get; set; } = new List<GoodValueModifier>();
     }
 }

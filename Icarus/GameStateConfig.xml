@@ -49,6 +49,9 @@
             </Values>
           </Modifier>
         </Modifiers>
+        <Goods>
+          <Good>CUM</Good>
+        </Goods>
       </Province>
       <Province>
         <Name>Danza Cipres</Name>
@@ -267,6 +270,27 @@
       <Tag>DES</Tag>
     </ValueTemplate>
   </ValueTemplates>
+  <Goods>
+    <Good>
+      <Name>Cum</Name>
+      <TAG>CUM</TAG>
+      <Description>Sticky, white, you know it.</Description>
+      <Values>
+        <Value>
+          <Tag>BCY</Tag>
+          <Modifier>10</Modifier>
+        </Value>
+        <Value>
+          <Tag>AGR</Tag>
+          <Modifier>5</Modifier>
+        </Value>
+        <Value>
+          <Tag>WEL</Tag>
+          <Modifier>20</Modifier>
+        </Value>
+      </Values>
+    </Good>
+  </Goods>
   <ValueRelationShips>
     <RelationShip>
       <Origin>BCY</Origin>

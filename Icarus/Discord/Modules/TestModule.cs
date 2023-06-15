@@ -43,5 +43,19 @@ namespace Bailiff.Discord.Modules
             await _valueManagementService.GenerateValueRelationships(Xmldata.LastChild.SelectSingleNode("ValueRelationShips"));
             await RespondAsync("Done");
 		}
-	}
+
+        [SlashCommand("gengoods", "What it says")]
+        public async Task RereadGoods()
+        {
+            string DataPath = @"./GameStateConfig.xml";
+            XmlDocument Xmldata = new XmlDocument();
+            Xmldata.Load(DataPath);
+            XmlNode xmlNode = Xmldata.LastChild.SelectSingleNode("Nation");
+
+
+
+            await _valueManagementService.ReadGoodXml(Xmldata.LastChild.SelectSingleNode("Goods"));
+            await RespondAsync("Done");
+        }
+    }
 }
