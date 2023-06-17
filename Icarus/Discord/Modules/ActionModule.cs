@@ -1,4 +1,5 @@
-﻿using Discord.Interactions;
+﻿using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
 using Icarus.Context;
 using Icarus.Context.Models;
@@ -6,6 +7,7 @@ using Icarus.Discord.CustomPreconditions;
 using Icarus.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Icarus.Discord.Modules
@@ -49,6 +51,18 @@ namespace Icarus.Discord.Modules
             var result = await _actionService.GiveToken(mention, tokenType, amount, Context.User.Id.ToString());
 
             await RespondAsync(result);
+        }
+
+        [SlashCommand("list-token-types", "Lists all token types present in the database")]
+        public async Task ListTokenTypes()
+        {
+            var types = _actionService.GetTokenTypes();
+
+            var embedBuilder = new EmbedBuilder()
+                .WithTitle("Token types.")
+                .WithDescription(types.Aggregate((current, next) => current + "\n" + next));
+
+            await RespondAsync(embed: embedBuilder.Build());
         }
     }
 }

@@ -65,11 +65,12 @@ namespace Icarus.Services
 
             return "Added favours.";
         }
-    }
 
-    public enum ActionTokenType
-    {
-        TestToken = 0,
-        OtherTestToken = 1
+        public List<string> GetTokenTypes()
+        {
+            using var db = new IcarusContext();
+
+            return db.TokenTypes.ToList().Select(tt => tt.TokenTypeName).ToList();
+        } 
     }
 }
