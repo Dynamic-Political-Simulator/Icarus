@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
@@ -23,42 +24,81 @@ namespace Icarus.Services
             _tickService.TickEvent += ValueTick;
         }
 
-        //This will need to be executed every Tick
+        /// <summary>
+        /// Wrapper Function which executes Tick Logic every Tick
+        /// </summary>
         public async void ValueTick()
         {
             await UpdateValues();
             await UpdateModifiers();
+            Console.WriteLine("Values Ticked!");
 
         }
+
+        /// <summary>
+        /// This updates all Values.
+        /// It first saves all projected changes into a cache and then applies them all during a second loop
+        /// </summary>
+        /// <returns>Nothing</returns>
+        /// <exception cref="Exception">This shouldn't be possible but lets have it here just in case</exception>
         public async Task UpdateValues()
         {
             using var db = new IcarusContext();
 
+            List<ValueChangeCache> changes = new List<ValueChangeCache>();
+
             foreach (Value Value in db.Values)
             {
-                CalculateNewValue(Value);
+                changes.Add(new ValueChangeCache()
+                {
+                    ValueId = Value.Id,
+                    ValueChange = GetValueChange(Value)
+                });
+                //Console.WriteLine($"{Value.Name}:{Value.CurrentValue}");
+            }
+            foreach (ValueChangeCache change in changes)
+            {
+                Value value = db.Values.FirstOrDefault(v => v.Id== change.ValueId);
+                if (value == null)
+                {
+                    throw new Exception("During the Tick ValueId was saved but later not found again. This should be impossible what did you do?");
+                }
+                else
+                {
+                    CalculateNewValue(value, change.ValueChange);
+                }
             }
             await db.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Projects the change of a Value for the next tick.
+        /// </summary>
+        /// <param name="value">Value to calculate the change for.</param>
+        /// <returns>The projected Change of the given Value.</returns>
         public float GetValueChange(Value value)
         {
             var config = ConfigFactory.GetConfig();
 
             float ValueGoal = GetValueGoal(value);
-            float Change;
-            if (value.CurrentValue < ValueGoal)
+            if (ValueGoal == value.CurrentValue)
             {
-                Change = 0.5f + ((value.CurrentValue - ValueGoal) * config.ValueChangeRatio);
+                return 0;
+            }
+            float Change;
+            if (value.CurrentValue < ValueGoal) //The change needs to be positive
+            {
+                Change = 0.5f + ((ValueGoal - value.CurrentValue) * config.ValueChangeRatio);
                 //If the change would move us above the goal then just change by enough to give us the exact Goal
                 if ((value.CurrentValue + Change) > ValueGoal)
                 { 
                     Change = ValueGoal - value.CurrentValue;
                 }
             }
-            else
+            else //The change needs to be negative
             {
-                Change = (0.5f + ((value.CurrentValue - ValueGoal) * config.ValueChangeRatio))*-1;
+                //(neg) = (neg)   + (neg)
+                Change = (-0.5f) + ((ValueGoal - value.CurrentValue) * config.ValueChangeRatio);
                 //If the change would move us below the goal then just change by enough to give us the exact Goal
                 if ((value.CurrentValue + Change) < ValueGoal)
                 {
@@ -71,23 +111,47 @@ namespace Icarus.Services
             //return AggregateModifiers(value) + value.RelationInducedChange;
         }
 
+        /// <summary>
+        /// Calculate the Goal a Value to moving to.
+        /// </summary>
+        /// <param name="value">Value to calculate the Goal for.</param>
+        /// <returns>The Goal a Value is moving to</returns>
         public float GetValueGoal(Value value)
         {
-            return AggregateModifiers(value) + ReEvaluateRelations(value) + value.BaseBalue;
+            //Goal due to Modifers + Goal due to Relationships + Base
+            float goal = (float)Math.Round(AggregateModifiers(value) + ReEvaluateRelations(value) + value.BaseBalue, 2);
+            if (goal < 0)
+            {
+                return 0f;
+            }
+            return goal;
         }
 
-        public float CalculateNewValue(Value Value)
+        /// <summary>
+        /// Apply a Change to a Value. Value can't be smaller than 0. Value is rounded to the nearest two digits.
+        /// </summary>
+        /// <param name="Value">Value to change</param>
+        /// <param name="ValueChange">Change of the Value</param>
+        /// <returns>New CurrentValue of the Value</returns>
+        public float CalculateNewValue(Value Value, float ValueChange)
         {
-            float ValueChange = GetValueChange(Value);
-            Value.CurrentValue += ValueChange;
+            float newValue = Value.CurrentValue + ValueChange;
+            Value.CurrentValue = (float)Math.Round(newValue,2);
+            if (Value.CurrentValue < 0) { Value.CurrentValue = 0; }
             return Value.CurrentValue;
         }
 
+        /// <summary>
+        /// Combine all modifiers affecting a certain Value.
+        /// </summary>
+        /// <param name="Value">Value to aggregate modifiers for.</param>
+        /// <returns>The combined shift in Goal of all modifiers</returns>
         public float AggregateModifiers(Value Value)
         {
             float Total = 0f;
             ValueModifier vm;
             //Aggregate the local Modifiers
+            //The loop iterates over all Modifiers which contain a ValueModifier targeting the chosen Value
             foreach (Modifier modifier in Value.Province.Modifiers.Where(m => m.Modifiers.FirstOrDefault(vm => vm.ValueTag == Value.TAG) != null)) 
             {
                 vm = modifier.Modifiers.FirstOrDefault(vm => vm.ValueTag == Value.TAG);
@@ -103,6 +167,11 @@ namespace Icarus.Services
             return Total;
         }
 
+        /// <summary>
+        /// Calculate the Goal of a Value induced only by its Relations.
+        /// </summary>
+        /// <param name="value">Value to calculate the Goal for</param>
+        /// <returns>Goal induced by relations of the given Value</returns>
         public float ReEvaluateRelations(Value value)
         {
             using var db = new IcarusContext();
@@ -111,15 +180,21 @@ namespace Icarus.Services
 
             
             //First float is Value second float is Weight
+            //Tuple Value1 = Current Value ; Value2 = Weighting
             List<Tuple<float,float>> ValueWeightPair= new List<Tuple<float,float>>();
             float TotalWeight = 0f;
 
             // Added AsQueryable here because it bitched about the Where being ambiguous
             //List of every relationship where the current Value is the Target
-            List<ValueRelationship> Relationships = db.Relationships.AsQueryable().Where(vr => vr.Target == value).ToList();
+            List<ValueRelationship> Relationships = db.Relationships.AsQueryable().Where(vr => vr.TargetTag == value.TAG).ToList();
+            if (Relationships.Count == 0) 
+            {
+                return 0f;
+            }
             foreach(ValueRelationship relationship in Relationships)
             {
-                ValueWeightPair.Add(new Tuple<float, float>(relationship.Origin.CurrentValue, relationship.Weight));
+                Value origin = value.Province.Values.FirstOrDefault(v => v.TAG == relationship.OriginTag);
+                ValueWeightPair.Add(new Tuple<float, float>(origin.CurrentValue, relationship.Weight));
                 TotalWeight += Math.Abs(relationship.Weight);
             }
 
@@ -127,12 +202,15 @@ namespace Icarus.Services
             {
                 NewGoal += (tuple.Item1 * tuple.Item2) / TotalWeight;
             }
-
+            string name = value.Name;
             return NewGoal;
         }
 
 
-
+        /// <summary>
+        /// This adjusts the remaining time and height of Modifiers after a tick.
+        /// </summary>
+        /// <returns>Nothing</returns>
         public async Task UpdateModifiers()
         {
             using var db = new IcarusContext();
@@ -180,8 +258,35 @@ namespace Icarus.Services
             await db.SaveChangesAsync();
         }
 
-        //These are the values used. Initial Values will need to be subject to later balancing
-        //Depreceated Delete?
+        public Province AddGoodToProvince(Good good, Province province)
+        {
+            Modifier GoodModifier = new Modifier()
+            {
+                Name = good.Name,
+                Description = good.Description,
+                Type = ModifierType.Permanent,
+                isGood = true
+            };
+
+            foreach (GoodValueModifier vm in good.ValueModifiers)
+            {
+                GoodModifier.Modifiers.Add(new ValueModifier()
+                {
+                    Modifier = vm.Modifier,
+                    ValueTag = vm.ValueTag,
+                    Decay = vm.Decay
+                });
+            }
+
+            province.Modifiers.Add(GoodModifier);
+
+            return province;
+        }
+
+        /// <summary>
+        /// Depreceated Function to generate Values. DO NOT USE!
+        /// </summary>
+        /// <returns>List of Value Objects</returns>
         public List<Value> GenerateValueTemplate()
         {
             List<Value> Values = new List<Value>();
@@ -259,6 +364,11 @@ namespace Icarus.Services
         //All the Gamestate XML reading after this
         //-----------------------------------------
 
+        /// <summary>
+        /// Wrapper function which handles top level reading logic.
+        /// </summary>
+        /// <param name="gameState">Gamestate to add game info to.</param>
+        /// <returns>nothing</returns>
         public async Task ReadGameStateConfig(GameState gameState)
         {
             string DataPath = @"./GameStateConfig.xml";
@@ -266,13 +376,18 @@ namespace Icarus.Services
             Xmldata.Load(DataPath);
             XmlNode xmlNode = Xmldata.LastChild.SelectSingleNode("Nation");
 
-
+            await ReadGoodXml(Xmldata.LastChild.SelectSingleNode("Goods"));
             await ReadNation(gameState, Xmldata.LastChild.SelectSingleNode("Nation"), Xmldata.LastChild.SelectSingleNode("ValueTemplates"));
             await GenerateValueRelationships(Xmldata.LastChild.SelectSingleNode("ValueRelationShips"));
-
-            return;
         }
 
+        /// <summary>
+        /// Reads all relevant GameState Data from an XML.
+        /// </summary>
+        /// <param name="gameState">Gamestate to add nation to.</param>
+        /// <param name="NationXml">XML Node containing Nation Data</param>
+        /// <param name="ValueTemplatesXml">XML Node containing generic Value Data</param>
+        /// <returns></returns>
         public async Task ReadNation(GameState gameState, XmlNode NationXml, XmlNode ValueTemplatesXml)
         {
             using var db = new IcarusContext();
@@ -336,6 +451,20 @@ namespace Icarus.Services
                     NewProvince.Modifiers.Add(NewModifier);
                 }
 
+                foreach(XmlNode GoodTag in province.SelectSingleNode("Goods").ChildNodes)
+                {
+                    Good GoodTemplate = db.Goods.FirstOrDefault(g => g.TAG == GoodTag.InnerText);
+                    if (GoodTemplate == null)
+                    {
+                        throw new Exception("Province contains Good Tag that can not be found in db.");
+                    }
+                    else
+                    {
+                        AddGoodToProvince(GoodTemplate, NewProvince);
+                    }
+                }
+
+
                 NewNation.Provinces.Add(NewProvince);
             }
 
@@ -344,7 +473,11 @@ namespace Icarus.Services
             await db.SaveChangesAsync();
         }
 
-        //What we wanna do here is 
+        /// <summary>
+        /// Creates the Relationships between Values from an XML
+        /// </summary>
+        /// <param name="RelationshipsXml">XML node containing Relationship data.</param>
+        /// <returns>Nothing</returns>
         public async Task GenerateValueRelationships(XmlNode RelationshipsXml)
         {
             using var db = new IcarusContext();
@@ -360,11 +493,18 @@ namespace Icarus.Services
                     Target = relationship.SelectSingleNode("Target").InnerText,
                     Weight = float.Parse(relationship.SelectSingleNode("Weight").InnerText),
                 });
+
+                db.Relationships.Add(new ValueRelationship()
+                {
+                    OriginTag = relationship.SelectSingleNode("Origin").InnerText,
+                    TargetTag = relationship.SelectSingleNode("Target").InnerText,
+                    Weight = float.Parse(relationship.SelectSingleNode("Weight").InnerText),
+                });
             }
 
             List<ValueRelationship> Relationships = new List<ValueRelationship>();
 
-            foreach(Value Value in Values)
+            /*foreach(Value Value in Values)
             {
                 List<RelationShipDTO> ValidDTOs = RelationShipDTOs.Where(v=> v.Origin == Value.TAG).ToList();
                 foreach (RelationShipDTO DTO in ValidDTOs)
@@ -387,12 +527,47 @@ namespace Icarus.Services
                 }
             }
 
-            db.Relationships.AddRange(Relationships);
+            db.Relationships.AddRange(Relationships);*/
 
+            await db.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Read Goods from XML
+        /// </summary>
+        /// <param name="GoodsXml">XML Node containing Good data</param>
+        /// <returns>Nothing</returns>
+        public async Task ReadGoodXml(XmlNode GoodsXml)
+        {
+            using var db = new IcarusContext();
+
+            foreach (XmlNode Modifier in GoodsXml.ChildNodes)
+            {
+                Good NewGood = new Good()
+                {
+                    Name = Modifier.SelectSingleNode("Name").InnerText,
+                    Description = Modifier.SelectSingleNode("Description").InnerText,
+                    TAG = Modifier.SelectSingleNode("TAG").InnerText
+                };
+
+                foreach (XmlNode ValueModifier in Modifier.SelectSingleNode("Values").ChildNodes)
+                {
+                    NewGood.ValueModifiers.Add(new Context.Models.GoodValueModifier()
+                    {
+                        ValueTag = ValueModifier.SelectSingleNode("Tag").InnerText,
+                        Modifier = float.Parse(ValueModifier.SelectSingleNode("Modifier").InnerText),
+                        Decay = 0
+                    });
+                }
+
+                db.Goods.Add(NewGood);
+            }
             await db.SaveChangesAsync();
         }
     }
 
+
+    //Some Helper Objects
     public class RelationShipDTO
     {
         public string Origin { get; set; }
@@ -405,5 +580,11 @@ namespace Icarus.Services
         public string Name { get; set; }
         public string Description { get; set; }
         public string TAG { get; set; }
+    }
+
+    public class ValueChangeCache
+    {
+        public int ValueId { get; set; }
+        public float ValueChange { get; set; }
     }
 }

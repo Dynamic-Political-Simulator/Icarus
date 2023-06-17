@@ -76,6 +76,7 @@ namespace Icarus.Services
 				{
 					TickEvent?.Invoke();
 					state.LastTickEpoch = currentEpoch;
+					GC.Collect();
 				}
 
 				db.GameStates.Update(state);

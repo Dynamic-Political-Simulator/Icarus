@@ -74,7 +74,7 @@ namespace Icarus.Discord.EconCommands
                 }
                 else
                 {
-                    stringBuilder.AppendLine($"{v.Name} : {v.CurrentValue}(-{_valueManagementService.GetValueChange(v)};{_valueManagementService.GetValueGoal(v)})");
+                    stringBuilder.AppendLine($"{v.Name} : {v.CurrentValue}({_valueManagementService.GetValueChange(v)};{_valueManagementService.GetValueGoal(v)})");
                 }
             }
             await RespondAsync(stringBuilder.ToString());

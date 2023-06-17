@@ -49,6 +49,8 @@ namespace Icarus.Context
         public DbSet<Nation> Nations { get; set; }
         public DbSet<Province> Provinces { get; set; }
         public DbSet<Modifier> Modifiers { get; set; }
+        public DbSet<Good> Goods { get; set; }
+        public DbSet<GoodValueModifier> GoodValueModifiers { get; set; }
 
         // Default Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -63,22 +65,15 @@ namespace Icarus.Context
 				}
 			);
 
+            modelBuilder.Entity<GoodValueModifier>()
+                .HasOne(m => m.GoodWrapper)
+                .WithMany(g => g.ValueModifiers)
+                .HasForeignKey(m => m.GoodWrapperId);
+
             modelBuilder.Entity<ValueModifier>()
                 .HasOne(m => m.ModifierWrapper)
                 .WithMany(m => m.Modifiers)
                 .HasForeignKey(m => m.ModifierWrapperId);
-
-            modelBuilder.Entity<ValueRelationship>()
-                .HasOne(vr => vr.Origin)
-                .WithMany()
-                .HasForeignKey(vr => vr.OriginId)
-                .OnDelete(DeleteBehavior.NoAction);
-                
-            modelBuilder.Entity<ValueRelationship>()
-                .HasOne(vr => vr.Target)
-                .WithMany()
-                .HasForeignKey(vr => vr.TargetId)
-                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Value>()
                 .HasOne(v => v.Province)
