@@ -72,5 +72,30 @@ namespace Icarus.Services
 
             return db.TokenTypes.ToList().Select(tt => tt.TokenTypeName).ToList();
         } 
+
+        public async Task<string> NewTokenType(string name)
+        {
+            using var db = new IcarusContext();
+
+            var allTypes = db.TokenTypes.ToList();
+
+            var existing = allTypes.FirstOrDefault(at => at.TokenTypeName.ToLowerInvariant() == name.ToLowerInvariant());
+
+            if (existing != null)
+            {
+                return "Could not create token type as it already exists.";
+            }
+
+            var newTokenType = new CharacterTokenType()
+            {
+                TokenTypeName = name
+            };
+
+            db.TokenTypes.Add(newTokenType);
+
+            await db.SaveChangesAsync();
+
+            return $"Added token type with name {name}";
+        }
     }
 }
