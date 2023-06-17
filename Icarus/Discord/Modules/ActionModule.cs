@@ -64,5 +64,12 @@ namespace Icarus.Discord.Modules
 
             await RespondAsync(embed: embedBuilder.Build());
         }
+
+        [SlashCommand("create-token", "Creates a new token type.")]
+        [RequireAdmin]
+        public async Task CreateTokenType(string tokenName)
+        {
+            await RespondAsync(await _actionService.NewTokenType(tokenName));
+        }
     }
 }
