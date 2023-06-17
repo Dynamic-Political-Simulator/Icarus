@@ -10,7 +10,8 @@ namespace Icarus.Context.Models
     {
         public string PlayerCharacterId { get; set; }
         public virtual PlayerCharacter Character { get; set; }
-        public ActionTokenType TokenType { get; set; }
+        public string TokenTypeId { get; set; }
+        public CharacterTokenType TokenType { get; set; }
         [Required]
         public int Amount { get; set; } = 0;
 

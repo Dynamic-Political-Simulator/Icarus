@@ -1,15 +1,11 @@
 ﻿using Discord.Interactions;
-using Discord.Interactions.Builders;
 using Discord.WebSocket;
 using Icarus.Context;
 using Icarus.Context.Models;
 using Icarus.Discord.CustomPreconditions;
 using Icarus.Services;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Icarus.Discord.Modules
@@ -31,7 +27,7 @@ namespace Icarus.Discord.Modules
 
         [SlashCommand("action-example", "action example please ignore")]
         [RequireProfile]
-        [RequireTokenAmount(ActionTokenType.TestToken, 5, true)]
+        [RequireTokenAmount("TestToken", 5, true)]
         public async Task ExampleAction()
         {
             using var db = new IcarusContext();
@@ -48,44 +44,11 @@ namespace Icarus.Discord.Modules
         [SlashCommand("give-favour", "Gives favours")]
         [RequireProfile]
         [RequireAdmin]
-        public async Task GiveToken(SocketGuildUser mention, ActionTokenType tokenType, int amount)
+        public async Task GiveToken(SocketGuildUser mention, string tokenType, int amount)
         {
-            if (amount > 7)
-            {
-                await RespondAsync("May not give a character more than seven favours of any type.");
-                return;
-            }
+            var result = await _actionService.GiveToken(mention, tokenType, amount, Context.User.Id.ToString());
 
-            using var db = new IcarusContext();
-
-            var character = db.Characters.Include(c => c.Tokens)
-                .FirstOrDefault(c => c.DiscordUserId == Context.User.Id.ToString() && c.YearOfDeath != -1);
-
-            if (character == null)
-            {
-                await RespondAsync($"User {Context.User.Username} does not have an active character.");
-                return;
-            }
-
-            var tokenEntry = character.Tokens.FirstOrDefault(t => t.TokenType == tokenType);
-
-            if (tokenEntry == null)
-            {
-                var newTokenEntry = new CharacterToken()
-                {
-                    PlayerCharacterId = character.CharacterId,
-                    TokenType = tokenType,
-                    Amount = amount
-                };
-
-                character.Tokens.Add(newTokenEntry);
-
-                tokenEntry = newTokenEntry;
-            }
-
-            if (tokenEntry.Amount > 7) tokenEntry.Amount =7;
-
-            await RespondAsync("Added favours.");
+            await RespondAsync(result);
         }
     }
 }
