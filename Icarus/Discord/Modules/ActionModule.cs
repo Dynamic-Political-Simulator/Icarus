@@ -22,7 +22,10 @@ namespace Icarus.Discord.Modules
             _actionService = actionService;
         }
 
+
+
         [SlashCommand("action-example", "action example please ignore")]
+        [RequireProfile]
         [RequireTokenAmount(ActionTokenType.TestToken, 5, true)]
         public async Task ExampleAction()
         {
@@ -35,6 +38,15 @@ namespace Icarus.Discord.Modules
             var result = _actionService.ExampleAction(character);
 
             await RespondAsync(result);
+        }
+
+        [SlashCommand("give-favour", "Gives favours")]
+        [RequireProfile]
+        [RequireAdmin]
+        public async Task GiveToken(int amount, SocketGuildUser mention,
+            [Choice("Test Token", ActionTokenType.TestToken.ToString()), Choice(), Choice()] string tokenType)
+        {
+
         }
     }
 }
