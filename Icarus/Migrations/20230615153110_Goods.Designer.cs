@@ -4,6 +4,7 @@ using Icarus.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Icarus.Migrations
 {
     [DbContext(typeof(IcarusContext))]
-    partial class IcarusContextModelSnapshot : ModelSnapshot
+    [Migration("20230615153110_Goods")]
+    partial class Goods
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -88,55 +91,6 @@ namespace Icarus.Migrations
                             TickInterval = 3600000L,
                             Year = 0
                         });
-                });
-
-            modelBuilder.Entity("Icarus.Context.Models.Good", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TAG")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Goods");
-                });
-
-            modelBuilder.Entity("Icarus.Context.Models.GoodValueModifier", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<float>("Decay")
-                        .HasColumnType("real");
-
-                    b.Property<int>("GoodWrapperId")
-                        .HasColumnType("int");
-
-                    b.Property<float>("Modifier")
-                        .HasColumnType("real");
-
-                    b.Property<string>("ValueTag")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("GoodWrapperId");
-
-                    b.ToTable("GoodValueModifiers");
                 });
 
             modelBuilder.Entity("Icarus.Context.Models.Modifier", b =>
@@ -358,17 +312,6 @@ namespace Icarus.Migrations
                     b.Navigation("Nation");
                 });
 
-            modelBuilder.Entity("Icarus.Context.Models.GoodValueModifier", b =>
-                {
-                    b.HasOne("Icarus.Context.Models.Good", "GoodWrapper")
-                        .WithMany("ValueModifiers")
-                        .HasForeignKey("GoodWrapperId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GoodWrapper");
-                });
-
             modelBuilder.Entity("Icarus.Context.Models.Modifier", b =>
                 {
                     b.HasOne("Icarus.Context.Models.Nation", null)
@@ -425,11 +368,6 @@ namespace Icarus.Migrations
             modelBuilder.Entity("Icarus.Context.Models.DiscordUser", b =>
                 {
                     b.Navigation("Characters");
-                });
-
-            modelBuilder.Entity("Icarus.Context.Models.Good", b =>
-                {
-                    b.Navigation("ValueModifiers");
                 });
 
             modelBuilder.Entity("Icarus.Context.Models.Modifier", b =>
