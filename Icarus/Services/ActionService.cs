@@ -83,7 +83,7 @@ namespace Icarus.Services
 
             if (existing != null)
             {
-                return "Could not create token type as it already exists.";
+                return "Coulgd not create token type as it already exists.";
             }
 
             var newTokenType = new CharacterTokenType()
