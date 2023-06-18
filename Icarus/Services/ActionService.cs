@@ -66,6 +66,20 @@ namespace Icarus.Services
             return "Added favours.";
         }
 
+        public List<CharacterToken> GetAllTokensForProfileActiveCharacter(string discordId)
+        {
+            using var db = new IcarusContext();
+
+            var activeCharacterTokens = db.Tokens.Include(ac => ac.TokenTypeId).Where(ac => ac.PlayerCharacterId == discordId);
+
+            if (activeCharacterTokens.Count() == 0)
+            {
+                return null;
+            }
+
+            return activeCharacterTokens.ToList();
+        }
+
         public List<string> GetTokenTypes()
         {
             using var db = new IcarusContext();

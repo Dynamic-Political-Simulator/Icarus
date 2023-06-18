@@ -25,7 +25,27 @@ namespace Icarus.Discord.Modules
             _interactionHelpers = interactionHelpers;
         }
 
+        [SlashCommand("my-favours", "Lists your tokens.")]
+        [RequireProfile]
+        public async Task ListMyTokens()
+        {
+            var tokens = _actionService.GetAllTokensForProfileActiveCharacter(Context.User.Id.ToString());
 
+            var embedBuilder = new EmbedBuilder();
+
+            embedBuilder.WithTitle("Your Tokens");
+
+            var sb = new StringBuilder();
+
+            foreach (var token in tokens)
+            {
+                sb.AppendLine(token.TokenTypeId + ": " + token.Amount);
+            }
+
+            embedBuilder.WithDescription(sb.ToString());
+
+            await RespondAsync(embed: embedBuilder.Build());
+        }
 
         [SlashCommand("action-example", "action example please ignore")]
         [RequireProfile]
