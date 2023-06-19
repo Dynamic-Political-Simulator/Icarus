@@ -7,6 +7,7 @@ using Icarus.Context.Models;
 using Icarus.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -78,6 +79,79 @@ namespace Icarus.Discord.EconCommands
                 }
             }
             await RespondAsync(stringBuilder.ToString());
+        }
+
+        [SlashCommand("showprovince","Show general Province Info")]
+        public async Task ShowProvince(string ProvinceName)
+        {
+            using var db = new IcarusContext();
+
+            Province province = db.Provinces.FirstOrDefault(p => p.Name == ProvinceName);
+            if (province == null)
+            {
+                await RespondAsync($"{ProvinceName} was not found!");
+            }
+
+            EmbedBuilder emb = new EmbedBuilder() 
+            {
+                Title = province.Name,
+                Description= province.Description,
+            };
+
+            StringBuilder GoodsList = new StringBuilder();
+            foreach (Modifier good in province.Modifiers.Where(m => m.isGood == true))
+            {
+                GoodsList.Append(good.Name+", ");
+            }
+            if(province.Modifiers.FirstOrDefault(m => m.isGood == true) == null)
+            {
+                GoodsList.Append("None");
+            }
+            
+
+            StringBuilder ModifierList = new StringBuilder();
+            foreach(Modifier modifier in province.Modifiers.Where(m => m.isGood == false))
+            {
+                ModifierList.Append(modifier.Name+", ");
+            }
+            if (province.Modifiers.FirstOrDefault(m => m.isGood != true) == null)
+            {
+                GoodsList.Append("None");
+            }
+
+            StringBuilder stringBuilder = new StringBuilder();
+            string format = "{0,20} {1,8} {2,8} {3,8}";
+            stringBuilder.AppendLine(String.Format(format, "Value", "Height", "Goal", "Projected Change"));
+            foreach (Value v in province.Values)
+            {
+                if (_valueManagementService.GetValueChange(v) >= 0)
+                {
+
+                    //stringBuilder.AppendLine($"{v.Name} : {v.CurrentValue}(+{_valueManagementService.GetValueChange(v)};{_valueManagementService.GetValueGoal(v)})");
+                    stringBuilder.AppendLine(String.Format(format, v.Name, v.CurrentValue, _valueManagementService.GetValueGoal(v), "+"+_valueManagementService.GetValueChange(v)));
+                }
+                else
+                {
+                    stringBuilder.AppendLine(String.Format(format, v.Name, v.CurrentValue, _valueManagementService.GetValueGoal(v), _valueManagementService.GetValueChange(v)));
+                }
+            }
+
+            try {
+                stringBuilder.ToString();
+                emb.AddField("Goods", GoodsList.ToString());
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+            }
+            
+            //emb.AddField("Goods", GoodsList.ToString());
+
+            emb.AddField("Modifier", ModifierList.ToString());
+            emb.AddField("Values", stringBuilder.ToString());
+
+            await RespondAsync(embed: emb.Build());
         }
 
         /*
