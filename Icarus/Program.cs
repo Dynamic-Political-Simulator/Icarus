@@ -1,60 +1,49 @@
 ﻿using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Castle.Core.Configuration;
 using Discord;
 using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Icarus.Context;
 using Icarus.Services;
+using Icarus.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Icarus
 {
-    internal class Program
+	internal class Program
 	{
-        private readonly DiscordSocketClient _client = new DiscordSocketClient();
+		private readonly DiscordSocketClient _client = new DiscordSocketClient();
 		// private readonly InteractionService _commands = new InteractionService(_client.Rest);
 
 		private IServiceProvider _services;
 
-        public static IConfigurationRoot Configuration { get; set; }
-
 		static Task Main(string[] args) => new Program().Start();
 
-        public async Task Start()
-        {
-            var configBuilder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
+		public async Task Start()
+		{
+			_client.Log += LogAsync;
 
-            Configuration = configBuilder.Build();
+			_services = BuildServiceProvider();
 
-            _client.Log += Log;
-
-            _services = BuildServiceProvider();
-
-			_services.ToString();
-
-			var icarusConfig = new IcarusConfig();
-			Configuration.GetSection("IcarusConfig").Bind(icarusConfig);
-
-			await _client.LoginAsync(TokenType.Bot, icarusConfig.Token);
-			await _client.StartAsync();
+			var icarusConfig = ConfigFactory.GetConfig();
 
 			_client.Ready += OnReady;
 
-			// new CommandHandler(_services, _commands, _client);
+			await _client.LoginAsync(TokenType.Bot, icarusConfig.Token.ToString());
+			await _client.StartAsync();
 
 			await _client.SetGameAsync(icarusConfig.Version);
 
 			await Task.Delay(-1);
-        }
+		}
 
 		private async Task OnReady()
 		{
-			var icarusConfig = new IcarusConfig();
-			Configuration.GetSection("IcarusConfig").Bind(icarusConfig);
+			var icarusConfig = ConfigFactory.GetConfig();
 
 			InteractionService interactionService = new InteractionService(_client.Rest);
 			// Register slash commands defined in modules
@@ -80,29 +69,37 @@ namespace Icarus
 					}
 				}
 			};
+
+			await Task.Delay(-1);
 		}
 
-		private Task Log(LogMessage msg)
-        {
-            Console.WriteLine(msg.ToString());
-            return Task.CompletedTask;
-        }
+		private Task LogAsync(LogMessage msg)
+		{
+			Console.WriteLine(msg.ToString());
+			return Task.CompletedTask;
+		}
 
-        public IServiceProvider BuildServiceProvider()
-        {
-            var services = new ServiceCollection();
+		public IServiceProvider BuildServiceProvider()
+		{
+			var services = new ServiceCollection();
 
-            services.AddOptions();
+			services.AddOptions();
 
 			// services.Configure<IcarusConfig>(Configuration.GetSection("IcarusConfig"));
 			services.AddSingleton<IConfiguration>(Configuration);
 
 			services.AddSingleton(_client)
+				//.AddSingleton(_commands)
+				.AddSingleton<ValueManagementService>()
 				.AddSingleton<TickService>()
 				.AddSingleton<GoogleSheetsService>()
-				.AddDbContext<IcarusContext>(ServiceLifetime.Transient);
+				.AddSingleton<ActionService>()
+				.AddSingleton<CharacterService>()
+				.AddSingleton<DiscordInteractionHelpers>()
+				.AddDbContext<IcarusContext>(ServiceLifetime.Transient)
+			.BuildServiceProvider();
 
-            return services.BuildServiceProvider();
-        }
-    }
+			return services.BuildServiceProvider();
+		}
+	}
 }

@@ -7,22 +7,24 @@ using System.Linq;
 using System;
 using Discord;
 using System.Collections.Generic;
+using Icarus.Context.Models;
+using System.Xml;
 
 namespace Bailiff.Discord.Modules
 {
 	public class TestModule : InteractionModuleBase<SocketInteractionContext>
 	{
 		private readonly DiscordSocketClient _client;
-		private readonly IcarusContext _dbcontext;
 		private readonly TickService _tickService;
 		private readonly GoogleSheetsService _gsheetsService;
+		private readonly ValueManagementService _valueManagementService;
 
-		public TestModule(DiscordSocketClient client, IcarusContext dbcontext, TickService tickService, GoogleSheetsService gsheetsService)
+		public TestModule(DiscordSocketClient client, TickService tickService, GoogleSheetsService gsheetsService, ValueManagementService valueManagementService)
 		{
 			_client = client;
-			_dbcontext = dbcontext;
 			_tickService = tickService;
 			_gsheetsService = gsheetsService;
+			_valueManagementService = valueManagementService;
 		}
 
 		[SlashCommand("test", "Test command please ignore")]
@@ -43,6 +45,34 @@ namespace Bailiff.Discord.Modules
 			await DeferAsync();
 			_gsheetsService.GenerateContext(spreadsheetID).Update(cellID, new List<List<string>> { new List<string> { newVal } });
 			await ModifyOriginalResponseAsync(x => x.Content = "Update made!");
+		}
+
+		[SlashCommand("genrel", "What is says")]
+		public async Task RereadRelationShips()
+		{
+			string DataPath = @"./GameStateConfig.xml";
+			XmlDocument Xmldata = new XmlDocument();
+			Xmldata.Load(DataPath);
+			XmlNode xmlNode = Xmldata.LastChild.SelectSingleNode("Nation");
+
+
+
+			await _valueManagementService.GenerateValueRelationships(Xmldata.LastChild.SelectSingleNode("ValueRelationShips"));
+			await RespondAsync("Done");
+		}
+
+		[SlashCommand("gengoods", "What it says")]
+		public async Task RereadGoods()
+		{
+			string DataPath = @"./GameStateConfig.xml";
+			XmlDocument Xmldata = new XmlDocument();
+			Xmldata.Load(DataPath);
+			XmlNode xmlNode = Xmldata.LastChild.SelectSingleNode("Nation");
+
+
+
+			await _valueManagementService.ReadGoodXml(Xmldata.LastChild.SelectSingleNode("Goods"));
+			await RespondAsync("Done");
 		}
 	}
 }

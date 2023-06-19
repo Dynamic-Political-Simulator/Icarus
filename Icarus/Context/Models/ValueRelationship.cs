@@ -9,13 +9,8 @@ namespace Icarus.Context.Models
     {
         [Key]
         public int ValueRelationShipId { get; set; }
-        public Value Origin { get; set; }
-        public int OriginId { get; set; }
-        public Value Target { get; set; }
-        public int TargetId { get; set; }
-
-        public float Factor { get; set; }
-        public float Max { get; set; }
-        public float Min { get; set; }
+        public string OriginTag { get; set; }
+        public string TargetTag { get; set; }
+        public float Weight { get; set; }
     }
 }

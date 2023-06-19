@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ValueRelationShips>
+  <RelationShip>
+    <Origin>IND</Origin>
+    <Target>ES</Target>
+    <Weight>1</Weight>
+  </RelationShip>
+  <RelationShip>
+    <Origin>IND</Origin>
+    <Target>H</Target>
+    <Weight>1</Weight>
+  </RelationShip>
+  <RelationShip>
+    <Origin>I</Origin>
+    <Target>IND</Target>
+    <Weight>1</Weight>
+  </RelationShip>
+  <RelationShip>
+    <Origin>I</Origin>
+    <Target>M</Target>
+    <Weight>1</Weight>
+  </RelationShip>
+  <RelationShip>
+    <Origin>U</Origin>
+    <Target>IND</Target>
+    <Weight>1</Weight>
+  </RelationShip>
+  <RelationShip>
+    <Origin>U</Origin>
+    <Target>Housing</Target>
+    <Weight>1</Weight>
+  </RelationShip>
+  <RelationShip>
+    <Origin>SEC</Origin>
+    <Target>LIT</Target>
+    <Weight>1</Weight>
+  </RelationShip>
+  <RelationShip>
+    <Origin>H</Origin>
+    <Target>LIT</Target>
+    <Weight>1</Weight>
+  </RelationShip>
+</ValueRelationShips>

@@ -1,0 +1,390 @@
+﻿using Azure;
+using Discord;
+using Discord.Commands;
+using Discord.Interactions;
+using Discord.Net;
+using Discord.WebSocket;
+using Icarus.Context;
+using Icarus.Context.Models;
+using Icarus.Services;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection.Emit;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+
+namespace Icarus.Discord.EconCommands
+{
+    public class ModifierCreation : InteractionModuleBase<SocketInteractionContext>
+    {
+        private readonly DiscordSocketClient _client;
+        private readonly ValueManagementService _valueManagementService;
+        private readonly DiscordInteractionHelpers _interactionHelpers;
+
+        public ModifierCreation(DiscordSocketClient client, ValueManagementService valueManagementService, DiscordInteractionHelpers interactionHelpers)
+        {
+            _client = client;
+            _valueManagementService = valueManagementService;
+            _interactionHelpers = interactionHelpers;
+            
+            
+            
+        }
+
+        //Creation of Modifier Steps
+        //Command to start the process
+        //Type in Name and Description
+        //Choose Provinces or Global
+        //Choose Values
+        //Set Height of Modifier per Value
+        //Set Type
+        //Set Decay Rate or Tick Amount
+
+
+        //Modals
+        public class NameModal : IModal
+        {
+            public string Title => "Create new Modifier";
+            // Strings with the ModalTextInput attribute will automatically become components.
+            [InputLabel("Name")]
+            [ModalTextInput(customId:"ModifierName", placeholder: "Enter Name", maxLength: 20)]
+            public string Name { get; set; }
+
+            // Additional paremeters can be specified to further customize the input.    
+            // Parameters can be optional
+            [RequiredInput(true)]
+            [InputLabel("Description")]
+            [ModalTextInput(customId:"ModifierDescription", TextInputStyle.Paragraph, "Enter Modifier Description", maxLength: 500)]
+            public string Description { get; set; }
+        }
+        public class TemporaryModal : IModal
+        {
+            public string Title => "Modifier Time";
+            // Strings with the ModalTextInput attribute will automatically become components.
+            [InputLabel("Tick Amount")]
+            [ModalTextInput(customId: "Time", placeholder: "Enter Tick Amount", maxLength: 20)]
+            public string Time { get; set; }
+        }
+        public class DecayModal : IModal
+        {
+            public string Title => "Decay Rate";
+            // Strings with the ModalTextInput attribute will automatically become components.
+            [InputLabel("Decay Rate")]
+            [ModalTextInput(customId: "Decay", placeholder: "Enter Decay as 0.1,0.25 etc", maxLength: 20)]
+            public string Decay { get; set; }
+        }
+
+        //First Command
+        [SlashCommand("createmodifier", "Starts the Process of Adding a Modifier")]
+        public async Task CreateModifer()
+        {
+            string messageId = Random.Shared.Next(9999).ToString();
+            ModalBuilder mb = new ModalBuilder()
+                .WithTitle("Set Height of Modifiers")
+                .WithCustomId(_interactionHelpers.GenerateCompoundId(messageId, "NameDescModal"))
+                .AddTextInput("Name", "ModifierName", placeholder: "Enter Name")
+                .AddTextInput("Description", "ModifierDescription", TextInputStyle.Paragraph);
+            
+
+            try
+            {
+                await Context.Interaction.RespondWithModalAsync(mb.Build());
+            }
+            catch (ArgumentException ex)
+            {
+                Debug.WriteLine(ex.Message);
+                throw ex;
+            }
+
+            Predicate<SocketInteraction> NameDesc = s =>
+            {
+                if (s.GetType() != typeof(SocketModal)) return false;
+                SocketModal d = (SocketModal)s;
+                return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId, "NameDescModal");
+            };
+
+            var responseModal = (SocketModal)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 5, 0), NameDesc);
+        
+            using var db = new IcarusContext();
+
+            ModifierCreationDTO modifier = new ModifierCreationDTO()
+            {
+                Name = responseModal.Data.Components.FirstOrDefault(c => c.CustomId == "ModifierName").Value,
+                Description = responseModal.Data.Components.FirstOrDefault(c => c.CustomId == "ModifierDescription").Value
+            };
+
+
+            //On to the next stage
+            List<string> provinces = new List<string>();
+            provinces.Add("Global");
+            foreach(Province province in db.Provinces)
+            {
+                provinces.Add(province.Name);
+                Debug.WriteLine(province.Name);
+            }
+            
+            SelectMenuBuilder sm = _interactionHelpers.CreateSelectMenu(messageId, "ProvinceSelection", provinces, "Select Provinces");
+            sm.MinValues = 1;
+            sm.MaxValues = sm.Options.Count();
+            Console.WriteLine("Building Menu");
+            ComponentBuilder builder = new ComponentBuilder()
+                .WithSelectMenu(sm);
+
+            await responseModal.RespondAsync("Choose Provinces or Global", components: builder.Build());
+
+
+            Predicate<SocketInteraction> ProvinceSelection = s =>
+            {
+                if (s.GetType() != typeof(SocketMessageComponent)) return false;
+                SocketMessageComponent d = (SocketMessageComponent)s;
+                return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "ProvinceSelection");
+            };
+
+            SocketMessageComponent responseDrop = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), ProvinceSelection);
+
+            modifier.Provinces = responseDrop.Data.Values.ToList();
+
+
+            List<string> ValueNames = new List<string>();
+            //We are just gonna grab a list of Values from the first province cause I don't wanna read the ValueTemplate in every time the command is executed.
+            //Sorta nasty but should work for this purpose.
+            List<Value> ValueTemplate = db.Provinces.FirstOrDefault().Values.ToList();
+            foreach (Value Value in ValueTemplate)
+            {
+                ValueNames.Add(Value.TAG);
+            }
+            sm = _interactionHelpers.CreateSelectMenu(messageId, "ValueSelection", ValueNames, "Select Values");
+            sm.MinValues = 1;
+            sm.MaxValues = sm.Options.Count();
+
+            
+
+
+
+            builder = new ComponentBuilder()
+                .WithSelectMenu(sm);
+
+
+            Debug.WriteLine("Sending Value Dropdown");
+            try
+            {
+                await responseDrop.UpdateAsync(x => {
+                    x.Content = "Select Values!";
+                    x.Components = builder.Build();
+                });
+            }
+            catch(HttpException ex)
+            {
+                Debug.WriteLine(ex.Reason);
+                throw ex;
+            }
+
+            Predicate<SocketInteraction> ValueSelection = s =>
+            {
+                if (s.GetType() != typeof(SocketMessageComponent)) return false;
+                SocketMessageComponent d = (SocketMessageComponent)s;
+                return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "ValueSelection");
+            };
+
+            responseDrop = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), ValueSelection);
+
+
+            List<string> values = responseDrop.Data.Values.ToList();
+            foreach (string Value in values)
+            {
+                string h = Value.Replace("_", " ");
+                modifier.ValueSizePairs.Add(h, 0.0f);
+            }
+
+
+            TextInputBuilder tb;
+            mb = new ModalBuilder()
+                .WithTitle("Set Height of Modifiers")
+                .WithCustomId(_interactionHelpers.GenerateCompoundId(messageId,"ValueHeight"));
+            foreach (string Value in values)
+            {
+                tb = new TextInputBuilder()
+                    .WithLabel(Value)
+                    .WithCustomId(Value);
+                mb.AddTextInput(tb);
+            }
+            //await DeleteOriginalResponseAsync();
+            //await responseDrop.UpdateAsync(x => {
+            //    x.Content = "Set Value Height!";
+            //    x.Components = null;
+            //});
+            try
+            {
+                await responseDrop.RespondWithModalAsync(mb.Build());
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Console.WriteLine(ex.Message);
+            }
+            
+
+            Predicate<SocketInteraction> ValueHeight = s =>
+            {
+                if (s.GetType() != typeof(SocketModal)) return false;
+                SocketModal d = (SocketModal)s;
+                return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId, "ValueHeight");
+            };
+
+            responseModal = (SocketModal)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 10, 0), ValueHeight);
+
+            
+            foreach (var Component in responseModal.Data.Components)
+            {
+                Debug.WriteLine(Component.CustomId + ": " + Component.Value);
+                modifier.ValueSizePairs[Component.CustomId] = float.Parse(Component.Value, System.Globalization.CultureInfo.InvariantCulture);
+
+            }
+                
+
+            sm = new SelectMenuBuilder()
+               .WithPlaceholder("Select Type")
+               .WithCustomId(_interactionHelpers.GenerateCompoundId(messageId, "TypeSelection"))
+               .WithMinValues(1)
+               .WithMaxValues(1)
+               .AddOption(ModifierType.Permanent.ToString(), ModifierType.Permanent.ToString())
+               .AddOption(ModifierType.Temporary.ToString(), ModifierType.Temporary.ToString())
+               .AddOption(ModifierType.Decaying.ToString(), ModifierType.Decaying.ToString());
+            builder = new ComponentBuilder()
+                .WithSelectMenu(sm);
+
+            await responseModal.RespondAsync("Select Type!", components: builder.Build());
+
+
+            Predicate<SocketInteraction> TypeSelection = s =>
+            {
+                if (s.GetType() != typeof(SocketMessageComponent)) return false;
+                SocketMessageComponent d = (SocketMessageComponent)s;
+                return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "TypeSelection");
+            };
+
+            responseDrop = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), TypeSelection);
+
+
+
+            modifier.ModifierType = Enum.Parse<ModifierType>(responseDrop.Data.Values.First());
+
+            if (modifier.ModifierType == ModifierType.Permanent)
+            {
+                //Head on to Finalization
+                await ModifierFinalization(modifier,responseDrop);
+                return;
+            }
+            else
+            {
+                mb = new ModalBuilder()
+                .WithCustomId(_interactionHelpers.GenerateCompoundId(messageId, "DDConf"));
+                
+                if (modifier.ModifierType == ModifierType.Temporary)
+                {
+                    mb.WithTitle("Set Duration");
+                    mb.AddTextInput(label: "Tick Amount", customId: "Time", placeholder: "Enter Tick Amount", maxLength: 20);
+                    await responseDrop.RespondWithModalAsync(mb.Build());
+                }
+                else
+                {
+                    try
+                    {
+                        mb.WithTitle("Set Decay");
+                        mb.AddTextInput(label: "Decay", customId: "Decay", placeholder: "Enter Decay as 0.1,0.25 etc", maxLength: 20);
+                        await responseDrop.RespondWithModalAsync(mb.Build());
+                    }
+                    catch (HttpException ex)
+                    {
+                        Console.WriteLine(ex.Reason);
+                    }
+                    
+                }
+            }
+            
+
+            Predicate<SocketInteraction> DDConf = s =>
+            {
+                if (s.GetType() != typeof(SocketModal)) return false;
+                SocketModal d = (SocketModal)s;
+                return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId, "DDConf");
+            };
+
+            responseModal = (SocketModal)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 10, 0), DDConf);
+
+            if (modifier.ModifierType == ModifierType.Temporary)
+            {
+                modifier.DurationOrDecay = int.Parse(responseModal.Data.Components.FirstOrDefault(c => c.CustomId == "Time").Value, System.Globalization.CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                modifier.DurationOrDecay = float.Parse(responseModal.Data.Components.FirstOrDefault(c => c.CustomId == "Decay").Value, System.Globalization.CultureInfo.InvariantCulture);
+            }
+
+            await ModifierFinalization(modifier, responseModal);
+
+        }
+
+        public async Task ModifierFinalization(ModifierCreationDTO modifier, SocketInteraction response)
+        {
+            using var db = new IcarusContext();
+
+            if (modifier.Provinces[0] == "Global")
+            {
+                db.Nations.First().Modifiers.Add(CreateModifier(modifier));
+            }
+            else
+            {
+                foreach(string province in modifier.Provinces)
+                {
+                    Province Province = db.Provinces.FirstOrDefault(p => p.Name == province);
+                    Province.Modifiers.Add(CreateModifier(modifier));
+                }
+            }
+            await db.SaveChangesAsync();
+            await response.RespondAsync($"Modifier {modifier.Name} has been successfully created.");
+        }
+
+        public Modifier CreateModifier(ModifierCreationDTO modifierDTO)
+        {
+            Modifier Modifier = new Modifier()
+            {
+                Name = modifierDTO.Name,
+                Description = modifierDTO.Description,
+                Type = modifierDTO.ModifierType
+            };
+            if (modifierDTO.ModifierType == ModifierType.Temporary)
+            {
+                Modifier.Duration = (int)(modifierDTO.DurationOrDecay);
+            }
+
+            foreach (KeyValuePair<string, float> ValueAmountPair in modifierDTO.ValueSizePairs)
+            {
+                ValueModifier valueModifier = new ValueModifier()
+                {
+                    ValueTag = ValueAmountPair.Key,
+                    Modifier = ValueAmountPair.Value,
+                };
+                if (modifierDTO.ModifierType == ModifierType.Decaying)
+                {
+                    valueModifier.Decay = modifierDTO.DurationOrDecay * ValueAmountPair.Value;
+                }
+                Modifier.Modifiers.Add(valueModifier);
+            }
+            return Modifier;
+        }
+    }
+
+    public class ModifierCreationDTO
+    {
+        public string Name { get; set; }
+        public string Description { get; set;}
+        public float DurationOrDecay { get; set;}
+        public ModifierType ModifierType { get; set;}
+        public Dictionary<string, float> ValueSizePairs { get; set;} = new Dictionary<string, float>();
+        public List<string> Provinces { get; set; } = new List<string>();
+    }
+}

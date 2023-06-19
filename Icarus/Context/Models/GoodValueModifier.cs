@@ -6,16 +6,16 @@ using Icarus.Context.Models;
 
 namespace Icarus.Context.Models
 {
-    public class ValueModifier
+    public class GoodValueModifier
     {
         [Key]
         public int ID { get; set; }
 
         public float Modifier { get; set; }
-        public float Decay { get; set; }
+        public float Decay { get; set; } = 0;
 
         public string ValueTag { get; set; }
-        public virtual Modifier ModifierWrapper { get; set; }
-        public int ModifierWrapperId { get; set; }
+        public virtual Good GoodWrapper { get; set; }
+        public int GoodWrapperId { get; set; }
     }
 }

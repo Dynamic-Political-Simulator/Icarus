@@ -6,6 +6,7 @@ using Icarus.Services;
 using System.Linq;
 using System;
 using Discord;
+using Icarus.Context.Models;
 
 namespace Bailiff.Discord.Modules
 {
@@ -13,13 +14,11 @@ namespace Bailiff.Discord.Modules
 	public class TickModule : InteractionModuleBase<SocketInteractionContext>
 	{
 		private readonly DiscordSocketClient _client;
-		private readonly IcarusContext _dbcontext;
 		private readonly TickService _tickService;
 
-		public TickModule(DiscordSocketClient client, IcarusContext dbcontext, TickService tickService)
+		public TickModule(DiscordSocketClient client, TickService tickService)
 		{
 			_client = client;
-			_dbcontext = dbcontext;
 			_tickService = tickService;
 		}
 
@@ -27,13 +26,11 @@ namespace Bailiff.Discord.Modules
 		public class TickConfigModule : InteractionModuleBase<SocketInteractionContext>
 		{
 			private readonly DiscordSocketClient _client;
-			private readonly IcarusContext _dbcontext;
 			private readonly TickService _tickService;
 
-			public TickConfigModule(DiscordSocketClient client, IcarusContext dbcontext, TickService tickService)
+			public TickConfigModule(DiscordSocketClient client, TickService tickService)
 			{
 				_client = client;
-				_dbcontext = dbcontext;
 				_tickService = tickService;
 			}
 
@@ -48,7 +45,9 @@ namespace Bailiff.Discord.Modules
 			[SlashCommand("set", "Set the tick interval")]
 			public async Task SetTick(long milliseconds = 0, int seconds = 0, int minutes = 0, int hours = 0)
 			{
-				long interval = (((hours * 60) + minutes) * 60 + seconds) * 1000 + milliseconds; // Sum up all the defined time units
+                using var db = new IcarusContext();
+
+                long interval = (((hours * 60) + minutes) * 60 + seconds) * 1000 + milliseconds; // Sum up all the defined time units
 				await DeferAsync();
 
 				if (interval <= 0)
@@ -58,10 +57,10 @@ namespace Bailiff.Discord.Modules
 				}
 
 				// Retrieve the GameState object, update the TickInterval and save it.
-				GameState state = _dbcontext.GameStates.FirstOrDefault();
+				GameState state = db.GameStates.FirstOrDefault();
 				state.TickInterval = interval;
-				_dbcontext.GameStates.Update(state);
-				await _dbcontext.SaveChangesAsync();
+				db.GameStates.Update(state);
+				await db.SaveChangesAsync();
 
 				await ModifyOriginalResponseAsync(x => x.Content = "Tick interval updated!");
 			}
