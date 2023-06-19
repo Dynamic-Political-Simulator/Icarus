@@ -5,6 +5,7 @@ using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Icarus.Context;
+using Icarus.Utils;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -24,12 +25,10 @@ namespace Icarus.Services
 	{
 		private SheetsService GoogleSheets;
 		private readonly SpreadsheetsResource.ValuesResource _googleSheetValues;
-		private readonly IConfiguration Configuration;
 		static readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
 
-		public GoogleSheetsService(IConfiguration configuration)
+		public GoogleSheetsService()
 		{
-			Configuration = configuration;
 			InitializeService();
 			_googleSheetValues = GoogleSheets.Spreadsheets.Values;
 		}
@@ -46,8 +45,8 @@ namespace Icarus.Services
 
 		private GoogleCredential GetCredentialsFromFile()
 		{
-			var icarusConfig = new IcarusConfig();
-			Configuration.GetSection("IcarusConfig").Bind(icarusConfig);
+			var icarusConfig = ConfigFactory.GetConfig();
+
 
 			GoogleCredential credential;
 			using (var stream = new FileStream(icarusConfig.GoogleAPIKeyLocation, FileMode.Open, FileAccess.Read))

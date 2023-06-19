@@ -85,9 +85,6 @@ namespace Icarus
 
 			services.AddOptions();
 
-			// services.Configure<IcarusConfig>(Configuration.GetSection("IcarusConfig"));
-			services.AddSingleton<IConfiguration>(Configuration);
-
 			services.AddSingleton(_client)
 				//.AddSingleton(_commands)
 				.AddSingleton<ValueManagementService>()
