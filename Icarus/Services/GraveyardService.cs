@@ -12,6 +12,7 @@ namespace Icarus.Services
     public class GraveyardService
     {
         private readonly DiscordSocketClient _client;
+
         public GraveyardService(DiscordSocketClient client) 
         {
             _client = client;

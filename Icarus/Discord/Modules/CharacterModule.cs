@@ -119,8 +119,24 @@ namespace Icarus.Discord.Modules
         }
 
         [RequireProfile]
-        [SlashCommand("set-assembly-rep", "Sets which group you represent in the assembly.")]
+        [SlashCommand("set-culture", "Sets your culture.")]
         public async Task SetCulture(string assembly)
+        {
+            try
+            {
+                await _characterService.UpdateCharacterCulture(Context.User.Id.ToString(), assembly);
+            }
+            catch (ArgumentException)
+            {
+                await RespondAsync("Culture may not be longer than 64 characters.");
+            }
+
+            await RespondAsync("Culture set.");
+        }
+
+        [RequireProfile]
+        [SlashCommand("set-assembly-rep", "Sets which group you represent in the assembly.")]
+        public async Task SetAssemblyRep(string assembly)
         {
             try
             {
