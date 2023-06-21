@@ -13,11 +13,11 @@ namespace Icarus.Discord.CustomPreconditions
 {
     public class RequireTokenAmount : PreconditionAttribute
     {
-        private readonly ActionTokenType _tokenType;
+        private readonly string _tokenType;
         private readonly int _amount;
         private readonly bool _removeTokens;
 
-        public RequireTokenAmount(ActionTokenType tokenType, int amount, bool removeTokens)
+        public RequireTokenAmount(string tokenType, int amount, bool removeTokens)
         {
             _tokenType = tokenType;
             _amount = amount;
@@ -29,14 +29,14 @@ namespace Icarus.Discord.CustomPreconditions
 
             var character = db.Characters.FirstOrDefault(c => c.YearOfDeath == -1 && c.DiscordUserId == context.User.Id.ToString());
 
-            if(character.Tokens.First(t => t.TokenType == _tokenType).Amount < _amount)
+            if(character.Tokens.First(t => t.TokenTypeId == _tokenType).Amount < _amount)
             {
                 return await Task.FromResult(PreconditionResult.FromError($"You need {_amount} of {nameof(_tokenType)} to do this."));
             }
 
             if (_removeTokens)
             {
-                var tokens = character.Tokens.First(t => t.TokenType == _tokenType);
+                var tokens = character.Tokens.First(t => t.TokenTypeId == _tokenType);
 
                 tokens.Amount -= _amount;
 
