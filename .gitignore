@@ -354,9 +354,9 @@ MigrationBackup/
 # VS Code generated files
 .vscode/
 
+# Google API Key
+gapiKey.json
 
-.env
-=======
 .vscode/
 /Icarus/deployment-staging.yaml
 /Icarus/deployment.yaml
