@@ -40,6 +40,7 @@ namespace Icarus.Context
 
         public DbSet<GameState> GameStates { get; set; }
         public DbSet<CharacterToken> Tokens { get; set; }
+        public DbSet<CharacterTokenType> TokenTypes { get; set; }
         public DbSet<DiscordUser> Users { get; set; }
         public DbSet<PlayerCharacter> Characters { get; set; }
 

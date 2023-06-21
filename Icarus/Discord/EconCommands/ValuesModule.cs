@@ -14,73 +14,73 @@ using System.Threading.Tasks;
 
 namespace Icarus.Discord.EconCommands
 {
-    public class ValuesModule : InteractionModuleBase<SocketInteractionContext>
-    {
-        private readonly DiscordSocketClient _client;
-        private readonly ValueManagementService _valueManagementService;
+	public class ValuesModule : InteractionModuleBase<SocketInteractionContext>
+	{
+		private readonly DiscordSocketClient _client;
+		private readonly ValueManagementService _valueManagementService;
 
-        public ValuesModule(DiscordSocketClient client, ValueManagementService valueManagementService)
-        {
-            _client = client;
-            _valueManagementService = valueManagementService;
-        }
+		public ValuesModule(DiscordSocketClient client, ValueManagementService valueManagementService)
+		{
+			_client = client;
+			_valueManagementService = valueManagementService;
+		}
 
-        [SlashCommand("setvalue","Set the specified Value to a certain Number.")]
-        public async Task SetValue(string ProvinceName,string ValueName, float Number)
-        {
-            using var db = new IcarusContext();
+		[SlashCommand("setvalue", "Set the specified Value to a certain Number.")]
+		public async Task SetValue(string ProvinceName, string ValueName, float Number)
+		{
+			using var db = new IcarusContext();
 
-            if (Number < 0)
-            {
-                await RespondAsync("A Value can not be smaller than Zero");
-            }
-            Province province = db.Provinces.FirstOrDefault(p => p.Name == ProvinceName);
-            if (province == null)
-            {
-                await RespondAsync($"{ProvinceName} was not found!");
-            }
-            Value Value = province.Values.FirstOrDefault(v => v.Name == ValueName);
-            if (Value == null)
-            {
-                await RespondAsync($"{ValueName} is not a Valid Value");
-            }
-            
+			if (Number < 0)
+			{
+				await RespondAsync("A Value can not be smaller than Zero");
+			}
+			Province province = db.Provinces.FirstOrDefault(p => p.Name == ProvinceName);
+			if (province == null)
+			{
+				await RespondAsync($"{ProvinceName} was not found!");
+			}
+			Value Value = province.Values.FirstOrDefault(v => v.Name == ValueName);
+			if (Value == null)
+			{
+				await RespondAsync($"{ValueName} is not a Valid Value");
+			}
 
-            Value.CurrentValue = Number;
 
-            await db.SaveChangesAsync();
-            await RespondAsync("Success!");
+			Value.CurrentValue = Number;
 
-        }
+			await db.SaveChangesAsync();
+			await RespondAsync("Success!");
 
-        [SlashCommand("showvalues", "Show Values of a Province")]
-        public async Task ShowValues(string ProvinceName)
-        {
-            using var db = new IcarusContext();
+		}
 
-            Province province = db.Provinces.FirstOrDefault(p => p.Name == ProvinceName);
-            if (province == null)
-            {
-                await RespondAsync($"{ProvinceName} was not found!");
-            }
+		[SlashCommand("showvalues", "Show Values of a Province")]
+		public async Task ShowValues(string ProvinceName)
+		{
+			using var db = new IcarusContext();
 
-            StringBuilder stringBuilder= new StringBuilder();
-            stringBuilder.AppendLine($"Value Name : Value");
-            foreach (Value v in province.Values)
-            {   
-                if (_valueManagementService.GetValueChange(v) >= 0)
-                {
-                    stringBuilder.AppendLine($"{v.Name} : {v.CurrentValue}(+{_valueManagementService.GetValueChange(v)};{_valueManagementService.GetValueGoal(v)})");
-                }
-                else
-                {
-                    stringBuilder.AppendLine($"{v.Name} : {v.CurrentValue}({_valueManagementService.GetValueChange(v)};{_valueManagementService.GetValueGoal(v)})");
-                }
-            }
-            await RespondAsync(stringBuilder.ToString());
-        }
+			Province province = db.Provinces.FirstOrDefault(p => p.Name == ProvinceName);
+			if (province == null)
+			{
+				await RespondAsync($"{ProvinceName} was not found!");
+			}
 
-        /*
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.AppendLine($"Value Name : Value");
+			foreach (Value v in province.Values)
+			{
+				if (_valueManagementService.GetValueChange(v) >= 0)
+				{
+					stringBuilder.AppendLine($"{v.Name} : {v.CurrentValue}(+{_valueManagementService.GetValueChange(v)};{_valueManagementService.GetValueGoal(v)})");
+				}
+				else
+				{
+					stringBuilder.AppendLine($"{v.Name} : {v.CurrentValue}({_valueManagementService.GetValueChange(v)};{_valueManagementService.GetValueGoal(v)})");
+				}
+			}
+			await RespondAsync(stringBuilder.ToString());
+		}
+
+		/*
         //Local Modifiers
         [SlashCommand("CreateLocalStaticModifier", "Creates a new permanent Modifier in a specific Province")]
         public async Task CreateLocalStaticModifier(string ProvinceName, string ValueName, string ModifierName, string Description, string Modifier)
@@ -164,5 +164,5 @@ namespace Icarus.Discord.EconCommands
             await RespondAsync($"Created new decaying local Modifier at {p.Name} affecting {v.Name} by {valueModifier.Modifier} decaying by {valueModifier.Decay} each Tick");
         }
         */
-    }
+	}
 }
