@@ -73,19 +73,19 @@ namespace Icarus.Discord.Modules
             await RespondAsync(result);
         }
 
-        [SlashCommand("list-token-types", "Lists all token types present in the database")]
+        [SlashCommand("list-favour-types", "Lists all favour types present in the database")]
         public async Task ListTokenTypes()
         {
             var types = _actionService.GetTokenTypes();
 
             var embedBuilder = new EmbedBuilder()
-                .WithTitle("Token types.")
+                .WithTitle("Favour types.")
                 .WithDescription(types.Aggregate((current, next) => current + "\n" + next));
 
             await RespondAsync(embed: embedBuilder.Build());
         }
 
-        [SlashCommand("create-token", "Creates a new token type.")]
+        [SlashCommand("create-favour", "Creates a new favour type.")]
         [RequireAdmin]
         public async Task CreateTokenType(string tokenName)
         {

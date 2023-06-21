@@ -31,7 +31,7 @@ namespace Icarus.Services
 
             if (tokenTypeExists == null)
             {
-                return $"Could not find token of type {tokenType}.";
+                return $"Could not find favour of type {tokenType}.";
             }
 
             var character = db.Characters.Include(c => c.Tokens)
@@ -97,7 +97,7 @@ namespace Icarus.Services
 
             if (existing != null)
             {
-                return "Coulgd not create token type as it already exists.";
+                return "Could not create favour type as it already exists.";
             }
 
             var newTokenType = new CharacterTokenType()
@@ -109,7 +109,7 @@ namespace Icarus.Services
 
             await db.SaveChangesAsync();
 
-            return $"Added token type with name {name}";
+            return $"Added favour type with name {name}";
         }
     }
 }
