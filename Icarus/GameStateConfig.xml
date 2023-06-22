@@ -30,6 +30,7 @@
             <Description>The frightening genius of the local resident called Grindor bestows large benefits on this province.</Description>
             <Type>Permanent</Type>
             <Duration>0</Duration>
+            <WealthMod>1.5</WealthMod>
             <Values>
               <Value>
                 <Tag>I</Tag>
@@ -75,6 +76,8 @@
         </Values>
         <Modifiers>
         </Modifiers>
+        <Goods>
+        </Goods>
       </Province>
       <Province>
         <Name>Sodara</Name>
@@ -98,6 +101,8 @@
         </Values>
         <Modifiers>
         </Modifiers>
+        <Goods>
+        </Goods>
       </Province>
       <Province>
         <Name>Alcon</Name>
@@ -121,6 +126,8 @@
         </Values>
         <Modifiers>
         </Modifiers>
+        <Goods>
+        </Goods>
       </Province>
       <Province>
         <Name>Harrane</Name>
@@ -144,6 +151,8 @@
         </Values>
         <Modifiers>
         </Modifiers>
+        <Goods>
+        </Goods>
       </Province>
       <Province>
         <Name>Macrea</Name>
@@ -167,6 +176,8 @@
         </Values>
         <Modifiers>
         </Modifiers>
+        <Goods>
+        </Goods>
       </Province>
       <Province>
         <Name>Sen Carria</Name>
@@ -190,6 +201,8 @@
         </Values>
         <Modifiers>
         </Modifiers>
+        <Goods>
+        </Goods>
       </Province>
     </Provinces>
   </Nation>

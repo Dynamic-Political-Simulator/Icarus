@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
+using Discord.WebSocket;
 using Icarus.Context;
 using Icarus.Context.Models;
 using Icarus.Discord.EconCommands;
@@ -372,16 +373,19 @@ namespace Icarus.Services
         /// </summary>
         /// <param name="gameState">Gamestate to add game info to.</param>
         /// <returns>nothing</returns>
-        public async Task ReadGameStateConfig(GameState gameState)
+        public async Task ReadGameStateConfig(GameState gameState, ISocketMessageChannel channel)
         {
             string DataPath = @"./GameStateConfig.xml";
             XmlDocument Xmldata = new XmlDocument();
             Xmldata.Load(DataPath);
             XmlNode xmlNode = Xmldata.LastChild.SelectSingleNode("Nation");
-
+            await channel.SendMessageAsync($"Generating Good Templates!");
             await ReadGoodXml(Xmldata.LastChild.SelectSingleNode("Goods"));
-            await ReadNation(gameState, Xmldata.LastChild.SelectSingleNode("Nation"), Xmldata.LastChild.SelectSingleNode("ValueTemplates"));
+            await channel.SendMessageAsync($"Done with Good Templates!");
+            await ReadNation(gameState, Xmldata.LastChild.SelectSingleNode("Nation"), Xmldata.LastChild.SelectSingleNode("ValueTemplates"), channel);
+            await channel.SendMessageAsync($"Generating Value Relationships!");
             await GenerateValueRelationships(Xmldata.LastChild.SelectSingleNode("ValueRelationShips"));
+            await channel.SendMessageAsync($"Everything successfully done!");
         }
 
         /// <summary>
@@ -391,7 +395,7 @@ namespace Icarus.Services
         /// <param name="NationXml">XML Node containing Nation Data</param>
         /// <param name="ValueTemplatesXml">XML Node containing generic Value Data</param>
         /// <returns></returns>
-        public async Task ReadNation(GameState gameState, XmlNode NationXml, XmlNode ValueTemplatesXml)
+        public async Task ReadNation(GameState gameState, XmlNode NationXml, XmlNode ValueTemplatesXml, ISocketMessageChannel channel)
         {
             using var db = new IcarusContext();
 
@@ -399,10 +403,13 @@ namespace Icarus.Services
                 Name = NationXml.SelectSingleNode("Name").InnerText,
                 Description = NationXml.SelectSingleNode("Description").InnerText
             };
-
+            await channel.SendMessageAsync($"Nation {NewNation.Name} created!");
+            Console.WriteLine($"Nation {NewNation.Name} created!");
             List<ValueTemplate> ValueTemplates = new List<ValueTemplate>();
 
-            foreach(XmlNode ValueTemplate in ValueTemplatesXml)
+            Console.WriteLine("Starting Value Registration!");
+            await channel.SendMessageAsync("Starting Value Registration!");
+            foreach (XmlNode ValueTemplate in ValueTemplatesXml)
             {
                 ValueTemplates.Add(new ValueTemplate()
                 {
@@ -410,16 +417,21 @@ namespace Icarus.Services
                     Description = ValueTemplate.SelectSingleNode("Description").InnerText,
                     TAG = ValueTemplate.SelectSingleNode("Tag").InnerText
                 });
+                Console.WriteLine($"Value {ValueTemplate.SelectSingleNode("Name").InnerText} with tag {ValueTemplate.SelectSingleNode("Tag").InnerText} registered!");
             }
-
-            foreach(XmlNode province in NationXml.SelectSingleNode("Provinces").ChildNodes)
+            Console.WriteLine("Value Registration done!");
+            await channel.SendMessageAsync("Value Registration done!");
+            Console.WriteLine("Registering Provinces!");
+            await channel.SendMessageAsync("Registering Provinces!");
+            foreach (XmlNode province in NationXml.SelectSingleNode("Provinces").ChildNodes)
             {
                 Province NewProvince = new Province()
                 {
                     Name = province.SelectSingleNode("Name").InnerText,
                     Description = province.SelectSingleNode("Description").InnerText
                 };
-                foreach(XmlNode Value in province.SelectSingleNode("Values").ChildNodes)
+                await channel.SendMessageAsync($"Creating Province {NewProvince.Name}!");
+                foreach (XmlNode Value in province.SelectSingleNode("Values").ChildNodes)
                 {
                     ValueTemplate vTemplate = ValueTemplates.FirstOrDefault(v => v.TAG == Value.Name);
                     NewProvince.Values.Add(new Value()
@@ -451,7 +463,7 @@ namespace Icarus.Services
                             Decay = float.Parse(ValueModifier.SelectSingleNode("Decay").InnerText)
                         });
                     }
-
+                    
                     NewProvince.Modifiers.Add(NewModifier);
                 }
 
@@ -468,7 +480,7 @@ namespace Icarus.Services
                     }
                 }
 
-
+                await channel.SendMessageAsync($"Done with Province {NewProvince.Name}!");
                 NewNation.Provinces.Add(NewProvince);
             }
 
