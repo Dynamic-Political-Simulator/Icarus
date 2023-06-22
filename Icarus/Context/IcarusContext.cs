@@ -94,7 +94,10 @@ namespace Icarus.Context
                 .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<CharacterToken>()
-                .HasKey(ct => new { ct.PlayerCharacterId, ct.TokenType });
+                .HasKey(ct => new { ct.PlayerCharacterId });
+
+            modelBuilder.Entity<CharacterToken>()
+                .HasOne(ct => ct.TokenType);
 
             modelBuilder.Entity<CharacterToken>()
                 .HasOne(ct => ct.Character)

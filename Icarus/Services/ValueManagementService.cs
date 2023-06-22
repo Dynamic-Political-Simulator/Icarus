@@ -15,10 +15,11 @@ namespace Icarus.Services
     public class ValueManagementService
     {
         private readonly TickService _tickService;
-
-        public ValueManagementService(TickService tickService)
+        private readonly EconVisualsService _visualsService;
+        public ValueManagementService(TickService tickService, EconVisualsService econVisualsService)
         {
             _tickService = tickService;
+            _visualsService= econVisualsService;
 
             _tickService.TickEvent += ValueTick;
         }
@@ -30,7 +31,9 @@ namespace Icarus.Services
         {
             await UpdateValues();
             await UpdateModifiers();
-            Console.WriteLine("Values Ticked!");
+            Console.WriteLine("Values Ticked! Generating Sheets!");
+            await _visualsService.UpdateProvinceView(this);
+            Console.WriteLine("Updated Sheets!");
 
         }
 
@@ -561,8 +564,16 @@ namespace Icarus.Services
                         Decay = 0
                     });
                 }
-
-                db.Goods.Add(NewGood);
+                Good good = db.Goods.FirstOrDefault(x => x.TAG == NewGood.TAG);
+                if (good != null)
+                {
+                    good = NewGood;
+                }
+                else
+                {
+                    db.Goods.Add(NewGood);
+                }
+                
             }
             await db.SaveChangesAsync();
         }

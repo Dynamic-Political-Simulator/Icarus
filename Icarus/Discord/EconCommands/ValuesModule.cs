@@ -90,6 +90,7 @@ namespace Icarus.Discord.EconCommands
             if (province == null)
             {
                 await RespondAsync($"{ProvinceName} was not found!");
+                return;
             }
 
             EmbedBuilder emb = new EmbedBuilder() 

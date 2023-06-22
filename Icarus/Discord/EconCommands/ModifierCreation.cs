@@ -4,6 +4,7 @@ using Discord.Commands;
 using Discord.Interactions;
 using Discord.Net;
 using Discord.WebSocket;
+using Google.Apis.Sheets.v4.Data;
 using Icarus.Context;
 using Icarus.Context.Models;
 using Icarus.Services;
@@ -107,7 +108,9 @@ namespace Icarus.Discord.EconCommands
             };
 
             var responseModal = (SocketModal)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 5, 0), NameDesc);
-        
+
+            if (responseModal == null) { return; }
+
             using var db = new IcarusContext();
 
             ModifierCreationDTO modifier = new ModifierCreationDTO()
@@ -144,6 +147,8 @@ namespace Icarus.Discord.EconCommands
             };
 
             SocketMessageComponent responseDrop = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), ProvinceSelection);
+
+            if (responseDrop == null) { return; }
 
             modifier.Provinces = responseDrop.Data.Values.ToList();
 
@@ -191,6 +196,7 @@ namespace Icarus.Discord.EconCommands
 
             responseDrop = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), ValueSelection);
 
+            if (responseDrop == null) { return; }
 
             List<string> values = responseDrop.Data.Values.ToList();
             foreach (string Value in values)
@@ -198,6 +204,8 @@ namespace Icarus.Discord.EconCommands
                 string h = Value.Replace("_", " ");
                 modifier.ValueSizePairs.Add(h, 0.0f);
             }
+            values.Add("TaxModifier");
+            modifier.ValueSizePairs.Add("TaxModifier", 0.0f);
 
 
             TextInputBuilder tb;
@@ -236,7 +244,8 @@ namespace Icarus.Discord.EconCommands
 
             responseModal = (SocketModal)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 10, 0), ValueHeight);
 
-            
+            if (responseModal == null) { return; }
+
             foreach (var Component in responseModal.Data.Components)
             {
                 Debug.WriteLine(Component.CustomId + ": " + Component.Value);
@@ -268,7 +277,7 @@ namespace Icarus.Discord.EconCommands
 
             responseDrop = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), TypeSelection);
 
-
+            if (responseDrop == null) { return; }
 
             modifier.ModifierType = Enum.Parse<ModifierType>(responseDrop.Data.Values.First());
 
@@ -314,6 +323,8 @@ namespace Icarus.Discord.EconCommands
             };
 
             responseModal = (SocketModal)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 10, 0), DDConf);
+
+            if (responseModal == null) { return; }
 
             if (modifier.ModifierType == ModifierType.Temporary)
             {
@@ -363,6 +374,11 @@ namespace Icarus.Discord.EconCommands
 
             foreach (KeyValuePair<string, float> ValueAmountPair in modifierDTO.ValueSizePairs)
             {
+                if(ValueAmountPair.Key == "TaxModifier")
+                {
+                    Modifier.WealthMod = ValueAmountPair.Value;
+                    continue;
+                }
                 ValueModifier valueModifier = new ValueModifier()
                 {
                     ValueTag = ValueAmountPair.Key,
@@ -409,6 +425,8 @@ namespace Icarus.Discord.EconCommands
 
             SocketMessageComponent response = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), ProvinceSelection);
 
+            if (response == null) { return; }
+
             Province _province = db.Provinces.FirstOrDefault(p => p.Name == response.Data.Values.First());
             if (_province == null)
             {
@@ -451,6 +469,8 @@ namespace Icarus.Discord.EconCommands
             };
 
             response = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), GoodSelection);
+
+            if (response == null) { return; }
 
             foreach (string modifier in response.Data.Values)
             {
@@ -503,7 +523,7 @@ namespace Icarus.Discord.EconCommands
 
             if (modifiers.Count == 0)
             {
-                await RespondAsync($"{province} has no Modifiers which can be removed.");
+                await RespondAsync($"{province} has no Modifiers which can be displayed.");
             }
 
             SelectMenuBuilder sm = _interactionHelpers.CreateSelectMenu(messageId.ToString(), "ModifierSelection", modifiers, "Select Modifier");
@@ -523,6 +543,8 @@ namespace Icarus.Discord.EconCommands
             };
 
             SocketMessageComponent response = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), GoodSelection);
+
+            if (response == null) { return; }
 
             Modifier Modifier = db.Modifiers.FirstOrDefault(m => m.Name == response.Data.Values.First());
 
