@@ -15,7 +15,6 @@ namespace Icarus.Services
     public class ValueManagementService
     {
         private readonly TickService _tickService;
-        public List<ModifierCreationDTO> Modifiers { get; set; } = new List<ModifierCreationDTO>();
 
         public ValueManagementService(TickService tickService)
         {
@@ -265,7 +264,8 @@ namespace Icarus.Services
                 Name = good.Name,
                 Description = good.Description,
                 Type = ModifierType.Permanent,
-                isGood = true
+                isGood = true,
+                WealthMod = good.WealthMod,
             };
 
             foreach (GoodValueModifier vm in good.ValueModifiers)
@@ -436,6 +436,7 @@ namespace Icarus.Services
                         Description = Modifier.SelectSingleNode("Description").InnerText,
                         Type = (ModifierType)Enum.Parse(typeof(ModifierType), Modifier.SelectSingleNode("Type").InnerText),
                         Duration = int.Parse(Modifier.SelectSingleNode("Duration").InnerText),
+                        WealthMod = float.Parse(Modifier.SelectSingleNode("WealthMod").InnerText, System.Globalization.CultureInfo.InvariantCulture)
                     };
 
                     foreach(XmlNode ValueModifier in Modifier.SelectSingleNode("Values").ChildNodes)
@@ -547,7 +548,8 @@ namespace Icarus.Services
                 {
                     Name = Modifier.SelectSingleNode("Name").InnerText,
                     Description = Modifier.SelectSingleNode("Description").InnerText,
-                    TAG = Modifier.SelectSingleNode("TAG").InnerText
+                    TAG = Modifier.SelectSingleNode("TAG").InnerText,
+                    WealthMod = float.Parse(Modifier.SelectSingleNode("WealthMod").InnerText, System.Globalization.CultureInfo.InvariantCulture)
                 };
 
                 foreach (XmlNode ValueModifier in Modifier.SelectSingleNode("Values").ChildNodes)
