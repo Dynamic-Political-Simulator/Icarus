@@ -106,21 +106,13 @@ namespace Icarus.Services
             await db.SaveChangesAsync();
         }
 
-        public async Task UpdateCharacterAssembly(string discordId, string assembly)
+        public async Task<List<PlayerCharacter>> GetAllCharactersIncludeGoI()
         {
-            if (assembly.Length > 64)
-            {
-                throw new ArgumentException();
-            }
-
             using var db = new IcarusContext();
 
-            var active = await GetActiveCharacter(discordId);
+            var allChars = await db.Characters.Include(c => c.GroupOfInterest).ToListAsync();
 
-            active.AssemblyRepresentation = assembly;
-
-            db.Update(active);
-            await db.SaveChangesAsync();
+            return allChars;
         }
     }
 }
