@@ -56,10 +56,7 @@ namespace Icarus.Migrations
             modelBuilder.Entity("Icarus.Context.Models.DebugChannel", b =>
                 {
                     b.Property<decimal>("ChannelId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("decimal(20,0)");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("ChannelId"));
 
                     b.HasKey("ChannelId");
 
@@ -170,10 +167,7 @@ namespace Icarus.Migrations
             modelBuilder.Entity("Icarus.Context.Models.GraveyardChannel", b =>
                 {
                     b.Property<decimal>("ChannelId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("decimal(20,0)");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("ChannelId"));
 
                     b.HasKey("ChannelId");
 

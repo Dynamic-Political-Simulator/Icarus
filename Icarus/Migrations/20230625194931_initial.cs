@@ -15,7 +15,6 @@ namespace Icarus.Migrations
                 columns: table => new
                 {
                     ChannelId = table.Column<decimal>(type: "decimal(20,0)", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1")
                 },
                 constraints: table =>
                 {
@@ -43,7 +42,6 @@ namespace Icarus.Migrations
                 columns: table => new
                 {
                     ChannelId = table.Column<decimal>(type: "decimal(20,0)", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1")
                 },
                 constraints: table =>
                 {
