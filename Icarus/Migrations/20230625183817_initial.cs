@@ -11,6 +11,18 @@ namespace Icarus.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "DebugChannels",
+                columns: table => new
+                {
+                    ChannelId = table.Column<decimal>(type: "decimal(20,0)", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DebugChannels", x => x.ChannelId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Goods",
                 columns: table => new
                 {
@@ -357,6 +369,9 @@ namespace Icarus.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "DebugChannels");
+
             migrationBuilder.DropTable(
                 name: "GameStates");
 

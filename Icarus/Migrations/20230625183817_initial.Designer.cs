@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Icarus.Migrations
 {
     [DbContext(typeof(IcarusContext))]
-    [Migration("20230625180739_initial")]
+    [Migration("20230625183817_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -54,6 +54,19 @@ namespace Icarus.Migrations
                     b.HasKey("TokenTypeName");
 
                     b.ToTable("TokenTypes");
+                });
+
+            modelBuilder.Entity("Icarus.Context.Models.DebugChannel", b =>
+                {
+                    b.Property<decimal>("ChannelId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(20,0)");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("ChannelId"));
+
+                    b.HasKey("ChannelId");
+
+                    b.ToTable("DebugChannels");
                 });
 
             modelBuilder.Entity("Icarus.Context.Models.DiscordUser", b =>

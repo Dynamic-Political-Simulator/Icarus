@@ -53,7 +53,7 @@ namespace Icarus.Context
         public DbSet<Good> Goods { get; set; }
         public DbSet<GoodValueModifier> GoodValueModifiers { get; set; }
         public DbSet<GraveyardChannel> GraveyardChannels { get; set; }
-
+        public DbSet<DebugChannel> DebugChannels { get; set; }
         public DbSet<GroupOfInterest> GroupOfInterests { get; set; }
 
         // Default Data

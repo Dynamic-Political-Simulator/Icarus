@@ -53,6 +53,19 @@ namespace Icarus.Migrations
                     b.ToTable("TokenTypes");
                 });
 
+            modelBuilder.Entity("Icarus.Context.Models.DebugChannel", b =>
+                {
+                    b.Property<decimal>("ChannelId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(20,0)");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("ChannelId"));
+
+                    b.HasKey("ChannelId");
+
+                    b.ToTable("DebugChannels");
+                });
+
             modelBuilder.Entity("Icarus.Context.Models.DiscordUser", b =>
                 {
                     b.Property<string>("DiscordId")
