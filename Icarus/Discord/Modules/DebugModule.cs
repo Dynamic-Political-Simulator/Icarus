@@ -18,7 +18,7 @@ namespace Icarus.Discord.Modules
             _debugService = debugService;
         }
 
-        [SlashCommand("add-debug-channel", "")]
+        [SlashCommand("add-debug-channel", "Adds a debug channel")]
         [RequireAdmin]
         public async Task AddChannel()
         {
