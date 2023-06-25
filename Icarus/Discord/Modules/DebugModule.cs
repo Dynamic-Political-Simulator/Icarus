@@ -23,7 +23,7 @@ namespace Icarus.Discord.Modules
         public async Task AddChannel()
         {
             await _debugService.AddChannel(Context.Channel.Id);
-            await ReplyAsync("Debug channel added.");
+            await RespondAsync("Debug channel added.");
         }
     }
 }
