@@ -1,5 +1,6 @@
 ﻿using Azure;
 using Icarus.Context;
+using Icarus.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,20 +22,27 @@ namespace Icarus.Services
 
         public async Task<string> KillCharacter(string discordId)
         {
-            var activeCharacter = await _characterService.GetActiveCharacter(discordId);
+            try
+            {
+                var activeCharacter = await _characterService.GetActiveCharacter(discordId);
 
-            using var db = new IcarusContext();
+                using var db = new IcarusContext();
 
-            var gameState = db.GameStates.First();
+                var gameState = db.GameStates.First();
 
-            activeCharacter.YearOfDeath = gameState.Year;
+                activeCharacter.YearOfDeath = gameState.Year;
 
-            db.Update(activeCharacter);
-            await db.SaveChangesAsync();
+                db.Update(activeCharacter);
+                await db.SaveChangesAsync();
 
-            _ = _graveyardService.SendGraveyardMessage(activeCharacter);
+                _ = _graveyardService.SendGraveyardMessage(activeCharacter);
 
-            return $"Press F for {activeCharacter.CharacterName}";
+                return $"Press F for {activeCharacter.CharacterName}";
+            }
+            catch (NoActiveCharacterException)
+            {
+                return "Could not kill character. No active character found.";
+            }
         }
     }
 }

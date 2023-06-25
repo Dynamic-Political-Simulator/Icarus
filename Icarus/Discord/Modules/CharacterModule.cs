@@ -157,7 +157,7 @@ namespace Icarus.Discord.Modules
 
         [RequireProfile]
         [SlashCommand("set-goi", "Sets your Group of Interest.")]
-        public async Task SetAssemblyRep(string assembly)
+        public async Task SetAssemblyRep()
         {
             var gois = await _goiService.GetAllGroups();
 
@@ -177,7 +177,7 @@ namespace Icarus.Discord.Modules
 
             var componentBuilder = new ComponentBuilder().WithSelectMenu(smb);
 
-            await ReplyAsync(components: componentBuilder.Build());
+            await RespondAsync("Select your Group of Interest", components: componentBuilder.Build(), ephemeral: true);
         }
     }
 }
