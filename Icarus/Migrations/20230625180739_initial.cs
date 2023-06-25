@@ -11,6 +11,47 @@ namespace Icarus.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Goods",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TAG = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    WealthMod = table.Column<float>(type: "real", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Goods", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GraveyardChannels",
+                columns: table => new
+                {
+                    ChannelId = table.Column<decimal>(type: "decimal(20,0)", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GraveyardChannels", x => x.ChannelId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GroupOfInterests",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GroupOfInterests", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Nations",
                 columns: table => new
                 {
@@ -25,6 +66,32 @@ namespace Icarus.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Relationships",
+                columns: table => new
+                {
+                    ValueRelationShipId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OriginTag = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TargetTag = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Weight = table.Column<float>(type: "real", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Relationships", x => x.ValueRelationShipId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TokenTypes",
+                columns: table => new
+                {
+                    TokenTypeName = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TokenTypes", x => x.TokenTypeName);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -34,6 +101,28 @@ namespace Icarus.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.DiscordId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GoodValueModifiers",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Modifier = table.Column<float>(type: "real", nullable: false),
+                    Decay = table.Column<float>(type: "real", nullable: false),
+                    ValueTag = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    GoodWrapperId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GoodValueModifiers", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_GoodValueModifiers_Goods_GoodWrapperId",
+                        column: x => x.GoodWrapperId,
+                        principalTable: "Goods",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -87,7 +176,9 @@ namespace Icarus.Migrations
                     CharacterDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Career = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Culture = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AssemblyRepresentation = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PrivilegedGroup = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    GoIid = table.Column<int>(type: "int", nullable: true),
+                    GroupOfInterestId = table.Column<int>(type: "int", nullable: true),
                     DiscordUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     YearOfBirth = table.Column<int>(type: "int", nullable: false),
                     YearOfDeath = table.Column<int>(type: "int", nullable: false)
@@ -95,6 +186,11 @@ namespace Icarus.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Characters", x => x.CharacterId);
+                    table.ForeignKey(
+                        name: "FK_Characters_GroupOfInterests_GroupOfInterestId",
+                        column: x => x.GroupOfInterestId,
+                        principalTable: "GroupOfInterests",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Characters_Users_DiscordUserId",
                         column: x => x.DiscordUserId,
@@ -112,6 +208,8 @@ namespace Icarus.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Duration = table.Column<int>(type: "int", nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
+                    isGood = table.Column<bool>(type: "bit", nullable: false),
+                    WealthMod = table.Column<float>(type: "real", nullable: false),
                     NationId = table.Column<int>(type: "int", nullable: true),
                     ProvinceId = table.Column<int>(type: "int", nullable: true)
                 },
@@ -159,18 +257,23 @@ namespace Icarus.Migrations
                 columns: table => new
                 {
                     PlayerCharacterId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    TokenType = table.Column<int>(type: "int", nullable: false),
+                    TokenTypeId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Amount = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tokens", x => new { x.PlayerCharacterId, x.TokenType });
+                    table.PrimaryKey("PK_Tokens", x => x.PlayerCharacterId);
                     table.ForeignKey(
                         name: "FK_Tokens_Characters_PlayerCharacterId",
                         column: x => x.PlayerCharacterId,
                         principalTable: "Characters",
                         principalColumn: "CharacterId",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Tokens_TokenTypes_TokenTypeId",
+                        column: x => x.TokenTypeId,
+                        principalTable: "TokenTypes",
+                        principalColumn: "TokenTypeName");
                 });
 
             migrationBuilder.CreateTable(
@@ -195,31 +298,6 @@ namespace Icarus.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Relationships",
-                columns: table => new
-                {
-                    ValueRelationShipId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    OriginId = table.Column<int>(type: "int", nullable: false),
-                    TargetId = table.Column<int>(type: "int", nullable: false),
-                    Weight = table.Column<float>(type: "real", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Relationships", x => x.ValueRelationShipId);
-                    table.ForeignKey(
-                        name: "FK_Relationships_Values_OriginId",
-                        column: x => x.OriginId,
-                        principalTable: "Values",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Relationships_Values_TargetId",
-                        column: x => x.TargetId,
-                        principalTable: "Values",
-                        principalColumn: "Id");
-                });
-
             migrationBuilder.InsertData(
                 table: "GameStates",
                 columns: new[] { "GameStateId", "LastTickEpoch", "NationId", "TickInterval", "Year" },
@@ -231,9 +309,19 @@ namespace Icarus.Migrations
                 column: "DiscordUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Characters_GroupOfInterestId",
+                table: "Characters",
+                column: "GroupOfInterestId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_GameStates_NationId",
                 table: "GameStates",
                 column: "NationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GoodValueModifiers_GoodWrapperId",
+                table: "GoodValueModifiers",
+                column: "GoodWrapperId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Modifiers_NationId",
@@ -251,14 +339,9 @@ namespace Icarus.Migrations
                 column: "NationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Relationships_OriginId",
-                table: "Relationships",
-                column: "OriginId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Relationships_TargetId",
-                table: "Relationships",
-                column: "TargetId");
+                name: "IX_Tokens_TokenTypeId",
+                table: "Tokens",
+                column: "TokenTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ValueModifiers_ModifierWrapperId",
@@ -278,6 +361,12 @@ namespace Icarus.Migrations
                 name: "GameStates");
 
             migrationBuilder.DropTable(
+                name: "GoodValueModifiers");
+
+            migrationBuilder.DropTable(
+                name: "GraveyardChannels");
+
+            migrationBuilder.DropTable(
                 name: "Relationships");
 
             migrationBuilder.DropTable(
@@ -290,10 +379,19 @@ namespace Icarus.Migrations
                 name: "Values");
 
             migrationBuilder.DropTable(
+                name: "Goods");
+
+            migrationBuilder.DropTable(
                 name: "Characters");
 
             migrationBuilder.DropTable(
+                name: "TokenTypes");
+
+            migrationBuilder.DropTable(
                 name: "Modifiers");
+
+            migrationBuilder.DropTable(
+                name: "GroupOfInterests");
 
             migrationBuilder.DropTable(
                 name: "Users");

@@ -18,7 +18,7 @@ namespace Icarus.Context.Models
 
         public string PrivilegedGroup { get; set; }
         public int? GoIid { get; set; }
-        public GroupOfInterest? GroupOfInterest { get; set; }
+        public virtual GroupOfInterest? GroupOfInterest { get; set; }
 
         public string DiscordUserId { get; set; }
         public virtual DiscordUser DiscordUser { get; set; }
