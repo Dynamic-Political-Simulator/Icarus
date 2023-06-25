@@ -25,12 +25,10 @@ namespace Icarus.Discord.Modules
         {
             using var db = new IcarusContext();
             //Some Code here to clean up the prior gameState
-            
 
+            await RespondAsync("Starting Gamestate generation!");
             GameState state = db.GameStates.FirstOrDefault();
-            await _valueManagementService.ReadGameStateConfig(state);
-
-            await RespondAsync("Success!");
+            await _valueManagementService.ReadGameStateConfig(state, Context.Channel);
         }
     }
 }

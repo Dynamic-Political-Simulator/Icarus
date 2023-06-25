@@ -18,6 +18,8 @@ namespace Icarus.Context.Models
         public bool isGood { get; set; } = false;
         public virtual List<ValueModifier> Modifiers { get; set; } = new List<ValueModifier>();
 
+        public float WealthMod { get; set; } = 1f;
+
     }
 
     public enum ModifierType

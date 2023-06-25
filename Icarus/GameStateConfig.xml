@@ -5,7 +5,7 @@
     <Description>Pee Pee Poo Poo</Description>
     <Provinces>
       <Province>
-        <Name>Ceratos</Name>
+        <Name>Cerato</Name>
         <Description>City big.</Description>
         <Values>
           <BCY>19</BCY>
@@ -30,6 +30,7 @@
             <Description>The frightening genius of the local resident called Grindor bestows large benefits on this province.</Description>
             <Type>Permanent</Type>
             <Duration>0</Duration>
+            <WealthMod>1.5</WealthMod>
             <Values>
               <Value>
                 <Tag>I</Tag>
@@ -75,6 +76,8 @@
         </Values>
         <Modifiers>
         </Modifiers>
+        <Goods>
+        </Goods>
       </Province>
       <Province>
         <Name>Sodara</Name>
@@ -98,6 +101,8 @@
         </Values>
         <Modifiers>
         </Modifiers>
+        <Goods>
+        </Goods>
       </Province>
       <Province>
         <Name>Alcon</Name>
@@ -121,6 +126,8 @@
         </Values>
         <Modifiers>
         </Modifiers>
+        <Goods>
+        </Goods>
       </Province>
       <Province>
         <Name>Harrane</Name>
@@ -144,6 +151,8 @@
         </Values>
         <Modifiers>
         </Modifiers>
+        <Goods>
+        </Goods>
       </Province>
       <Province>
         <Name>Macrea</Name>
@@ -167,6 +176,8 @@
         </Values>
         <Modifiers>
         </Modifiers>
+        <Goods>
+        </Goods>
       </Province>
       <Province>
         <Name>Sen Carria</Name>
@@ -190,6 +201,8 @@
         </Values>
         <Modifiers>
         </Modifiers>
+        <Goods>
+        </Goods>
       </Province>
     </Provinces>
   </Nation>
@@ -275,6 +288,7 @@
       <Name>Cum</Name>
       <TAG>CUM</TAG>
       <Description>Sticky, white, you know it.</Description>
+      <WealthMod>1.5</WealthMod>
       <Values>
         <Value>
           <Tag>BCY</Tag>
@@ -287,6 +301,290 @@
         <Value>
           <Tag>WEL</Tag>
           <Modifier>20</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Iron</Name>
+      <TAG>FE</TAG>
+      <Description>The metal that the world is made of.</Description>
+      <WealthMod>1.5</WealthMod>
+      <Values>
+        <Value>
+          <Tag>IND</Tag>
+          <Modifier>5</Modifier>
+        </Value>
+        <Value>
+          <Tag>H</Tag>
+          <Modifier>-2</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Coal</Name>
+      <TAG>C</TAG>
+      <Description>Its black it burns you dig it up and make machine go vroom!</Description>
+      <WealthMod>1.6</WealthMod>
+      <Values>
+        <Value>
+          <Tag>IND</Tag>
+          <Modifier>10</Modifier>
+        </Value>
+        <Value>
+          <Tag>M</Tag>
+          <Modifier>5</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Wine</Name>
+      <TAG>WINE</TAG>
+      <Description>The drink of the Gods!</Description>
+      <WealthMod>0.9</WealthMod>
+      <Values>
+        <Value>
+          <Tag>WEL</Tag>
+          <Modifier>5</Modifier>
+        </Value>
+        <Value>
+          <Tag>BCY</Tag>
+          <Modifier>2</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Grain</Name>
+      <TAG>G</TAG>
+      <Description>The thing the people eat. Yummy!</Description>
+      <WealthMod>0.6</WealthMod>
+      <Values>
+        <Value>
+          <Tag>BCY</Tag>
+          <Modifier>5</Modifier>
+        </Value>
+        <Value>
+          <Tag>U</Tag>
+          <Modifier>-10</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Meat and Fish</Name>
+      <TAG>MAF</TAG>
+      <Description>Fisheries and Livestock. But eat in moderation.</Description>
+      <WealthMod>0.6</WealthMod>
+      <Values>
+        <Value>
+          <Tag>H</Tag>
+          <Modifier>-2</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Fabrics</Name>
+      <TAG>G</TAG>
+      <Description>Whether its Cotton or Wool it keeps you warm.</Description>
+      <WealthMod>0.75</WealthMod>
+      <Values>
+        <Value>
+          <Tag>AGR</Tag>
+          <Modifier>5</Modifier>
+        </Value>
+        <Value>
+          <Tag>U</Tag>
+          <Modifier>-10</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Oil</Name>
+      <TAG>OIL</TAG>
+      <Description>The black tar that burns and stick to you.</Description>
+      <WealthMod>2</WealthMod>
+      <Values>
+        <Value>
+          <Tag>IND</Tag>
+          <Modifier>15</Modifier>
+        </Value>
+        <Value>
+          <Tag>H</Tag>
+          <Modifier>-10</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Wood</Name>
+      <TAG>WOOD</TAG>
+      <Description>That thing trees are made of.</Description>
+      <WealthMod>0.6</WealthMod>
+      <Values>
+        <Value>
+          <Tag>AGR</Tag>
+          <Modifier>5</Modifier>
+        </Value>
+        <Value>
+          <Tag>U</Tag>
+          <Modifier>-15</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Cash Crops</Name>
+      <TAG>CG</TAG>
+      <Description>Coffee, Silk, Tea, and all the other things you can grow and make money from.</Description>
+      <WealthMod>1.5</WealthMod>
+      <Values>
+        <Value>
+          <Tag>AGR</Tag>
+          <Modifier>15</Modifier>
+        </Value>
+        <Value>
+          <Tag>U</Tag>
+          <Modifier>-10</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Clothes</Name>
+      <TAG>CLO</TAG>
+      <Description>The things you actually wear.</Description>
+      <WealthMod>1</WealthMod>
+      <Values>
+        <Value>
+          <Tag>IND</Tag>
+          <Modifier>5</Modifier>
+        </Value>
+        <Value>
+          <Tag>U</Tag>
+          <Modifier>5</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Tools</Name>
+      <TAG>TOO</TAG>
+      <Description>Wrenches, Hammers the whole assortment.</Description>
+      <WealthMod>1.2</WealthMod>
+      <Values>
+        <Value>
+          <Tag>IND</Tag>
+          <Modifier>15</Modifier>
+        </Value>
+        <Value>
+          <Tag>U</Tag>
+          <Modifier>5</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Machinery</Name>
+      <TAG>MAC</TAG>
+      <Description>The big machines that make the modern world go.</Description>
+      <WealthMod>1.8</WealthMod>
+      <Values>
+        <Value>
+          <Tag>IND</Tag>
+          <Modifier>15</Modifier>
+        </Value>
+        <Value>
+          <Tag>M</Tag>
+          <Modifier>10</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Grocerys</Name>
+      <TAG>GRO</TAG>
+      <Description>Icky processed food.</Description>
+      <WealthMod>1</WealthMod>
+      <Values>
+        <Value>
+          <Tag>AGR</Tag>
+          <Modifier>5</Modifier>
+        </Value>
+        <Value>
+          <Tag>U</Tag>
+          <Modifier>5</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Ships</Name>
+      <TAG>SHI</TAG>
+      <Description>Weird contraptions that allow you to go over water.</Description>
+      <WealthMod>1.5</WealthMod>
+      <Values>
+        <Value>
+          <Tag>IND</Tag>
+          <Modifier>10</Modifier>
+        </Value>
+        <Value>
+          <Tag>U</Tag>
+          <Modifier>5</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Weapons</Name>
+      <TAG>WEP</TAG>
+      <Description>Boom boom sticks both big and small.</Description>
+      <WealthMod>1.5</WealthMod>
+      <Values>
+        <Value>
+          <Tag>IND</Tag>
+          <Modifier>15</Modifier>
+        </Value>
+        <Value>
+          <Tag>U</Tag>
+          <Modifier>5</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Chemicals</Name>
+      <TAG>CHE</TAG>
+      <Description>Weird smelly liquids, gases and solid stuff.</Description>
+      <WealthMod>1</WealthMod>
+      <Values>
+        <Value>
+          <Tag>IND</Tag>
+          <Modifier>5</Modifier>
+        </Value>
+        <Value>
+          <Tag>U</Tag>
+          <Modifier>5</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Paper</Name>
+      <TAG>PAP</TAG>
+      <Description>White stuff made for burning.</Description>
+      <WealthMod>1</WealthMod>
+      <Values>
+        <Value>
+          <Tag>WEL</Tag>
+          <Modifier>15</Modifier>
+        </Value>
+        <Value>
+          <Tag>U</Tag>
+          <Modifier>5</Modifier>
+        </Value>
+      </Values>
+    </Good>
+    <Good>
+      <Name>Luxury Goods</Name>
+      <TAG>LUX</TAG>
+      <Description>SHINY!!!.</Description>
+      <WealthMod>1.5</WealthMod>
+      <Values>
+        <Value>
+          <Tag>U</Tag>
+          <Modifier>10</Modifier>
+        </Value>
+        <Value>
+          <Tag>WEL</Tag>
+          <Modifier>5</Modifier>
         </Value>
       </Values>
     </Good>

@@ -4,6 +4,7 @@ using Discord.Commands;
 using Discord.Interactions;
 using Discord.Net;
 using Discord.WebSocket;
+using Google.Apis.Sheets.v4.Data;
 using Icarus.Context;
 using Icarus.Context.Models;
 using Icarus.Services;
@@ -107,7 +108,9 @@ namespace Icarus.Discord.EconCommands
             };
 
             var responseModal = (SocketModal)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 5, 0), NameDesc);
-        
+
+            if (responseModal == null) { return; }
+
             using var db = new IcarusContext();
 
             ModifierCreationDTO modifier = new ModifierCreationDTO()
@@ -144,6 +147,8 @@ namespace Icarus.Discord.EconCommands
             };
 
             SocketMessageComponent responseDrop = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), ProvinceSelection);
+
+            if (responseDrop == null) { return; }
 
             modifier.Provinces = responseDrop.Data.Values.ToList();
 
@@ -191,6 +196,7 @@ namespace Icarus.Discord.EconCommands
 
             responseDrop = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), ValueSelection);
 
+            if (responseDrop == null) { return; }
 
             List<string> values = responseDrop.Data.Values.ToList();
             foreach (string Value in values)
@@ -198,6 +204,8 @@ namespace Icarus.Discord.EconCommands
                 string h = Value.Replace("_", " ");
                 modifier.ValueSizePairs.Add(h, 0.0f);
             }
+            values.Add("TaxModifier");
+            modifier.ValueSizePairs.Add("TaxModifier", 0.0f);
 
 
             TextInputBuilder tb;
@@ -236,7 +244,8 @@ namespace Icarus.Discord.EconCommands
 
             responseModal = (SocketModal)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 10, 0), ValueHeight);
 
-            
+            if (responseModal == null) { return; }
+
             foreach (var Component in responseModal.Data.Components)
             {
                 Debug.WriteLine(Component.CustomId + ": " + Component.Value);
@@ -268,7 +277,7 @@ namespace Icarus.Discord.EconCommands
 
             responseDrop = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), TypeSelection);
 
-
+            if (responseDrop == null) { return; }
 
             modifier.ModifierType = Enum.Parse<ModifierType>(responseDrop.Data.Values.First());
 
@@ -314,6 +323,8 @@ namespace Icarus.Discord.EconCommands
             };
 
             responseModal = (SocketModal)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 10, 0), DDConf);
+
+            if (responseModal == null) { return; }
 
             if (modifier.ModifierType == ModifierType.Temporary)
             {
@@ -363,6 +374,11 @@ namespace Icarus.Discord.EconCommands
 
             foreach (KeyValuePair<string, float> ValueAmountPair in modifierDTO.ValueSizePairs)
             {
+                if(ValueAmountPair.Key == "TaxModifier")
+                {
+                    Modifier.WealthMod = ValueAmountPair.Value;
+                    continue;
+                }
                 ValueModifier valueModifier = new ValueModifier()
                 {
                     ValueTag = ValueAmountPair.Key,
@@ -375,6 +391,199 @@ namespace Icarus.Discord.EconCommands
                 Modifier.Modifiers.Add(valueModifier);
             }
             return Modifier;
+        }
+
+        [SlashCommand("removemodifier", "Starts the Process of removing a good from a province!")]
+        public async Task RemoveModifier()
+        {
+            using var db = new IcarusContext();
+
+            List<string> provinces = new List<string>();
+            foreach (Province province in db.Provinces.Where(p => p.Modifiers.Any(m => m.isGood == false)))
+            {
+                provinces.Add(province.Name);
+                Debug.WriteLine(province.Name);
+            }
+            int messageId = Random.Shared.Next(0, 9999);
+            SelectMenuBuilder sm = _interactionHelpers.CreateSelectMenu(messageId.ToString(), "ProvinceSelection", provinces, "Select Provinces");
+            sm.MinValues = 1;
+            sm.MaxValues = 1;
+            Console.WriteLine("Building Menu");
+            ComponentBuilder builder = new ComponentBuilder()
+                .WithSelectMenu(sm);
+
+
+            // Respond to the modal.
+            await RespondAsync("Choose Province", components: builder.Build());
+
+            Predicate<SocketInteraction> ProvinceSelection = s =>
+            {
+                if (s.GetType() != typeof(SocketMessageComponent)) return false;
+                SocketMessageComponent d = (SocketMessageComponent)s;
+                return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "ProvinceSelection");
+            };
+
+            SocketMessageComponent response = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), ProvinceSelection);
+
+            if (response == null) { return; }
+
+            Province _province = db.Provinces.FirstOrDefault(p => p.Name == response.Data.Values.First());
+            if (_province == null)
+            {
+                await RespondAsync("Province not found!");
+                return;
+            }
+
+            List<string> modifiers = new List<string>();
+            foreach (Modifier modifier in _province.Modifiers.Where(m => m.isGood == false))
+            {
+                modifiers.Add(modifier.Name);
+                Debug.WriteLine(modifier.Name);
+            }
+
+            if (modifiers.Count == 0)
+            {
+                await response.UpdateAsync(x => {
+                    x.Content = $"{_province.Name} has no Modifiers which can be removed.";
+                    x.Components = null;
+                });
+            }
+
+            sm = _interactionHelpers.CreateSelectMenu(messageId.ToString(), "ModifierSelection", modifiers, "Select Modifier");
+            sm.MinValues = 1;
+            sm.MaxValues = sm.Options.Count();
+            Console.WriteLine("Building Menu");
+            builder = new ComponentBuilder()
+                .WithSelectMenu(sm);
+
+            await response.UpdateAsync(x => {
+                x.Content = "Select Modifiers!";
+                x.Components = builder.Build();
+            });
+
+            Predicate<SocketInteraction> GoodSelection = s =>
+            {
+                if (s.GetType() != typeof(SocketMessageComponent)) return false;
+                SocketMessageComponent d = (SocketMessageComponent)s;
+                return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "ModifierSelection");
+            };
+
+            response = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), GoodSelection);
+
+            if (response == null) { return; }
+
+            foreach (string modifier in response.Data.Values)
+            {
+                Modifier Modifier = _province.Modifiers.FirstOrDefault(m => m.Name == modifier);
+                if (Modifier == null)
+                {
+                    await RespondAsync($"{modifier} not found");
+                }
+                db.Modifiers.Remove(Modifier);
+            }
+
+            await db.SaveChangesAsync();
+            await response.UpdateAsync(x => {
+                x.Content = "Success!";
+                x.Components = null;
+            });
+        }
+
+        [SlashCommand("showmodifier", "Displays Information about a modifier")]
+        public async Task ShowModifier(string province = null)
+        {
+            using var db = new IcarusContext();
+
+            int messageId = Random.Shared.Next(0, 9999);
+            List<string> modifiers = new List<string>();
+            if (province == null)
+            {
+                foreach (Modifier modifier in db.Modifiers.Where(m => m.isGood == false))
+                {
+                    modifiers.Add(modifier.Name);
+                    Debug.WriteLine(modifier.Name);
+                }
+            }
+            else
+            {
+                Province _province = db.Provinces.FirstOrDefault(p => p.Name == province);
+                if (_province == null)
+                {
+                    await RespondAsync("Province not found!");
+                    return;
+                }
+
+                
+                foreach (Modifier modifier in _province.Modifiers.Where(m => m.isGood == false))
+                {
+                    modifiers.Add(modifier.Name);
+                    Debug.WriteLine(modifier.Name);
+                }
+            }
+
+            if (modifiers.Count == 0)
+            {
+                await RespondAsync($"{province} has no Modifiers which can be displayed.");
+            }
+
+            SelectMenuBuilder sm = _interactionHelpers.CreateSelectMenu(messageId.ToString(), "ModifierSelection", modifiers, "Select Modifier");
+            sm.MinValues = 1;
+            sm.MaxValues = 1;
+            Console.WriteLine("Building Menu");
+            ComponentBuilder builder = new ComponentBuilder()
+                .WithSelectMenu(sm);
+
+            await RespondAsync("Choose Modifier",components:builder.Build());
+
+            Predicate<SocketInteraction> GoodSelection = s =>
+            {
+                if (s.GetType() != typeof(SocketMessageComponent)) return false;
+                SocketMessageComponent d = (SocketMessageComponent)s;
+                return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "ModifierSelection");
+            };
+
+            SocketMessageComponent response = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), GoodSelection);
+
+            if (response == null) { return; }
+
+            Modifier Modifier = db.Modifiers.FirstOrDefault(m => m.Name == response.Data.Values.First());
+
+            if (Modifier == null)
+            {
+                await response.UpdateAsync(x => {
+                    x.Content = "You somehow cause an oopsie whoopsie";
+                    x.Components = null;
+                });
+                return;
+            }
+
+            EmbedBuilder emb = new EmbedBuilder()
+            {
+                Title = Modifier.Name,
+                Description = Modifier.Description,
+            };
+
+            StringBuilder Effects = new StringBuilder();
+            foreach(ValueModifier vm in Modifier.Modifiers)
+            {
+                Effects.AppendLine($"{vm.ValueTag}:{vm.Modifier}");
+                if (vm.Decay != 0)
+                {
+                    Effects.Append($" Decay: {vm.Decay}");
+                }
+            }
+            if (Modifier.Modifiers.Count == 0)
+            {
+                Effects.Append("None");
+            }
+
+            emb.AddField("Effects",Effects.ToString());
+
+            await response.UpdateAsync(x => {
+                x.Content = $"Showing Modifier {Modifier.Name}";
+                x.Components = null;
+                x.Embed = emb.Build();
+            });
         }
     }
 
