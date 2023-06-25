@@ -17,11 +17,18 @@ namespace Icarus.Discord.Modules
 {
     public class CharacterModule : InteractionModuleBase<SocketInteractionContext>
     {
-        private readonly CharacterService _characterService;
+        private readonly DiscordSocketClient _client;
 
-        public CharacterModule(CharacterService characterService) 
+        private readonly CharacterService _characterService;
+        private readonly GoIService _goiService;
+        private readonly RoleService _roleService;
+
+        public CharacterModule(DiscordSocketClient client, CharacterService characterService, GoIService goIService, RoleService roleService) 
         {
+            _client = client;
             _characterService = characterService;
+            _goiService = goIService;
+            _roleService = roleService;
         }
 
         [SlashCommand("create-character", "Creates a new character.")]
@@ -31,8 +38,18 @@ namespace Icarus.Discord.Modules
             try
             {
                 await _characterService.CreateNewCharacter(Context.User.Id.ToString(), characterName, startingAge);
-                await RespondAsync($"Character {characterName} has been created. Remember there are also commands for setting" +
-                    $" your culture and career.");
+                await RespondAsync(@$"Character {characterName} has been created. Remember there are also commands for setting
+                    your character description (set-bio), culture (set-culture), and career (set-career).
+
+                    You can also set your Group of Interest and your Privileged Group.
+
+                    A Privileged Group (or PG for short) is the semi-organised entity which appointed you to the position of Notable. 
+                    Their name, exact nature (a merchant house, a chamber of the Admiralty, an Olikost temple), and their ideological bend are entirely up to you, consider them part of your character's backstory.
+
+                    That being said, all PG's also must fall within an empowered Group of Interest (GoI) which they reasonably correlate to. GoI's are overarching classifications of powerful interests such as Urban Guilds or Landed Estates. 
+                    If a PG would not fit within any empowered GoI (for example pirates are a GoI but they represent various dregs and outlaws), then it simply means that you cannot make it. 
+                    PG's must also not be overly powerful, you cannot create a PG which is canonicly the owner of half the land on an island - basically, keep it simple, keep it fair.
+                    ");
             }
             catch(ExistingActiveCharacterException)
             {
@@ -70,9 +87,13 @@ namespace Icarus.Discord.Modules
                 {
                     embedBuilder.AddField("Career", character.Career);
                 }
-                if (character.AssemblyRepresentation != null)
+                if (character.GoIid != null)
                 {
-                    embedBuilder.AddField("Assembly Representation", character.AssemblyRepresentation);
+                    embedBuilder.AddField("Assembly Representation", character.GroupOfInterest.Name);
+                }
+                if (character.PrivilegedGroup != null)
+                {
+                    embedBuilder.AddField("Privileged Group", character.PrivilegedGroup);
                 }
 
 
@@ -119,19 +140,44 @@ namespace Icarus.Discord.Modules
         }
 
         [RequireProfile]
-        [SlashCommand("set-assembly-rep", "Sets which group you represent in the assembly.")]
+        [SlashCommand("set-culture", "Sets your culture.")]
         public async Task SetCulture(string assembly)
         {
             try
             {
-                await _characterService.UpdateCharacterAssembly(Context.User.Id.ToString(), assembly);
+                await _characterService.UpdateCharacterCulture(Context.User.Id.ToString(), assembly);
             }
             catch (ArgumentException)
             {
-                await RespondAsync("Assembly representation may not be longer than 64 characters.");
+                await RespondAsync("Culture may not be longer than 64 characters.");
             }
 
-            await RespondAsync("Assembly representation set.");
+            await RespondAsync("Culture set.");
+        }
+
+        [RequireProfile]
+        [SlashCommand("set-goi", "Sets your Group of Interest.")]
+        public async Task SetAssemblyRep(string assembly)
+        {
+            var gois = await _goiService.GetAllGroups();
+
+            var smb = new SelectMenuBuilder()
+                .WithPlaceholder("Group of Interest")
+                .WithMinValues(1)
+                .WithMaxValues(1)
+                .WithCustomId("char-goi-selection");
+                
+            foreach (var group in gois)
+            {
+                var smob = new SelectMenuOptionBuilder();
+
+                smob.WithValue(group.Id.ToString());
+                smob.WithLabel(group.Name);
+            }
+
+            var componentBuilder = new ComponentBuilder().WithSelectMenu(smb);
+
+            await ReplyAsync(components: componentBuilder.Build());
         }
     }
 }

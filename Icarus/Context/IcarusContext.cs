@@ -52,6 +52,9 @@ namespace Icarus.Context
         public DbSet<Modifier> Modifiers { get; set; }
         public DbSet<Good> Goods { get; set; }
         public DbSet<GoodValueModifier> GoodValueModifiers { get; set; }
+        public DbSet<GraveyardChannel> GraveyardChannels { get; set; }
+
+        public DbSet<GroupOfInterest> GroupOfInterests { get; set; }
 
         // Default Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)

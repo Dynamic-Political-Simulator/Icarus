@@ -1,4 +1,5 @@
 ﻿using Discord.API;
+using Discord.WebSocket;
 using Icarus.Context;
 using Icarus.Context.Models;
 using Icarus.Exceptions;
@@ -17,7 +18,7 @@ namespace Icarus.Services
         {
             using var db = new IcarusContext();
 
-            var active = await db.Characters.SingleOrDefaultAsync(c => c.DiscordUserId == discordId && c.YearOfDeath == -1);
+            var active = await db.Characters.Include(c => c.GroupOfInterest).SingleOrDefaultAsync(c => c.DiscordUserId == discordId && c.YearOfDeath == -1);
 
             if (active == null)
             {
@@ -106,20 +107,40 @@ namespace Icarus.Services
             await db.SaveChangesAsync();
         }
 
-        public async Task UpdateCharacterAssembly(string discordId, string assembly)
+        public async Task<List<PlayerCharacter>> GetAllCharactersIncludeGoI()
         {
-            if (assembly.Length > 64)
-            {
-                throw new ArgumentException();
-            }
+            using var db = new IcarusContext();
+
+            var allChars = await db.Characters.Include(c => c.GroupOfInterest).ToListAsync();
+
+            return allChars;
+        }
+
+        public async Task HandleGroupOfInterestSelectMenu(SocketMessageComponent arg)
+        {
+            var selection = arg.Data.Values.FirstOrDefault();
+
+            var character = await GetActiveCharacter(arg.User.Id.ToString());
 
             using var db = new IcarusContext();
 
-            var active = await GetActiveCharacter(discordId);
+            character.GoIid = int.Parse(selection);
 
-            active.AssemblyRepresentation = assembly;
+            db.Update(character);
+            await db.SaveChangesAsync();
 
-            db.Update(active);
+            await arg.RespondAsync("Group of Interest set.", ephemeral: true);
+        }
+
+        public async Task UpdateGoI(string characterId, int goiId)
+        {
+            using var db = new IcarusContext();
+
+            var character = db.Characters.Single(c => c.CharacterId == characterId);
+
+            character.GoIid = goiId;
+
+            db.Update(character);
             await db.SaveChangesAsync();
         }
     }
