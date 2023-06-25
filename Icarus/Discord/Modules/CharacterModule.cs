@@ -17,11 +17,18 @@ namespace Icarus.Discord.Modules
 {
     public class CharacterModule : InteractionModuleBase<SocketInteractionContext>
     {
-        private readonly CharacterService _characterService;
+        private readonly DiscordSocketClient _client;
 
-        public CharacterModule(CharacterService characterService) 
+        private readonly CharacterService _characterService;
+        private readonly GoIService _goiService;
+        private readonly RoleService _roleService;
+
+        public CharacterModule(DiscordSocketClient client, CharacterService characterService, GoIService goIService, RoleService roleService) 
         {
+            _client = client;
             _characterService = characterService;
+            _goiService = goIService;
+            _roleService = roleService;
         }
 
         [SlashCommand("create-character", "Creates a new character.")]
@@ -80,9 +87,13 @@ namespace Icarus.Discord.Modules
                 {
                     embedBuilder.AddField("Career", character.Career);
                 }
-                if (character.AssemblyRepresentation != null)
+                if (character.GoIid != null)
                 {
-                    embedBuilder.AddField("Assembly Representation", character.AssemblyRepresentation);
+                    embedBuilder.AddField("Assembly Representation", character.GroupOfInterest.Name);
+                }
+                if (character.PrivilegedGroup != null)
+                {
+                    embedBuilder.AddField("Privileged Group", character.PrivilegedGroup);
                 }
 
 
@@ -145,19 +156,28 @@ namespace Icarus.Discord.Modules
         }
 
         [RequireProfile]
-        [SlashCommand("set-assembly-rep", "Sets which group you represent in the assembly.")]
+        [SlashCommand("set-goi", "Sets your Group of Interest.")]
         public async Task SetAssemblyRep(string assembly)
         {
-            try
+            var gois = await _goiService.GetAllGroups();
+
+            var smb = new SelectMenuBuilder()
+                .WithPlaceholder("Group of Interest")
+                .WithMinValues(1)
+                .WithMaxValues(1)
+                .WithCustomId("char-goi-selection");
+                
+            foreach (var group in gois)
             {
-                await _characterService.UpdateCharacterAssembly(Context.User.Id.ToString(), assembly);
-            }
-            catch (ArgumentException)
-            {
-                await RespondAsync("Assembly representation may not be longer than 64 characters.");
+                var smob = new SelectMenuOptionBuilder();
+
+                smob.WithValue(group.Id.ToString());
+                smob.WithLabel(group.Name);
             }
 
-            await RespondAsync("Assembly representation set.");
+            var componentBuilder = new ComponentBuilder().WithSelectMenu(smb);
+
+            await ReplyAsync(components: componentBuilder.Build());
         }
     }
 }

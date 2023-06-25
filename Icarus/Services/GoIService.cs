@@ -26,5 +26,7 @@ namespace Icarus.Services
 
             return await db.GroupOfInterests.ToListAsync();
         }
+
+        
     }
 }
