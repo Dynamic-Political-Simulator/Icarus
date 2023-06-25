@@ -1,7 +1,9 @@
 ﻿using Discord;
 using Discord.Interactions;
+using Icarus.Context;
 using Icarus.Discord.CustomPreconditions;
 using Icarus.Services;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +22,31 @@ namespace Icarus.Discord.Modules
         {
             _characterService = characterService;
             _goiService = goiService;
+        }
+
+        [SlashCommand("gois", "Lists all gois.")]
+        [RequireAdmin]
+        public async Task ListGroups()
+        {
+            var gois = await _goiService.GetAllGroups();
+
+            var sb = new StringBuilder();
+
+            foreach (var go in gois)
+            {
+                sb.AppendLine($"{go.Id}: {go.Name}");
+            }
+
+            var resultString = sb.ToString();
+
+            if (resultString == "" || resultString == null) resultString = "No GoI's in database.";
+
+            var eb = new EmbedBuilder();
+
+            eb.WithTitle("Groups of Interest");
+            eb.WithDescription(resultString);
+
+            await ReplyAsync(embed: eb.Build());
         }
 
         [SlashCommand("character-gois", "Lists all characters grouped by assigned gois.")]
