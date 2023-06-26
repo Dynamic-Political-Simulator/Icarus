@@ -133,6 +133,7 @@ namespace Icarus
 				.AddSingleton<DebugService>()
 				.AddSingleton<AgeService>()
 				.AddSingleton<MessagingService>()
+				.AddSingleton<ComponentReactionHandlerService>()
 				.AddDbContext<IcarusContext>(ServiceLifetime.Transient)
 			.BuildServiceProvider();
 
