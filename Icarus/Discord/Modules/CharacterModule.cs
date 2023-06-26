@@ -181,6 +181,8 @@ namespace Icarus.Discord.Modules
 
                 smob.WithValue(group.Id.ToString());
                 smob.WithLabel(group.Name);
+
+                smb.AddOption(smob);
             }
 
             var componentBuilder = new ComponentBuilder().WithSelectMenu(smb);
