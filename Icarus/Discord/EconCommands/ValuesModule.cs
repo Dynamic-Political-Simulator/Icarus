@@ -226,7 +226,7 @@ namespace Icarus.Discord.EconCommands
 
             const string cmd = "bash";
             string args = $"";
-            const string activateVenv = "./Scripts/activate";
+            const string activateVenv = "source .python/bin/activate";
             var commandsToExecute = new List<string>(){
                 "pip install -r requirements.txt",
                 $"python ChartGen.py {string.Join(",", values)} {goal}"
