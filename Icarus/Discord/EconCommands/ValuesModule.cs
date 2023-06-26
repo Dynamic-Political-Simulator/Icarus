@@ -12,6 +12,9 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Icarus.Discord.CustomPreconditions;
+using System.IO;
+using Icarus.Utils;
 
 namespace Icarus.Discord.EconCommands
 {
@@ -27,6 +30,7 @@ namespace Icarus.Discord.EconCommands
         }
 
         [SlashCommand("setvalue","Set the specified Value to a certain Number.")]
+        [RequireAdmin]
         public async Task SetValue(string ProvinceName,string ValueName, float Number)
         {
             using var db = new IcarusContext();
@@ -155,89 +159,126 @@ namespace Icarus.Discord.EconCommands
             await RespondAsync(embed: emb.Build());
         }
 
-        /*
-        //Local Modifiers
-        [SlashCommand("CreateLocalStaticModifier", "Creates a new permanent Modifier in a specific Province")]
-        public async Task CreateLocalStaticModifier(string ProvinceName, string ValueName, string ModifierName, string Description, string Modifier)
+        [SlashCommand("showvalue", "Show specific info about a Value")]
+        public async Task ShowValue(string ProvinceName, string ValueTAG)
         {
-            ValueModifier valueModifier = new ValueModifier()
+            using var db = new IcarusContext();
+
+            Value value = db.Provinces.FirstOrDefault(p => p.Name == ProvinceName).Values.FirstOrDefault(v => v.Name == ValueTAG);
+            if (value == null)
             {
-                Name = ModifierName,
-                Description = Description,
-                Modifier = float.Parse(Modifier),
-                Type = ModifierType.Permanent,
-                Locality = Locality.Local
+                await RespondAsync($"{ValueTAG} was not found in {ProvinceName}");
+                return;
+            }
+
+            await DeferAsync();
+
+            EmbedBuilder emb = new EmbedBuilder()
+            {
+                Title = $"{value.Name} in {ProvinceName}",
+                Description = value.Description,
             };
-            Province p = _icarusContext.Provinces.FirstOrDefault(p=>p.Name == ProvinceName);
-            if (p == null)
+
+            float valueGoal = _valueManagementService.GetValueGoal(value);
+
+            EmbedFieldBuilder CurrentValue = new EmbedFieldBuilder()
+                .WithName("Current Value")
+                .WithValue(value.CurrentValue);
+
+            EmbedFieldBuilder Goal = new EmbedFieldBuilder()
+                .WithName("Goal")
+                .WithValue(valueGoal.ToString());
+
+            EmbedFieldBuilder Change = new EmbedFieldBuilder()
+                .WithName("Change")
+                .WithValue(_valueManagementService.GetValueChange(value).ToString());
+
+            List<float> heights = new List<float>();
+
+            foreach(ValueHistory hist in value.PastValues)
             {
-                await RespondAsync("Province not Found");
+                heights.Add(hist.Height);
             }
-            Value v = p.Values.FirstOrDefault(v=>v.Name == ValueName);
-            if (v == null)
+
+            GenChart(heights, valueGoal);
+
+            try
             {
-                await RespondAsync("Value not Found");
+                emb.WithImageUrl(@"attachment://D:\SeasonDPS\Icarus\Icarus\Images\.chart.png");
+                
+                emb.AddField(CurrentValue);
+                emb.AddField(Goal);
+                emb.AddField(Change);
+                //await Context.Channel.SendMessageAsync(embed:emb.Build());
+                
+                await FollowupWithFileAsync(@"D:\SeasonDPS\Icarus\Icarus\Images\.chart.png", embed: emb.Build());
             }
-            v.Modifiers.Add(valueModifier);
-            await _icarusContext.SaveChangesAsync();
-            await RespondAsync($"Created new permanent local Modifier at {p.Name} affecting {v.Name} by {valueModifier.Modifier}");
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            
         }
 
-        [SlashCommand("CreateLocalTemporaryModifier", "Creates a new temporary Modifier in a specific Province")]
-        public async Task CreateLocalTemporaryModifier(string ProvinceName, string ValueName, string ModifierName, string Description, string Modifier, string Ticks)
+        public void GenChart(List<float> values, float goal)
         {
-            ValueModifier valueModifier = new ValueModifier()
-            {
-                Name = ModifierName,
-                Description = Description,
-                Modifier = float.Parse(Modifier),
-                Type = ModifierType.Temporary,
-                Duration = int.Parse(Ticks),
-                Locality = Locality.Local
-            };
-            Province p = _icarusContext.Provinces.FirstOrDefault(p => p.Name == ProvinceName);
-            if (p == null)
-            {
-                await RespondAsync("Province not Found");
-            }
-            Value v = p.Values.FirstOrDefault(v => v.Name == ValueName);
-            if (v == null)
-            {
-                await RespondAsync("Value not Found");
-            }
-            v.Modifiers.Add(valueModifier);
-            _icarusContext.Modifiers.Add(valueModifier);
-            await _icarusContext.SaveChangesAsync();
-            await RespondAsync($"Created new temporary local Modifier at {p.Name} affecting {v.Name} by {valueModifier.Modifier} lasting {valueModifier.Duration} Ticks");
-        }
+            var icarusConfig = ConfigFactory.GetConfig();
 
-        [SlashCommand("CreateLocalDecayingModifier", "Creates a new decaying Modifier in a specific Province")]
-        public async Task CreateLocalDecayingModifier(string ProvinceName, string ValueName, string ModifierName, string Description, string Modifier, string Decay)
-        {
-            ValueModifier valueModifier = new ValueModifier()
-            {
-                Name = ModifierName,
-                Description = Description,
-                Modifier = float.Parse(Modifier),
-                Type = ModifierType.Temporary,
-                Decay = float.Parse(Decay),
-                Locality = Locality.Local
+            const string cmd = "PowerShell";
+            string args = $"";
+            const string activateVenv = "./Scripts/activate";
+            var commandsToExecute = new List<string>(){
+                "pip install -r requirements.txt",
+                $"python ChartGen.py {string.Join(",", values)} {goal}"
             };
-            Province p = _icarusContext.Provinces.FirstOrDefault(p => p.Name == ProvinceName);
-            if (p == null)
+
+            string test = $"{string.Join(",", values)}";
+
+            var startInfo = new ProcessStartInfo
             {
-                await RespondAsync("Province not Found");
-            }
-            Value v = p.Values.FirstOrDefault(v => v.Name == ValueName);
-            if (v == null)
+                RedirectStandardOutput = true,
+                RedirectStandardInput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                Arguments = args,
+                FileName = cmd,
+                WorkingDirectory = icarusConfig.PythonScriptLocation
+            };
+
+            try
             {
-                await RespondAsync("Value not Found");
+                var process = Process.Start(startInfo);
+                if (process == null)
+                    throw new Exception("Could not start process");
+
+                using var sw = process.StandardInput;
+                if (sw.BaseStream.CanWrite)
+                {
+                    sw.WriteLine(activateVenv);
+                    foreach (var command in commandsToExecute)
+                    {
+                        sw.WriteLine(command);
+                    }
+                    sw.Flush();
+                    sw.Close();
+                }
+
+                var sb = new StringBuilder();
+                while (!process.HasExited)
+                    sb.Append(process.StandardOutput.ReadToEnd());
+
+                var error = process.StandardError.ReadToEnd();
+                if (!string.IsNullOrEmpty(error))
+                    throw new Exception($"Something went wrong: \n{error}");
+                Console.WriteLine(sb.ToString());
             }
-            v.Modifiers.Add(valueModifier);
-            _icarusContext.Modifiers.Add(valueModifier);
-            await _icarusContext.SaveChangesAsync();
-            await RespondAsync($"Created new decaying local Modifier at {p.Name} affecting {v.Name} by {valueModifier.Modifier} decaying by {valueModifier.Decay} each Tick");
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            
+            
         }
-        */
     }
 }

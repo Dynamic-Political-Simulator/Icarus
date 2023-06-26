@@ -14,6 +14,7 @@ namespace Icarus.Context.Models
         public string Description { get; set; }
         public string TAG { get; set; }
         public float CurrentValue { get; set; }
+        public virtual List<ValueHistory> PastValues { get; set; }
         public float BaseBalue { get; set; }
         //public float GoalValue { get; set; }
         public int ProvinceId { get; set; }

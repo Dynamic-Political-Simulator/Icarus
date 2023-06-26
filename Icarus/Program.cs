@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Globalization;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Castle.Core.Configuration;
 using Discord;
@@ -25,7 +27,16 @@ namespace Icarus
 
 		public async Task Start()
 		{
-			_client.Log += LogAsync;
+            CultureInfo culture;
+
+			culture = CultureInfo.CreateSpecificCulture("en-US");
+
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+            Thread.CurrentThread.CurrentCulture = culture;
+            Thread.CurrentThread.CurrentUICulture = culture;
+            _client.Log += LogAsync;
 
 			_services = BuildServiceProvider();
 

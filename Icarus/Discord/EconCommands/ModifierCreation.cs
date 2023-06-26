@@ -16,6 +16,7 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Icarus.Discord.CustomPreconditions;
 
 namespace Icarus.Discord.EconCommands
 {
@@ -80,6 +81,7 @@ namespace Icarus.Discord.EconCommands
 
         //First Command
         [SlashCommand("createmodifier", "Starts the Process of Adding a Modifier")]
+        [RequireAdmin]
         public async Task CreateModifer()
         {
             string messageId = Random.Shared.Next(9999).ToString();
@@ -394,6 +396,7 @@ namespace Icarus.Discord.EconCommands
         }
 
         [SlashCommand("removemodifier", "Starts the Process of removing a good from a province!")]
+        //[RequireAdmin]
         public async Task RemoveModifier()
         {
             using var db = new IcarusContext();

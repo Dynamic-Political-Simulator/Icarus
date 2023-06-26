@@ -52,6 +52,7 @@ namespace Icarus.Context
         public DbSet<Modifier> Modifiers { get; set; }
         public DbSet<Good> Goods { get; set; }
         public DbSet<GoodValueModifier> GoodValueModifiers { get; set; }
+        public DbSet<ValueHistory> valueHistories { get; set; }
 
         // Default Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -80,6 +81,10 @@ namespace Icarus.Context
                 .HasOne(v => v.Province)
                 .WithMany(p => p.Values)
                 .HasForeignKey(v => v.ProvinceId);
+            modelBuilder.Entity<ValueHistory>()
+                .HasOne(h => h.Value)
+                .WithMany(v => v.PastValues)
+                .HasForeignKey(h => h.ValueId);
                 
             modelBuilder.Entity<Province>()
                 .HasOne(p => p.Nation)

@@ -55,7 +55,8 @@ namespace Icarus.Services
                 changes.Add(new ValueChangeCache()
                 {
                     ValueId = Value.Id,
-                    ValueChange = GetValueChange(Value)
+                    ValueChange = GetValueChange(Value),
+                    ValueGoal = GetValueGoal(Value)
                 });
                 //Console.WriteLine($"{Value.Name}:{Value.CurrentValue}");
             }
@@ -68,7 +69,7 @@ namespace Icarus.Services
                 }
                 else
                 {
-                    CalculateNewValue(value, change.ValueChange);
+                    CalculateNewValue(value, change.ValueChange, change.ValueGoal);
                 }
             }
             await db.SaveChangesAsync();
@@ -136,13 +137,25 @@ namespace Icarus.Services
         /// <param name="Value">Value to change</param>
         /// <param name="ValueChange">Change of the Value</param>
         /// <returns>New CurrentValue of the Value</returns>
-        public float CalculateNewValue(Value Value, float ValueChange)
+        public float CalculateNewValue(Value Value, float ValueChange, float Goal)
         {
             float newValue = Value.CurrentValue + ValueChange;
+            //Add the value to the history
+            ValueHistory valueHistory = new ValueHistory() 
+            {
+                Height = Value.CurrentValue,
+                Goal = Goal,
+                Change = ValueChange
+            };
+            Value.PastValues.Add(valueHistory);
+            if (Value.PastValues.Count > 1000)
+            {
+                Value.PastValues.RemoveAt(0);
+            }
             Value.CurrentValue = (float)Math.Round(newValue,2);
             if (Value.CurrentValue < 0) { Value.CurrentValue = 0; }
             return Value.CurrentValue;
-        }
+        }   
 
         /// <summary>
         /// Combine all modifiers affecting a certain Value.
@@ -611,5 +624,6 @@ namespace Icarus.Services
     {
         public int ValueId { get; set; }
         public float ValueChange { get; set; }
+        public float ValueGoal { get; set; }
     }
 }

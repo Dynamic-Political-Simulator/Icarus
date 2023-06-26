@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static Icarus.Discord.EconCommands.ModifierCreation;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Icarus.Discord.CustomPreconditions;
 
 namespace Icarus.Discord.EconCommands
 {
@@ -34,6 +35,7 @@ namespace Icarus.Discord.EconCommands
         }
 
         [SlashCommand("addgood", "Starts the Process to add a good to a province!")]
+        [RequireAdmin]
         public async Task CreateGood()
         {
             using var db = new IcarusContext();
@@ -145,6 +147,7 @@ namespace Icarus.Discord.EconCommands
 
 
         [SlashCommand("removegood", "Starts the Process of removing a good from a province!")]
+        [RequireAdmin]
         public async Task RemoveGood()
         {
             using var db = new IcarusContext();
