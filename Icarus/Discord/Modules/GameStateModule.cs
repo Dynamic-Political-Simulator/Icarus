@@ -4,6 +4,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Icarus.Context;
 using Icarus.Context.Models;
+using Icarus.Discord.CustomPreconditions;
 using Icarus.Services;
 using System;
 using System.Linq;
@@ -21,6 +22,7 @@ namespace Icarus.Discord.Modules
         }
 
         [SlashCommand("starttestgame", "Starts a new Game")]
+        [RequireAdmin]
         public async Task StartTestGame()
         {
             using var db = new IcarusContext();

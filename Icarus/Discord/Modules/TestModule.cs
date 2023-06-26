@@ -9,6 +9,7 @@ using Discord;
 using System.Collections.Generic;
 using Icarus.Context.Models;
 using System.Xml;
+using Icarus.Discord.CustomPreconditions;
 
 namespace Bailiff.Discord.Modules
 {
@@ -34,13 +35,15 @@ namespace Bailiff.Discord.Modules
 		}
 
 		[SlashCommand("get-cell-test", "get a cell in google sheets")]
+		[RequireAdmin]
 		public async Task GetCellTest(string spreadsheetID, string cellID)
 		{
 			await RespondAsync($"{_gsheetsService.GenerateContext(spreadsheetID).Get(cellID)[0][0]}");
 		}
 
 		[SlashCommand("update-cell-test", "get a cell in google sheets")]
-		public async Task UpdateCellTest(string spreadsheetID, string cellID, string newVal)
+        [RequireAdmin]
+        public async Task UpdateCellTest(string spreadsheetID, string cellID, string newVal)
 		{
 			await DeferAsync();
 			_gsheetsService.GenerateContext(spreadsheetID).Update(cellID, new List<List<string>> { new List<string> { newVal } });
@@ -48,7 +51,8 @@ namespace Bailiff.Discord.Modules
 		}
 
 		[SlashCommand("genrel", "What is says")]
-		public async Task RereadRelationShips()
+        [RequireAdmin]
+        public async Task RereadRelationShips()
 		{
 			string DataPath = @"./GameStateConfig.xml";
 			XmlDocument Xmldata = new XmlDocument();
@@ -62,7 +66,8 @@ namespace Bailiff.Discord.Modules
 		}
 
 		[SlashCommand("gengoods", "What it says")]
-		public async Task RereadGoods()
+        [RequireAdmin]
+        public async Task RereadGoods()
 		{
 			string DataPath = @"./GameStateConfig.xml";
 			XmlDocument Xmldata = new XmlDocument();

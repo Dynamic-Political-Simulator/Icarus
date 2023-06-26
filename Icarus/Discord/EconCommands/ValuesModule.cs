@@ -164,7 +164,7 @@ namespace Icarus.Discord.EconCommands
         {
             using var db = new IcarusContext();
 
-            Value value = db.Provinces.FirstOrDefault(p => p.Name == ProvinceName).Values.FirstOrDefault(v => v.Name == ValueTAG);
+            Value value = db.Provinces.FirstOrDefault(p => p.Name == ProvinceName).Values.FirstOrDefault(v => v.TAG == ValueTAG);
             if (value == null)
             {
                 await RespondAsync($"{ValueTAG} was not found in {ProvinceName}");
