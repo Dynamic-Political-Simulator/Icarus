@@ -22,11 +22,13 @@ namespace Icarus.Discord.EconCommands
     {
         private readonly DiscordSocketClient _client;
         private readonly ValueManagementService _valueManagementService;
+        private readonly DebugService _debugService;
 
-        public ValuesModule(DiscordSocketClient client, ValueManagementService valueManagementService)
+        public ValuesModule(DiscordSocketClient client, ValueManagementService valueManagementService, DebugService debugService)
         {
             _client = client;
             _valueManagementService = valueManagementService;
+            _debugService = debugService;
         }
 
         [SlashCommand("setvalue","Set the specified Value to a certain Number.")]
@@ -228,8 +230,8 @@ namespace Icarus.Discord.EconCommands
             string args = $"";
             const string activateVenv = "source .python/bin/activate";
             var commandsToExecute = new List<string>(){
-                "pip install -r requirements.txt",
-                $"python ChartGen.py {string.Join(",", values)} {goal}"
+                //"pip install -r requirements.txt",
+                $"python publish/PythonScrips/ChartGen.py {string.Join(",", values)} {goal}"
             };
 
             string test = $"{string.Join(",", values)}";
@@ -276,9 +278,8 @@ namespace Icarus.Discord.EconCommands
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
+                _ = _debugService.PrintToChannels(ex.Message);
             }
-            
-            
         }
     }
 }
