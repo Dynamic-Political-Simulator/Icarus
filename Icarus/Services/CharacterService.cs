@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Icarus.Services
@@ -109,6 +110,23 @@ namespace Icarus.Services
             var active = await GetActiveCharacter(discordId);
 
             active.Culture = culture;
+
+            db.Update(active);
+            await db.SaveChangesAsync();
+        }
+
+        public async Task UpdateCharacterPG(string discordId, string pg)
+        {
+            if (pg.Length > 64)
+            {
+                throw new ArgumentException();
+            }
+
+            using var db = new IcarusContext();
+
+            var active = await GetActiveCharacter(discordId);
+
+            active.PrivilegedGroup = pg;
 
             db.Update(active);
             await db.SaveChangesAsync();

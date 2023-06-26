@@ -33,17 +33,11 @@ namespace Icarus.Discord.Modules
             try
             {
                 await _characterService.CreateNewCharacter(Context.User.Id.ToString(), characterName, startingAge);
-                await RespondAsync(@$"Character {characterName} has been created. Remember there are also commands for setting
-                    your character description (set-bio), culture (set-culture), and career (set-career).
+                await RespondAsync(@$"Character {characterName} has been created. Remember there are also commands for setting your character description (set-bio), culture (set-culture), career (set-career), PG (set-pg), and GoI (set-goi).
 
-                    You can also set your Group of Interest and your Privileged Group.
+                    A Patronage Group (or PG for short) is the semi-organised entity which appointed you to the position of Notable. Their name, exact nature (a merchant house, a chamber of the Admiralty, an Olikost temple), and their ideological bend are entirely up to you, consider them part of your character's backstory.
 
-                    A Privileged Group (or PG for short) is the semi-organised entity which appointed you to the position of Notable. 
-                    Their name, exact nature (a merchant house, a chamber of the Admiralty, an Olikost temple), and their ideological bend are entirely up to you, consider them part of your character's backstory.
-
-                    That being said, all PG's also must fall within an empowered Group of Interest (GoI) which they reasonably correlate to. GoI's are overarching classifications of powerful interests such as Urban Guilds or Landed Estates. 
-                    If a PG would not fit within any empowered GoI (for example pirates are a GoI but they represent various dregs and outlaws), then it simply means that you cannot make it. 
-                    PG's must also not be overly powerful, you cannot create a PG which is canonicly the owner of half the land on an island - basically, keep it simple, keep it fair.
+                    That being said, all PG's also must fall within an empowered Group of Interest (GoI) which they reasonably correlate to. GoI's are overarching classifications of powerful interests such as Urban Guilds or Landed Estates. If a PG would not fit within any empowered GoI (for example pirates are a GoI but they represent various dregs and outlaws), then it simply means that you cannot make it. PG's must also not be overly powerful, you cannot create a PG which is canonicly the owner of half the land on an island - basically, keep it simple, keep it fair.
                     ");
             }
             catch(ExistingActiveCharacterException)
@@ -88,9 +82,12 @@ namespace Icarus.Discord.Modules
                 }
                 if (character.PrivilegedGroup != null)
                 {
-                    embedBuilder.AddField("Privileged Group", character.PrivilegedGroup);
+                    embedBuilder.AddField("Patronage Group", character.PrivilegedGroup);
                 }
-
+                if (character.GoIid != null)
+                {
+                    embedBuilder.AddField("Group of Interest", character.GroupOfInterest.Name);
+                }
 
                 await RespondAsync(embed: embedBuilder.Build());
             }
@@ -148,6 +145,22 @@ namespace Icarus.Discord.Modules
             }
 
             await RespondAsync("Culture set.");
+        }
+
+        [RequireProfile]
+        [SlashCommand("set-pg", "Sets your Patronage Group.")]
+        public async Task SetPG(string pg)
+        {
+            try
+            {
+                await _characterService.UpdateCharacterPG(Context.User.Id.ToString(), pg);
+            }
+            catch (ArgumentException)
+            {
+                await RespondAsync("PG may not be longer than 64 characters.");
+            }
+
+            await RespondAsync("PG set.");
         }
 
         [RequireProfile]
