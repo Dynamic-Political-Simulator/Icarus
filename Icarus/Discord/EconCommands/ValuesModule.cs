@@ -231,7 +231,7 @@ namespace Icarus.Discord.EconCommands
             const string activateVenv = "source .python/bin/activate";
             var commandsToExecute = new List<string>(){
                 //"pip install -r requirements.txt",
-                $"python publish/PythonScrips/ChartGen.py {string.Join(",", values)} {goal}"
+                $"python ChartGen.py {string.Join(",", values)} {goal}"
             };
 
             string test = $"{string.Join(",", values)}";
