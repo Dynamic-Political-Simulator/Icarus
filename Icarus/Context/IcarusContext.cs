@@ -43,7 +43,7 @@ namespace Icarus.Context
         public DbSet<CharacterTokenType> TokenTypes { get; set; }
         public DbSet<DiscordUser> Users { get; set; }
         public DbSet<PlayerCharacter> Characters { get; set; }
-
+        public DbSet<DeathTimer> DeathTimer { get; set; }
         public DbSet<Value> Values { get; set; }
         public DbSet<ValueModifier> ValueModifiers { get; set; }
         public DbSet<ValueRelationship> Relationships { get; set; }

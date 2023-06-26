@@ -1,5 +1,6 @@
 ﻿using Azure;
 using Icarus.Context;
+using Icarus.Context.Models;
 using Icarus.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -13,11 +14,27 @@ namespace Icarus.Services
     {
         private readonly CharacterService _characterService;
         private readonly GraveyardService _graveyardService;
+        private readonly DebugService _debugService;
 
         public DeathService(CharacterService characterService, GraveyardService graveyardService)
         {
             _characterService = characterService;
             _graveyardService = graveyardService;
+        }
+
+        public async Task OldAgeDeath(PlayerCharacter character)
+        {
+            using var db = new IcarusContext();
+
+            var newDeathTimer = new DeathTimer()
+            {
+                CharacterId = character.CharacterId
+            };
+
+            db.DeathTimer.Add(newDeathTimer);
+            await db.SaveChangesAsync();
+
+            _ = _debugService.PrintToChannels($"Character {character.CharacterName} has been added to the 24-hour death timer.");
         }
 
         public async Task<string> KillCharacter(string discordId)

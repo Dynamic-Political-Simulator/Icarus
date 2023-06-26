@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Icarus.Context.Models
 {
@@ -11,5 +12,7 @@ namespace Icarus.Context.Models
         public int Year { get; set; }
         public int? NationId { get; set; }
         public virtual Nation? Nation { get; set; }
+        public bool AgingEnabled { get; set; } = false;
+        public DateTime LastAgingEvent { get; set; }
     }
 }

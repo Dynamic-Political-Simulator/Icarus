@@ -2,16 +2,11 @@
 using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
-using Icarus.Context;
 using Icarus.Discord.CustomPreconditions;
 using Icarus.Exceptions;
 using Icarus.Services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Icarus.Discord.Modules
 {
