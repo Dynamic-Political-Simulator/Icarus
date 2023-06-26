@@ -24,4 +24,7 @@ COPY ./Icarus/appsettings.staging.json /publish
 COPY ./Icarus/appsettings.prod.json /publish
 COPY ./Icarus/ValueRelationShips.xml /publish
 COPY ./dpsproject-11f5133691e4.json /publish
+
+RUN apt-get update
+RUN apt-get install -y python3
 ENTRYPOINT ["dotnet", "Icarus.dll"]
