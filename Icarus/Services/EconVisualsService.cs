@@ -1,5 +1,6 @@
 ﻿using Icarus.Context;
 using Icarus.Context.Models;
+using Icarus.Utils;
 using System;
 using System.Collections.Generic;
 using System.Formats.Asn1;
@@ -24,7 +25,8 @@ namespace Icarus.Services
 
         public async Task UpdateProvinceView(ValueManagementService _valueManagementService)
         {
-            string sheetId = "19oiQ3tLW1BzObJ1iusIFfBOfmPsqMZkIdw5THwytWdw";
+            var icarusConfig = ConfigFactory.GetConfig();
+            string sheetId = icarusConfig.ValueSheetId;
             SheetContext sheetContext = _googleSheetsService.GenerateContext(sheetId);
 
             using var db = new IcarusContext();

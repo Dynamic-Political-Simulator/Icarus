@@ -6,7 +6,7 @@
     <Provinces>
       <Province>
         <Name>Cerato</Name>
-        <Description>City big.</Description>
+        <Description>The home of Sarcosta's most modern institutions and the capitol of the Concorde. Volcanic ash fertilises the two rivers that run through Cerato's countryside, while the new industries in Dissandola, Mayenne, Savatte, and other cities roar to life. If there is to be a future for Sarcosta, it will be decided here..</Description>
         <Values>
           <BCY>19</BCY>
           <I>23</I>
@@ -26,37 +26,37 @@
         </Values>
         <Modifiers>
           <Modifier>
-            <Name>Grindors Genius</Name>
-            <Description>The frightening genius of the local resident called Grindor bestows large benefits on this province.</Description>
+            <Name>Cerato</Name>
+            <Description>The capital city big and beautifull.</Description>
             <Type>Permanent</Type>
             <Duration>0</Duration>
-            <WealthMod>1.5</WealthMod>
+            <WealthMod>0</WealthMod>
             <Values>
               <Value>
                 <Tag>I</Tag>
-                <Modifier>50</Modifier>
+                <Modifier>5</Modifier>
                 <Decay>0</Decay>
               </Value>
               <Value>
                 <Tag>M</Tag>
-                <Modifier>60</Modifier>
+                <Modifier>5</Modifier>
                 <Decay>0</Decay>
               </Value>
               <Value>
                 <Tag>U</Tag>
-                <Modifier>30</Modifier>
+                <Modifier>10</Modifier>
                 <Decay>0</Decay>
               </Value>
             </Values>
           </Modifier>
         </Modifiers>
         <Goods>
-          <Good>CUM</Good>
+          <Good>CLO</Good>
         </Goods>
       </Province>
       <Province>
         <Name>Danza Cipres</Name>
-        <Description>City big.</Description>
+        <Description>Danza Cipres is often overlooked by those from other islands of Sarcosta, often pulled between the struggles of its neighbors. But, as Sarcosta dopts more and more industrial technologies, some suspect that Danza Cipres' deposits of iron and coal might become the backbone to a new, modern economy.</Description>
         <Values>
           <BCY>11</BCY>
           <I>17</I>
@@ -77,11 +77,13 @@
         <Modifiers>
         </Modifiers>
         <Goods>
+          <Good>FE</Good>
+          <Good>C</Good>
         </Goods>
       </Province>
       <Province>
         <Name>Sodara</Name>
-        <Description>City big.</Description>
+        <Description>While Harrane's history languishes in ruins, Sodara's history of trade and industry still shines enough to be seen today when one walks around Matis or Asato. While it may have lost its status the center of Sarcostan culture and trade to Ceratos, its urbanisation and many workshops nonetheless play a vital role to the Sarcostan economy.</Description>
         <Values>
           <BCY>22</BCY>
           <I>15</I>
@@ -106,7 +108,7 @@
       </Province>
       <Province>
         <Name>Alcon</Name>
-        <Description>City big.</Description>
+        <Description>Dominated by the Sword-Lords that reconquered it, Alcon contains the headquarters for Sarcosta's navy and much of its martial class. Its economy is not quite as prosperous as Ceratos, Sodara, or even Harrane, but despite the lack of arable land, Alcon's economy gets by on horse-ranching, vineyards, and some of the largest enclosures of Steelwood.</Description>
         <Values>
           <BCY>9</BCY>
           <I>12</I>
@@ -131,7 +133,7 @@
       </Province>
       <Province>
         <Name>Harrane</Name>
-        <Description>City big.</Description>
+        <Description> Harrane's history is long, but today it exists as the rural heartland for Sarcosta, but also a site of some of its most divisive struggles. Ruins of the First Empire stand alongside the scars from the Tempest, and new landlord families rise to replace the old dynasties. Harrane has the largest peasant population of any island, and there is some fear as to what they might do if left to their own devices again.</Description>
         <Values>
           <BCY>27</BCY>
           <I>14</I>
@@ -156,7 +158,7 @@
       </Province>
       <Province>
         <Name>Macrea</Name>
-        <Description>City big.</Description>
+        <Description>With one of the lowest populations of any island in Sarcosta and only nominally under government control, Macrea is something of an anomaly. The peasantry within Macrea still enjoy a high degree of freedom from and leverage against their landlords, but it remains to be seen if such liberty can be maintained.</Description>
         <Values>
           <BCY>13</BCY>
           <I>6</I>
@@ -181,7 +183,7 @@
       </Province>
       <Province>
         <Name>Sen Carria</Name>
-        <Description>City big.</Description>
+        <Description>The island chain of Sen Carria is home to many a pirate and political exile, far away from Dissandola's reach. Most of the ideological roots of the Tempest have long since faded away or been blown to pieces, but that hasn't stoped Sen Carria from being an unpickable thorn in the government's side.</Description>
         <Values>
           <BCY>15</BCY>
           <I>3</I>
@@ -284,26 +286,6 @@
     </ValueTemplate>
   </ValueTemplates>
   <Goods>
-    <Good>
-      <Name>Cum</Name>
-      <TAG>CUM</TAG>
-      <Description>Sticky, white, you know it.</Description>
-      <WealthMod>1.5</WealthMod>
-      <Values>
-        <Value>
-          <Tag>BCY</Tag>
-          <Modifier>10</Modifier>
-        </Value>
-        <Value>
-          <Tag>AGR</Tag>
-          <Modifier>5</Modifier>
-        </Value>
-        <Value>
-          <Tag>WEL</Tag>
-          <Modifier>20</Modifier>
-        </Value>
-      </Values>
-    </Good>
     <Good>
       <Name>Iron</Name>
       <TAG>FE</TAG>
@@ -662,7 +644,7 @@
     </RelationShip>
     <RelationShip>
       <Origin>T</Origin>
-      <Target>ES</Target>
+      <Target>W</Target>
       <Weight>1</Weight>
     </RelationShip>
     <RelationShip>

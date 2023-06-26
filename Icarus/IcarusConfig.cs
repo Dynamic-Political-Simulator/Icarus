@@ -15,6 +15,8 @@ namespace Icarus
 		public ulong GuildId { get; set; }
 		public int TickResolution { get; set; }
 		public string GoogleAPIKeyLocation { get; set; }
+		public string PythonScriptLocation { get; set; }
+		public string ValueSheetId { get; set; }
 		public float ValueChangeRatio { get; set; }
 	}
 }
