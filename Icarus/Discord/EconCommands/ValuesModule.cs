@@ -204,14 +204,14 @@ namespace Icarus.Discord.EconCommands
 
             try
             {
-                emb.WithImageUrl(@"attachment://D:\SeasonDPS\Icarus\Icarus\Images\.chart.png");
+                //emb.WithImageUrl(@"attachment://D:\SeasonDPS\Icarus\Icarus\Images\.chart.png");
                 
                 emb.AddField(CurrentValue);
                 emb.AddField(Goal);
                 emb.AddField(Change);
                 //await Context.Channel.SendMessageAsync(embed:emb.Build());
                 
-                await FollowupWithFileAsync(@"D:\SeasonDPS\Icarus\Icarus\Images\.chart.png", embed: emb.Build());
+                await FollowupWithFileAsync(@"\publish\Images\.chart.png", embed: emb.Build());
             }
             catch (Exception ex)
             {
@@ -224,7 +224,7 @@ namespace Icarus.Discord.EconCommands
         {
             var icarusConfig = ConfigFactory.GetConfig();
 
-            const string cmd = "PowerShell";
+            const string cmd = "bash";
             string args = $"";
             const string activateVenv = "./Scripts/activate";
             var commandsToExecute = new List<string>(){
