@@ -1,4 +1,6 @@
 ﻿using Azure;
+using Discord;
+using Discord.WebSocket;
 using Icarus.Context;
 using Icarus.Context.Models;
 using Icarus.Exceptions;
@@ -17,13 +19,19 @@ namespace Icarus.Services
         private readonly GraveyardService _graveyardService;
         private readonly DebugService _debugService;
         private readonly TickService _tickService;
+        private readonly MessagingService _messagingService;
 
-        public DeathService(CharacterService characterService, GraveyardService graveyardService, DebugService debugService, TickService tickService)
+        public DeathService(CharacterService characterService, 
+            GraveyardService graveyardService, 
+            DebugService debugService, 
+            TickService tickService,
+            MessagingService messagingService)
         {
             _characterService = characterService;
             _graveyardService = graveyardService;
             _debugService = debugService;
             _tickService = tickService;
+            _messagingService = messagingService;
 
             _tickService.TickEvent += CheckDeathTimer;
         }
@@ -49,6 +57,8 @@ namespace Icarus.Services
                 CharacterId = character.CharacterId
             };
 
+            _ = _messagingService.SendMessageToUser(ulong.Parse(character.DiscordUserId), "You feel your life force waning.You are certain you only have 24 hours left, it is best to deal with everything undone now before it's too late.");
+
             db.DeathTimer.Add(newDeathTimer);
             await db.SaveChangesAsync();
 
@@ -71,6 +81,8 @@ namespace Icarus.Services
                 await db.SaveChangesAsync();
 
                 _ = _graveyardService.SendGraveyardMessage(activeCharacter);
+
+                _ = _messagingService.SendMessageToUser(ulong.Parse(activeCharacter.DiscordUserId), $"{activeCharacter.CharacterName} has died.");
 
                 return $"Press F for {activeCharacter.CharacterName}";
             }
@@ -96,6 +108,8 @@ namespace Icarus.Services
                 await db.SaveChangesAsync();
 
                 _ = _graveyardService.SendGraveyardMessage(activeCharacter);
+
+                _ = _messagingService.SendMessageToUser(ulong.Parse(activeCharacter.DiscordUserId), $"{activeCharacter.CharacterName} has died.");
 
                 return $"Press F for {activeCharacter.CharacterName}";
             }
