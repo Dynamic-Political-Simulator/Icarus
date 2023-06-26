@@ -16,6 +16,7 @@ namespace Icarus.Utils
 
             var configBuilder = new ConfigurationBuilder()
                 .AddJsonFile($"appsettings.{envVariables["environment"]}.json", optional: false, reloadOnChange: true);
+                //.AddJsonFile($"appsettings.staging.json", optional: false, reloadOnChange: true);
 
             var Configuration = configBuilder.Build();
 

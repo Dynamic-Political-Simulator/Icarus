@@ -53,6 +53,35 @@ namespace Icarus.Migrations
                     b.ToTable("TokenTypes");
                 });
 
+            modelBuilder.Entity("Icarus.Context.Models.DeathTimer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CharacterId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("TimeKilled")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DeathTimer");
+                });
+
+            modelBuilder.Entity("Icarus.Context.Models.DebugChannel", b =>
+                {
+                    b.Property<decimal>("ChannelId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.HasKey("ChannelId");
+
+                    b.ToTable("DebugChannels");
+                });
+
             modelBuilder.Entity("Icarus.Context.Models.DiscordUser", b =>
                 {
                     b.Property<string>("DiscordId")
@@ -73,6 +102,12 @@ namespace Icarus.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GameStateId"));
+
+                    b.Property<bool>("AgingEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastAgingEvent")
+                        .HasColumnType("datetime2");
 
                     b.Property<long>("LastTickEpoch")
                         .HasColumnType("bigint");
@@ -96,6 +131,8 @@ namespace Icarus.Migrations
                         new
                         {
                             GameStateId = 1,
+                            AgingEnabled = false,
+                            LastAgingEvent = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             LastTickEpoch = 0L,
                             TickInterval = 3600000L,
                             Year = 0
@@ -152,6 +189,32 @@ namespace Icarus.Migrations
                     b.HasIndex("GoodWrapperId");
 
                     b.ToTable("GoodValueModifiers");
+                });
+
+            modelBuilder.Entity("Icarus.Context.Models.GraveyardChannel", b =>
+                {
+                    b.Property<decimal>("ChannelId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.HasKey("ChannelId");
+
+                    b.ToTable("GraveyardChannels");
+                });
+
+            modelBuilder.Entity("Icarus.Context.Models.GroupOfInterest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GroupOfInterests");
                 });
 
             modelBuilder.Entity("Icarus.Context.Models.Modifier", b =>
@@ -219,9 +282,6 @@ namespace Icarus.Migrations
                     b.Property<string>("CharacterId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("AssemblyRepresentation")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Career")
                         .HasColumnType("nvarchar(max)");
 
@@ -237,6 +297,15 @@ namespace Icarus.Migrations
                     b.Property<string>("DiscordUserId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int?>("GoIid")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("GroupOfInterestId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PrivilegedGroup")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("YearOfBirth")
                         .HasColumnType("int");
 
@@ -246,6 +315,8 @@ namespace Icarus.Migrations
                     b.HasKey("CharacterId");
 
                     b.HasIndex("DiscordUserId");
+
+                    b.HasIndex("GroupOfInterestId");
 
                     b.ToTable("Characters");
                 });
@@ -437,7 +508,13 @@ namespace Icarus.Migrations
                         .WithMany("Characters")
                         .HasForeignKey("DiscordUserId");
 
+                    b.HasOne("Icarus.Context.Models.GroupOfInterest", "GroupOfInterest")
+                        .WithMany("Characters")
+                        .HasForeignKey("GroupOfInterestId");
+
                     b.Navigation("DiscordUser");
+
+                    b.Navigation("GroupOfInterest");
                 });
 
             modelBuilder.Entity("Icarus.Context.Models.Province", b =>
@@ -492,6 +569,11 @@ namespace Icarus.Migrations
             modelBuilder.Entity("Icarus.Context.Models.Good", b =>
                 {
                     b.Navigation("ValueModifiers");
+                });
+
+            modelBuilder.Entity("Icarus.Context.Models.GroupOfInterest", b =>
+                {
+                    b.Navigation("Characters");
                 });
 
             modelBuilder.Entity("Icarus.Context.Models.Modifier", b =>

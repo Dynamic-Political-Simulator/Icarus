@@ -43,7 +43,7 @@ namespace Icarus.Context
         public DbSet<CharacterTokenType> TokenTypes { get; set; }
         public DbSet<DiscordUser> Users { get; set; }
         public DbSet<PlayerCharacter> Characters { get; set; }
-
+        public DbSet<DeathTimer> DeathTimer { get; set; }
         public DbSet<Value> Values { get; set; }
         public DbSet<ValueModifier> ValueModifiers { get; set; }
         public DbSet<ValueRelationship> Relationships { get; set; }
@@ -53,6 +53,10 @@ namespace Icarus.Context
         public DbSet<Good> Goods { get; set; }
         public DbSet<GoodValueModifier> GoodValueModifiers { get; set; }
         public DbSet<ValueHistory> valueHistories { get; set; }
+        public DbSet<GraveyardChannel> GraveyardChannels { get; set; }
+        public DbSet<DebugChannel> DebugChannels { get; set; }
+        public DbSet<GroupOfInterest> GroupOfInterests { get; set; }
+
 
         // Default Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -1,4 +1,5 @@
 ﻿using Discord.API;
+using Discord.WebSocket;
 using Icarus.Context;
 using Icarus.Context.Models;
 using Icarus.Exceptions;
@@ -7,17 +8,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Icarus.Services
 {
     public class CharacterService
     {
+        public async Task<PlayerCharacter> GetCharacter(string characterId)
+        {
+            using var db = new IcarusContext();
+
+            return db.Characters.SingleOrDefault(c => c.CharacterId == characterId);
+        }
+
         public async Task<PlayerCharacter> GetActiveCharacter(string discordId)
         {
             using var db = new IcarusContext();
 
-            var active = await db.Characters.SingleOrDefaultAsync(c => c.DiscordUserId == discordId && c.YearOfDeath == -1);
+            var active = await db.Characters.Include(c => c.GroupOfInterest).SingleOrDefaultAsync(c => c.DiscordUserId == discordId && c.YearOfDeath == -1);
 
             if (active == null)
             {
@@ -106,9 +115,9 @@ namespace Icarus.Services
             await db.SaveChangesAsync();
         }
 
-        public async Task UpdateCharacterAssembly(string discordId, string assembly)
+        public async Task UpdateCharacterPG(string discordId, string pg)
         {
-            if (assembly.Length > 64)
+            if (pg.Length > 64)
             {
                 throw new ArgumentException();
             }
@@ -117,9 +126,46 @@ namespace Icarus.Services
 
             var active = await GetActiveCharacter(discordId);
 
-            active.AssemblyRepresentation = assembly;
+            active.PrivilegedGroup = pg;
 
             db.Update(active);
+            await db.SaveChangesAsync();
+        }
+
+        public async Task<List<PlayerCharacter>> GetAllCharactersIncludeGoI()
+        {
+            using var db = new IcarusContext();
+
+            var allChars = await db.Characters.Include(c => c.GroupOfInterest).ToListAsync();
+
+            return allChars;
+        }
+
+        public async Task HandleGroupOfInterestSelectMenu(SocketMessageComponent arg)
+        {
+            var selection = arg.Data.Values.FirstOrDefault();
+
+            var character = await GetActiveCharacter(arg.User.Id.ToString());
+
+            using var db = new IcarusContext();
+
+            character.GoIid = int.Parse(selection);
+
+            db.Update(character);
+            await db.SaveChangesAsync();
+
+            await arg.RespondAsync("Group of Interest set.", ephemeral: true);
+        }
+
+        public async Task UpdateGoI(string characterId, int goiId)
+        {
+            using var db = new IcarusContext();
+
+            var character = db.Characters.Single(c => c.CharacterId == characterId);
+
+            character.GoIid = goiId;
+
+            db.Update(character);
             await db.SaveChangesAsync();
         }
     }

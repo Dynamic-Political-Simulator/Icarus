@@ -105,6 +105,13 @@ namespace Icarus
 				.AddSingleton<CharacterService>()
 				.AddSingleton<DiscordInteractionHelpers>()
 				.AddSingleton<EconVisualsService>()
+				.AddSingleton<GoIService>()
+				.AddSingleton<RoleService>()
+				.AddSingleton<DeathService>()
+				.AddSingleton<GraveyardService>()
+				.AddSingleton<DebugService>()
+				.AddSingleton<AgeService>()
+				.AddSingleton<MessagingService>()
 				.AddDbContext<IcarusContext>(ServiceLifetime.Transient)
 			.BuildServiceProvider();
 
