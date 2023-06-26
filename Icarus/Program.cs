@@ -13,6 +13,7 @@ using Icarus.Services;
 using Icarus.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using IResult = Discord.Interactions.IResult;
 
 namespace Icarus
 {
@@ -60,6 +61,26 @@ namespace Icarus
 			// Register slash commands defined in modules
 			await interactionService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), _services);
 			await interactionService.RegisterCommandsToGuildAsync(icarusConfig.GuildId); // TODO: Register commands globally when this reaches production (otherwise they will not be usable in DMs)
+
+			interactionService.SlashCommandExecuted += async (SlashCommandInfo arg1, IInteractionContext arg2, IResult arg3) => 
+			{
+				if (!arg3.IsSuccess)
+				{
+					switch (arg3.Error)
+					{
+						case InteractionCommandError.UnmetPrecondition:
+							await arg2.Interaction.RespondAsync($"{arg3.ErrorReason}", ephemeral: true);
+							break;
+						case InteractionCommandError.Exception:
+							await _services.GetService<DebugService>().PrintToChannels($"An exception ocurred:\n{arg3.ErrorReason}");
+							await arg2.Interaction.RespondAsync("An exception ocurred when executing command. Please inform staff of what you were trying to run.", ephemeral: true);							
+							break;
+						default:
+							await arg2.Interaction.RespondAsync("Command could not be executed. Try again later.", ephemeral: true);
+							break;
+					}
+				}
+			};
 
 			// Register a callback to handle commands when they are run.
 			_client.InteractionCreated += async (SocketInteraction socketInteraction) =>
