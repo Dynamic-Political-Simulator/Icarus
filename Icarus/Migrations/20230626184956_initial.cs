@@ -325,6 +325,28 @@ namespace Icarus.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "valueHistories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Height = table.Column<float>(type: "real", nullable: false),
+                    Goal = table.Column<float>(type: "real", nullable: false),
+                    Change = table.Column<float>(type: "real", nullable: false),
+                    ValueId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_valueHistories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_valueHistories_Values_ValueId",
+                        column: x => x.ValueId,
+                        principalTable: "Values",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 table: "GameStates",
                 columns: new[] { "GameStateId", "AgingEnabled", "LastAgingEvent", "LastTickEpoch", "NationId", "TickInterval", "Year" },
@@ -371,6 +393,11 @@ namespace Icarus.Migrations
                 column: "TokenTypeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_valueHistories_ValueId",
+                table: "valueHistories",
+                column: "ValueId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ValueModifiers_ModifierWrapperId",
                 table: "ValueModifiers",
                 column: "ModifierWrapperId");
@@ -406,10 +433,10 @@ namespace Icarus.Migrations
                 name: "Tokens");
 
             migrationBuilder.DropTable(
-                name: "ValueModifiers");
+                name: "valueHistories");
 
             migrationBuilder.DropTable(
-                name: "Values");
+                name: "ValueModifiers");
 
             migrationBuilder.DropTable(
                 name: "Goods");
@@ -419,6 +446,9 @@ namespace Icarus.Migrations
 
             migrationBuilder.DropTable(
                 name: "TokenTypes");
+
+            migrationBuilder.DropTable(
+                name: "Values");
 
             migrationBuilder.DropTable(
                 name: "Modifiers");
