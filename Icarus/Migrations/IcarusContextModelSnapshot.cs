@@ -53,6 +53,25 @@ namespace Icarus.Migrations
                     b.ToTable("TokenTypes");
                 });
 
+            modelBuilder.Entity("Icarus.Context.Models.DeathTimer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CharacterId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("TimeKilled")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DeathTimer");
+                });
+
             modelBuilder.Entity("Icarus.Context.Models.DebugChannel", b =>
                 {
                     b.Property<decimal>("ChannelId")
@@ -84,6 +103,12 @@ namespace Icarus.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GameStateId"));
 
+                    b.Property<bool>("AgingEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastAgingEvent")
+                        .HasColumnType("datetime2");
+
                     b.Property<long>("LastTickEpoch")
                         .HasColumnType("bigint");
 
@@ -106,6 +131,8 @@ namespace Icarus.Migrations
                         new
                         {
                             GameStateId = 1,
+                            AgingEnabled = false,
+                            LastAgingEvent = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             LastTickEpoch = 0L,
                             TickInterval = 3600000L,
                             Year = 0

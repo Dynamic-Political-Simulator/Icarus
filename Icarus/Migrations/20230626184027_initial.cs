@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -10,6 +11,20 @@ namespace Icarus.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "DeathTimer",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CharacterId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TimeKilled = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DeathTimer", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "DebugChannels",
                 columns: table => new
@@ -144,7 +159,9 @@ namespace Icarus.Migrations
                     TickInterval = table.Column<long>(type: "bigint", nullable: false),
                     LastTickEpoch = table.Column<long>(type: "bigint", nullable: false),
                     Year = table.Column<int>(type: "int", nullable: false),
-                    NationId = table.Column<int>(type: "int", nullable: true)
+                    NationId = table.Column<int>(type: "int", nullable: true),
+                    AgingEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    LastAgingEvent = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -310,8 +327,8 @@ namespace Icarus.Migrations
 
             migrationBuilder.InsertData(
                 table: "GameStates",
-                columns: new[] { "GameStateId", "LastTickEpoch", "NationId", "TickInterval", "Year" },
-                values: new object[] { 1, 0L, null, 3600000L, 0 });
+                columns: new[] { "GameStateId", "AgingEnabled", "LastAgingEvent", "LastTickEpoch", "NationId", "TickInterval", "Year" },
+                values: new object[] { 1, false, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 0L, null, 3600000L, 0 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Characters_DiscordUserId",
@@ -367,6 +384,9 @@ namespace Icarus.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "DeathTimer");
+
             migrationBuilder.DropTable(
                 name: "DebugChannels");
 
