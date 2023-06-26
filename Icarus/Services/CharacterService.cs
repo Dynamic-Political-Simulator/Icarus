@@ -14,6 +14,13 @@ namespace Icarus.Services
 {
     public class CharacterService
     {
+        public async Task<PlayerCharacter> GetCharacter(string characterId)
+        {
+            using var db = new IcarusContext();
+
+            return db.Characters.SingleOrDefault(c => c.CharacterId == characterId);
+        }
+
         public async Task<PlayerCharacter> GetActiveCharacter(string discordId)
         {
             using var db = new IcarusContext();

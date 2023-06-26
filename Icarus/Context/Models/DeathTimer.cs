@@ -14,5 +14,8 @@ namespace Icarus.Context.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string CharacterId { get; set; }
+
+        //Initially null, set when the actual kill command is used and it goes to graveyard.
+        public DateTime? TimeKilled { get; set; }
     }
 }
