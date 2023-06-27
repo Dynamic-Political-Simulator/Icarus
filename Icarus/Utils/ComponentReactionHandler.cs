@@ -29,7 +29,7 @@ namespace Icarus.Utils
             switch (arg.Data.CustomId)
             {
                 case "char-goi-selection":
-                    _ = _characterService.HandleGroupOfInterestSelectMenu(arg);
+                    await _characterService.HandleGroupOfInterestSelectMenu(arg);
                     break;
             }
         }
