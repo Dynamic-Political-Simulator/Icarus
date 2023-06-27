@@ -15,7 +15,7 @@ def GenChart(values, valueGoal):
     plt.legend().remove()
     os.chdir("..")
     if not os.path.exists("./Icarus/Images/"):
-    os.makedirs("./Icarus/Images/")
+        os.makedirs("./Icarus/Images/")
     os.chdir("./Icarus/Images/")
     plt.savefig(f"{os.curdir}chart")
     return f"Saved Chart at {os.curdir}chart!"
