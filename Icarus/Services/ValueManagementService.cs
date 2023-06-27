@@ -447,12 +447,19 @@ namespace Icarus.Services
                 foreach (XmlNode Value in province.SelectSingleNode("Values").ChildNodes)
                 {
                     ValueTemplate vTemplate = ValueTemplates.FirstOrDefault(v => v.TAG == Value.Name);
+                    float basev = 0f;
+                    if (Value.Name == "BCY"|| Value.Name == "I"|| Value.Name == "U"|| Value.Name == "M" ||
+                        Value.Name == "H" || Value.Name == "SEC" || Value.Name == "EDU" || Value.Name == "WEL")
+                    {
+                        basev = float.Parse(Value.InnerText, System.Globalization.CultureInfo.InvariantCulture);
+                    }
+
                     NewProvince.Values.Add(new Value()
                     {
                         Name = vTemplate.Name,
                         Description = vTemplate.Description,
                         TAG = vTemplate.TAG,
-                        BaseBalue = float.Parse(Value.InnerText, System.Globalization.CultureInfo.InvariantCulture),
+                        BaseBalue = basev,
                         CurrentValue = float.Parse(Value.InnerText, System.Globalization.CultureInfo.InvariantCulture)
                     });
                 }
