@@ -29,6 +29,12 @@ namespace Icarus.Services
 		/// </summary>
 		public event TickHandler NextTickEvent;
 
+		/// <summary>
+		/// This event is called whenever a check to fire <c>TickEvent</c> is made.
+		/// This is useful for hooking into the internal TickResolution loop to make periodic checks with no in-game consequence.
+		/// </summary>
+		public event TickHandler TickCheckEvent;
+
 		public TickService()
 		{
 			StartTickCheck();
@@ -68,9 +74,11 @@ namespace Icarus.Services
 			using var db = new IcarusContext();
 			var state = db.GameStates.FirstOrDefault();
 
+			TickCheckEvent?.Invoke();
+
 			if (state.TickInterval >= 0)
 			{
-				long currentEpoch = DateTime.Now.ToFileTimeUtc();
+				long currentEpoch = DateTimeOffset.Now.ToUnixTimeSeconds();
 				// If the difference between current epoch and saved epoch exceeds the interval (defined in ms), a tick has ocurred.
 				if (currentEpoch - state.LastTickEpoch >= state.TickInterval)
 				{
