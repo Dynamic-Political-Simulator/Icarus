@@ -138,7 +138,7 @@ namespace Icarus.Discord.EconCommands
             ComponentBuilder builder = new ComponentBuilder()
                 .WithSelectMenu(sm);
 
-            await responseModal.RespondAsync("Choose Provinces or Global", components: builder.Build());
+            await responseModal.RespondAsync("Choose Provinces or Global", components: builder.Build(), ephemeral: true);
 
 
             Predicate<SocketInteraction> ProvinceSelection = s =>
@@ -267,7 +267,7 @@ namespace Icarus.Discord.EconCommands
             builder = new ComponentBuilder()
                 .WithSelectMenu(sm);
 
-            await responseModal.RespondAsync("Select Type!", components: builder.Build());
+            await responseModal.RespondAsync("Select Type!", components: builder.Build(), ephemeral: true);
 
 
             Predicate<SocketInteraction> TypeSelection = s =>

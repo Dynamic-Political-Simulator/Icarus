@@ -117,6 +117,11 @@ namespace Icarus.Context
                 .HasOne(pc => pc.DiscordUser)
                 .WithMany(du => du.Characters)
                 .HasForeignKey(pc => pc.DiscordUserId);
+
+            modelBuilder.Entity<PlayerCharacter>()
+                .HasOne(pc => pc.GroupOfInterest)
+                .WithMany(goi => goi.Characters)
+                .HasForeignKey(pc => pc.GoIid);
         }
     }
 }
