@@ -56,7 +56,7 @@ namespace Icarus.Discord.EconCommands
                 .WithSelectMenu(sm);
 
 
-            await RespondAsync("Choose Provinces", components: builder.Build());
+            await RespondAsync("Choose Provinces", components: builder.Build(), ephemeral: true);
 
             Predicate<SocketInteraction> ProvinceSelection = s =>
             {
