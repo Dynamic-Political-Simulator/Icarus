@@ -15,7 +15,7 @@ namespace Icarus.Services
         {
             using var db = new IcarusContext();
 
-            var alreadyExists = db.GroupOfInterests.Single(g => g.Name.Equals(name, System.StringComparison.OrdinalIgnoreCase));
+            var alreadyExists = db.GroupOfInterests.Single(g => g.Name.ToLower() == name.ToLower());
 
             if (alreadyExists != null)
             {
