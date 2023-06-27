@@ -29,4 +29,4 @@ def Pong():
 #GenChart(df,10)
 
 
-app.run(port= os.getenv("PORT",5000))
+app.run()

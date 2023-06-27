@@ -231,7 +231,7 @@ namespace Icarus.Discord.EconCommands
             try
             {
                 using HttpClient client = new();
-                var m = await client.GetAsync($"http://127.0.0.1:5000/genChart/{string.Join(",", values)}/{goal}/");
+                var m = await client.GetAsync($"http://localhost:5000/genChart/{string.Join(",", values)}/{goal}/");
                 string t = await m.Content.ReadAsStringAsync();
                 _ = _debugService.PrintToChannels(t);
                 Console.WriteLine(t);
