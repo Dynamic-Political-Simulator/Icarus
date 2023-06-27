@@ -27,7 +27,7 @@ namespace Icarus.Services
 
             using var db = new IcarusContext();
 
-            var tokenTypeExists = db.TokenTypes.FirstOrDefault(tt => tt.TokenTypeName.ToLowerInvariant() == tokenType.ToLowerInvariant());
+            var tokenTypeExists = db.TokenTypes.FirstOrDefault(tt => tt.TokenTypeName.ToLower() == tokenType.ToLower());
 
             if (tokenTypeExists == null)
             {

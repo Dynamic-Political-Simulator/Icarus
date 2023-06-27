@@ -35,15 +35,22 @@ namespace Icarus.Discord.Modules
 
             embedBuilder.WithTitle("Your Tokens");
 
-            var sb = new StringBuilder();
-
-            foreach (var token in tokens)
+            if (tokens.Any())
             {
-                sb.AppendLine(token.TokenTypeId + ": " + token.Amount);
+                var sb = new StringBuilder();
+
+                foreach (var token in tokens)
+                {
+                    sb.AppendLine(token.TokenTypeId + ": " + token.Amount);
+                }
+
+                embedBuilder.WithDescription(sb.ToString());
             }
-
-            embedBuilder.WithDescription(sb.ToString());
-
+            else
+            {
+                embedBuilder.WithDescription("You have no favours.");
+            }
+            
             await RespondAsync(embed: embedBuilder.Build());
         }
 

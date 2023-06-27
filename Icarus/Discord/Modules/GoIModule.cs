@@ -69,13 +69,13 @@ namespace Icarus.Discord.Modules
 
                 var sbLoop = new StringBuilder();
 
-                var charactersWithGoi = result.Where(c => c.GoIid == goi.Id).ToList().OrderBy(c => c.CharacterName);
+                var charactersWithGoi = result.Where(c => c.GoIid == goi.Id && c.YearOfDeath == -1).ToList().OrderBy(c => c.CharacterName);
 
                 if (charactersWithGoi.Any())
                 {
                     foreach (var line in charactersWithGoi)
                     {
-                        sbLoop.AppendLine(line.CharacterName + ": " + line.GroupOfInterest.Name);
+                        sbLoop.AppendLine(line.CharacterName);
                     }
                 }
                 else
