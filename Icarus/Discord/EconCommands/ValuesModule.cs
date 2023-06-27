@@ -16,6 +16,7 @@ using Icarus.Discord.CustomPreconditions;
 using System.IO;
 using Icarus.Utils;
 using System.Net.Http;
+using SixLabors.ImageSharp;
 
 namespace Icarus.Discord.EconCommands
 {
@@ -203,7 +204,11 @@ namespace Icarus.Discord.EconCommands
                 heights.Add(hist.Height);
             }
 
-            await GenChart(heights, valueGoal);
+            MemoryStream m = await GenChart(heights, valueGoal);
+            if (m == null) 
+            {
+                await FollowupAsync("Could not retrieve Chart!");
+            }
 
             try
             {
@@ -214,25 +219,40 @@ namespace Icarus.Discord.EconCommands
                 emb.AddField(Change);
                 //await Context.Channel.SendMessageAsync(embed:emb.Build());
 
-                await FollowupWithFileAsync(@"\publish\Images\.chart.png", embed: emb.Build());
-                //await FollowupWithFileAsync(@"D:\SeasonDPS\Icarus\Icarus\Images\.chart.png", embed: emb.Build());
+                //await FollowupWithFileAsync(@"\publish\Images\.chart.png", embed: emb.Build());
+                FileAttachment f = new FileAttachment(m, "Chart.png");
+                await FollowupWithFileAsync(f, embed: emb.Build());
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
+                await FollowupAsync(ex.Message);
             }
             
         }
 
-        public async Task GenChart(List<float> values, float goal)
+        public async Task<MemoryStream> GenChart(List<float> values, float goal)
         {
             var icarusConfig = ConfigFactory.GetConfig();
 
             try
             {
                 using HttpClient client = new();
-                var m = await client.GetAsync($"http://127.0.0.1:5000/genChart/{string.Join(",", values)}/{goal}/");
+                var m = await client.GetAsync($"http://localhost:5000/genChart/{string.Join(",", values)}/{goal}/");
                 string t = await m.Content.ReadAsStringAsync();
+                ChartDTO? chart = JsonSerializer.Deserialize<ChartDTO>(t);
+                byte[] bytes = Convert.FromBase64String(chart.Base64String);
+
+                SixLabors.ImageSharp.Image image;
+
+                return new MemoryStream(bytes);
+
+                using (MemoryStream ms = new MemoryStream(bytes))
+                {
+                    image = SixLabors.ImageSharp.Image.Load(ms);
+                }
+                string path = @".\Image\Chart.png";
+                image.SaveAsPng(path);
                 _ = _debugService.PrintToChannels(t);
                 Console.WriteLine(t);
 
@@ -242,6 +262,7 @@ namespace Icarus.Discord.EconCommands
             {
                 _ = _debugService.PrintToChannels(ex.Message);
                 Console.WriteLine(ex.ToString());
+                return null;
             }
 
             /*const string cmd = "bash";
@@ -299,5 +320,10 @@ namespace Icarus.Discord.EconCommands
                 _ = _debugService.PrintToChannels(ex.Message);
             }*/
         }
+    }
+
+    public class ChartDTO
+    {
+        public string Base64String { get; set; }
     }
 }

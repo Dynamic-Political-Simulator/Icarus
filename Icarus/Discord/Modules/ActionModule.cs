@@ -29,21 +29,28 @@ namespace Icarus.Discord.Modules
         [RequireProfile]
         public async Task ListMyTokens()
         {
-            var tokens = _actionService.GetAllTokensForProfileActiveCharacter(Context.User.Id.ToString());
+            var tokens = await _actionService.GetAllTokensForProfileActiveCharacter(Context.User.Id.ToString());
 
             var embedBuilder = new EmbedBuilder();
 
-            embedBuilder.WithTitle("Your Tokens");
+            embedBuilder.WithTitle("Your Favours");
 
-            var sb = new StringBuilder();
-
-            foreach (var token in tokens)
+            if (tokens.Any())
             {
-                sb.AppendLine(token.TokenTypeId + ": " + token.Amount);
+                var sb = new StringBuilder();
+
+                foreach (var token in tokens)
+                {
+                    sb.AppendLine(token.TokenTypeId + ": " + token.Amount);
+                }
+
+                embedBuilder.WithDescription(sb.ToString());
             }
-
-            embedBuilder.WithDescription(sb.ToString());
-
+            else
+            {
+                embedBuilder.WithDescription("You have no favours.");
+            }
+            
             await RespondAsync(embed: embedBuilder.Build());
         }
 

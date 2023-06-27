@@ -12,46 +12,48 @@
           <I>23</I>
           <U>30</U>
           <M>12</M>
-          <AGR>0</AGR>
-          <IND>0</IND>
-          <ES>0</ES>
-          <T>0</T>
-          <W>0</W>
+          <AGR>28</AGR>
+          <IND>43</IND>
+          <ES>35</ES>
+          <T>65</T>
+          <W>50</W>
           <H>30</H>
           <SEC>24</SEC>
           <EDU>22</EDU>
-          <LIT>0</LIT>
+          <LIT>22</LIT>
           <WEL>15.5</WEL>
           <DES>0</DES>
         </Values>
         <Modifiers>
           <Modifier>
-            <Name>Cerato</Name>
-            <Description>The capital city big and beautifull.</Description>
+            <Name>Protected Harbors</Name>
+            <Description>The large, protected harbors of Cerato provide ideal protection from storms. This has led many shipbuilders to base their operations in them.</Description>
             <Type>Permanent</Type>
             <Duration>0</Duration>
             <WealthMod>0</WealthMod>
             <Values>
               <Value>
-                <Tag>I</Tag>
+                <Tag>IND</Tag>
                 <Modifier>5</Modifier>
                 <Decay>0</Decay>
               </Value>
               <Value>
-                <Tag>M</Tag>
-                <Modifier>5</Modifier>
-                <Decay>0</Decay>
-              </Value>
-              <Value>
-                <Tag>U</Tag>
+                <Tag>T</Tag>
                 <Modifier>10</Modifier>
+                <Decay>0</Decay>
+              </Value>
+              <Value>
+                <Tag>SEC</Tag>
+                <Modifier>5</Modifier>
                 <Decay>0</Decay>
               </Value>
             </Values>
           </Modifier>
         </Modifiers>
         <Goods>
-          <Good>CLO</Good>
+          <Good>TOO</Good>
+          <Good>MAC</Good>
+          <Good>SHI</Good>
         </Goods>
       </Province>
       <Province>
@@ -62,23 +64,43 @@
           <I>17</I>
           <U>16</U>
           <M>10</M>
-          <AGR>0</AGR>
-          <IND>0</IND>
-          <ES>0</ES>
-          <T>0</T>
-          <W>0</W>
+          <AGR>12</AGR>
+          <IND>18</IND>
+          <ES>15</ES>
+          <T>16</T>
+          <W>15</W>
           <H>20</H>
           <SEC>20</SEC>
           <EDU>10</EDU>
-          <LIT>0</LIT>
+          <LIT>10</LIT>
           <WEL>13</WEL>
           <DES>0</DES>
         </Values>
         <Modifiers>
+          <Modifier>
+            <Name>Extensive Swampland</Name>
+            <Description>Danza Cipres has been full of swamps for a very, very, long time. Recently swamp-clearing has been accelerating, but there's still a long way to go.</Description>
+            <Type>Permanent</Type>
+            <Duration>0</Duration>
+            <WealthMod>0</WealthMod>
+            <Values>
+              <Value>
+                <Tag>AGR</Tag>
+                <Modifier>-5</Modifier>
+                <Decay>0</Decay>
+              </Value>
+              <Value>
+                <Tag>IND</Tag>
+                <Modifier>5</Modifier>
+                <Decay>0</Decay>
+              </Value>
+            </Values>
+          </Modifier>
         </Modifiers>
         <Goods>
           <Good>FE</Good>
           <Good>C</Good>
+          <Good>WOOD</Good>
         </Goods>
       </Province>
       <Province>
@@ -89,21 +111,43 @@
           <I>15</I>
           <U>18</U>
           <M>7</M>
-          <AGR>0</AGR>
-          <IND>0</IND>
-          <ES>0</ES>
-          <T>0</T>
-          <W>0</W>
+          <AGR>14</AGR>
+          <IND>14</IND>
+          <ES>14</ES>
+          <T>18</T>
+          <W>16</W>
           <H>23</H>
           <SEC>23</SEC>
           <EDU>19</EDU>
-          <LIT>0</LIT>
+          <LIT>19</LIT>
           <WEL>11</WEL>
           <DES>0</DES>
         </Values>
         <Modifiers>
+          <Modifier>
+            <Name>Gemstone Mines</Name>
+            <Description>The central mountains of Sodara, controlled by the Xlotl family, have contained large gemstone mines for generations. They produce much of the island's wealth and financial base for their banking system.</Description>
+            <Type>Permanent</Type>
+            <Duration>0</Duration>
+            <WealthMod>0</WealthMod>
+            <Values>
+              <Value>
+                <Tag>IND</Tag>
+                <Modifier>5</Modifier>
+                <Decay>0</Decay>
+              </Value>
+              <Value>
+                <Tag>T</Tag>
+                <Modifier>5</Modifier>
+                <Decay>0</Decay>
+              </Value>
+            </Values>
+          </Modifier>
         </Modifiers>
         <Goods>
+          <Good>MAF</Good>
+          <Good>FAB</Good>
+          <Good>TOO</Good>
         </Goods>
       </Province>
       <Province>
@@ -114,21 +158,38 @@
           <I>12</I>
           <U>11</U>
           <M>5</M>
-          <AGR>0</AGR>
-          <IND>0</IND>
-          <ES>0</ES>
-          <T>0</T>
-          <W>0</W>
+          <AGR>8</AGR>
+          <IND>11</IND>
+          <ES>10</ES>
+          <T>11</T>
+          <W>10</W>
           <H>24</H>
           <SEC>30</SEC>
           <EDU>16</EDU>
-          <LIT>0</LIT>
+          <LIT>16</LIT>
           <WEL>14</WEL>
           <DES>0</DES>
         </Values>
         <Modifiers>
+          <Modifier>
+            <Name>Grand Cannon Foundry</Name>
+            <Description>Built via military contract, the Grand Cannon Foundry is the central cannon manufactory for the Armed Forces. It takes up a city quarter.</Description>
+            <Type>Permanent</Type>
+            <Duration>0</Duration>
+            <WealthMod>0</WealthMod>
+            <Values>
+              <Value>
+                <Tag>IND</Tag>
+                <Modifier>10</Modifier>
+                <Decay>0</Decay>
+              </Value>
+            </Values>
+          </Modifier>
         </Modifiers>
         <Goods>
+          <Good>WINE</Good>
+          <Good>SHI</Good>
+          <Good>WEP</Good>
         </Goods>
       </Province>
       <Province>
@@ -139,21 +200,38 @@
           <I>14</I>
           <U>26</U>
           <M>3</M>
-          <AGR>0</AGR>
-          <IND>0</IND>
-          <ES>0</ES>
-          <T>0</T>
-          <W>0</W>
+          <AGR>14</AGR>
+          <IND>14</IND>
+          <ES>14</ES>
+          <T>26</T>
+          <W>20</W>
           <H>27</H>
           <SEC>22</SEC>
           <EDU>13</EDU>
-          <LIT>0</LIT>
+          <LIT>13</LIT>
           <WEL>13</WEL>
           <DES>0</DES>
         </Values>
         <Modifiers>
+          <Modifier>
+            <Name>Ancient Waterways</Name>
+            <Description>Harrane has been the cradle of Sarcostan civilization and has had agriculture for the longest. this has left a series of canals and irrigation works for modern Sarcostans to use.</Description>
+            <Type>Permanent</Type>
+            <Duration>0</Duration>
+            <WealthMod>0</WealthMod>
+            <Values>
+              <Value>
+                <Tag>BCY</Tag>
+                <Modifier>15</Modifier>
+                <Decay>0</Decay>
+              </Value>
+            </Values>
+          </Modifier>
         </Modifiers>
         <Goods>
+          <Good>G</Good>
+          <Good>CG</Good>
+          <Good>CLO</Good>
         </Goods>
       </Province>
       <Province>
@@ -164,21 +242,42 @@
           <I>6</I>
           <U>5</U>
           <M>1</M>
-          <AGR>0</AGR>
-          <IND>0</IND>
-          <ES>0</ES>
-          <T>0</T>
-          <W>0</W>
+          <AGR>6</AGR>
+          <IND>6</IND>
+          <ES>6</ES>
+          <T>5</T>
+          <W>5</W>
           <H>23</H>
           <SEC>19</SEC>
           <EDU>15</EDU>
-          <LIT>0</LIT>
+          <LIT>15</LIT>
           <WEL>12</WEL>
           <DES>0</DES>
         </Values>
         <Modifiers>
+          <Modifier>
+            <Name>Fortified Monasteries</Name>
+            <Description>Proximity to pirates has led the monks of Macrea to build large, fortified religious centers where civilians can flee in case of attack.</Description>
+            <Type>Permanent</Type>
+            <Duration>0</Duration>
+            <WealthMod>0</WealthMod>
+            <Values>
+              <Value>
+                <Tag>SEC</Tag>
+                <Modifier>5</Modifier>
+                <Decay>0</Decay>
+              </Value>
+              <Value>
+                <Tag>T</Tag>
+                <Modifier>5</Modifier>
+                <Decay>0</Decay>
+              </Value>
+            </Values>
+          </Modifier>
         </Modifiers>
         <Goods>
+          <Good>G</Good>
+          <Good>MAF</Good>
         </Goods>
       </Province>
       <Province>
@@ -189,21 +288,42 @@
           <I>3</I>
           <U>6</U>
           <M>0</M>
-          <AGR>0</AGR>
-          <IND>0</IND>
-          <ES>0</ES>
-          <T>0</T>
-          <W>0</W>
+          <AGR>6</AGR>
+          <IND>4</IND>
+          <ES>5</ES>
+          <T>6</T>
+          <W>5</W>
           <H>17</H>
           <SEC>8</SEC>
           <EDU>8</EDU>
-          <LIT>0</LIT>
+          <LIT>8</LIT>
           <WEL>13</WEL>
           <DES>0</DES>
         </Values>
         <Modifiers>
+          <Modifier>
+            <Name>Ensenada, Pirate Hideout</Name>
+            <Description>Yaaarrr!</Description>
+            <Type>Permanent</Type>
+            <Duration>0</Duration>
+            <WealthMod>0.1</WealthMod>
+            <Values>
+              <Value>
+                <Tag>SEC</Tag>
+                <Modifier>-25</Modifier>
+                <Decay>0</Decay>
+              </Value>
+              <Value>
+                <Tag>T</Tag>
+                <Modifier>5</Modifier>
+                <Decay>0</Decay>
+              </Value>
+            </Values>
+          </Modifier>
         </Modifiers>
         <Goods>
+          <Good>C</Good>
+          <Good>SHI</Good>
         </Goods>
       </Province>
     </Provinces>
@@ -364,7 +484,7 @@
     </Good>
     <Good>
       <Name>Fabrics</Name>
-      <TAG>G</TAG>
+      <TAG>FAB</TAG>
       <Description>Whether its Cotton or Wool it keeps you warm.</Description>
       <WealthMod>0.75</WealthMod>
       <Values>

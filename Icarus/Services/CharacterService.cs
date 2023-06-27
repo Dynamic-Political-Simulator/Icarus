@@ -149,7 +149,10 @@ namespace Icarus.Services
 
             using var db = new IcarusContext();
 
-            character.GoIid = int.Parse(selection);
+            var newGoi = db.GroupOfInterests.Single(g => g.Id == int.Parse(selection));
+
+            character.GoIid = newGoi.Id;
+            character.GroupOfInterest = newGoi;
 
             db.Update(character);
             await db.SaveChangesAsync();

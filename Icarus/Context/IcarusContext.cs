@@ -104,10 +104,9 @@ namespace Icarus.Context
                 .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<CharacterToken>()
-                .HasKey(ct => new { ct.PlayerCharacterId });
-
-            modelBuilder.Entity<CharacterToken>()
-                .HasOne(ct => ct.TokenType);
+                .HasOne(ct => ct.TokenType)
+                .WithMany()
+                .HasForeignKey(ct => ct.TokenTypeId);
 
             modelBuilder.Entity<CharacterToken>()
                 .HasOne(ct => ct.Character)
@@ -123,6 +122,8 @@ namespace Icarus.Context
                 .HasOne(pc => pc.GroupOfInterest)
                 .WithMany(goi => goi.Characters)
                 .HasForeignKey(pc => pc.GoIid);
+
+            modelBuilder.Entity<CharacterToken>().HasKey(ct => new { ct.PlayerCharacterId, ct.TokenTypeId });
         }
     }
 }

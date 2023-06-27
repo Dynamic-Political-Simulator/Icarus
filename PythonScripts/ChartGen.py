@@ -1,9 +1,11 @@
 from pandas import DataFrame, Series
 import matplotlib.pyplot as plt
 from numpy.random import randn
-from flask import Flask
+from flask import Flask, jsonify
 import os
 import sys
+import base64
+import json
 
 app = Flask(__name__)
 
@@ -11,12 +13,21 @@ app = Flask(__name__)
 def GenChart(values, valueGoal):
     df = DataFrame([float(i) for i in values.split(',')])
     df.plot()
-    plt.axhline(y = valueGoal, color = 'b', label = 'Goal')
+    plt.axhline(y = float(valueGoal), color = 'b', label = 'Goal')
     plt.legend().remove()
-    os.chdir("..")
-    os.chdir("./Icarus/Images/")
-    plt.savefig(f"{os.curdir}chart")
-    return f"Saved Chart at {os.curdir}chart!"
+
+    #os.chdir("..")
+    #os.chdir("./Icarus/Images/")
+    #plt.savefig(f"{os.curdir}chart")
+    import io
+    my_stringIObytes = io.BytesIO()
+    plt.savefig(my_stringIObytes, format='jpg')
+    my_stringIObytes.seek(0)
+    my_base64_jpgData = base64.b64encode(my_stringIObytes.read()).decode()
+    m = {
+        "Base64String" : my_base64_jpgData
+    }
+    return m
 
 @app.route("/ping/")
 def Pong():
@@ -29,4 +40,4 @@ def Pong():
 #GenChart(df,10)
 
 
-app.run(port= os.getenv("PORT",5000))
+app.run()

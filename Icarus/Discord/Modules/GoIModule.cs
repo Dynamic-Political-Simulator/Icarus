@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
+using Icarus.Context;
 using Icarus.Discord.CustomPreconditions;
 using Icarus.Services;
 using System.Linq;
@@ -19,6 +20,13 @@ namespace Icarus.Discord.Modules
             _goiService = goiService;
         }
 
+        [SlashCommand("create-goi", "Adds a new GoI to the database.")]
+        [RequireAdmin]
+        public async Task AddGoI(string name)
+        {
+            await RespondAsync(await _goiService.AddGoI(name), ephemeral: true);
+        }
+
         [SlashCommand("gois", "Lists all gois.")]
         [RequireAdmin]
         public async Task ListGroups()
@@ -34,14 +42,14 @@ namespace Icarus.Discord.Modules
 
             var resultString = sb.ToString();
 
-            if (resultString == "" || resultString == null) resultString = "No GoI's in database.";
+            if (gois.Count == 0) resultString = "No GoI's in database.";
 
             var eb = new EmbedBuilder();
 
             eb.WithTitle("Groups of Interest");
             eb.WithDescription(resultString);
 
-            await ReplyAsync(embed: eb.Build());
+            await RespondAsync(embed: eb.Build(), ephemeral: false);
         }
 
         [SlashCommand("character-gois", "Lists all characters grouped by assigned gois.")]
@@ -61,12 +69,20 @@ namespace Icarus.Discord.Modules
 
                 var sbLoop = new StringBuilder();
 
-                var charactersWithGoi = result.Where(c => c.GoIid == goi.Id).ToList().OrderBy(c => c.CharacterName);
+                var charactersWithGoi = result.Where(c => c.GoIid == goi.Id && c.YearOfDeath == -1).ToList().OrderBy(c => c.CharacterName);
 
-                foreach(var line in charactersWithGoi)
+                if (charactersWithGoi.Any())
                 {
-                    sbLoop.AppendLine(line.CharacterName + ": " + line.GroupOfInterest.Name);
+                    foreach (var line in charactersWithGoi)
+                    {
+                        sbLoop.AppendLine(line.CharacterName);
+                    }
                 }
+                else
+                {
+                    sbLoop.AppendLine("No characters with this Group of Interest.");
+                }
+                
 
                 newFieldLoop.WithValue(sbLoop.ToString());
 
@@ -80,16 +96,23 @@ namespace Icarus.Discord.Modules
 
             var charactersWithNoGoi = result.Where(c => c.GoIid == null).ToList().OrderBy(c => c.CharacterName);
 
-            foreach (var line in charactersWithNoGoi)
+            if (charactersWithNoGoi.Any())
             {
-                sb.AppendLine(line.CharacterName);
+                foreach (var line in charactersWithNoGoi)
+                {
+                    sb.AppendLine(line.CharacterName);
+                }
+            }
+            else
+            {
+                sb.AppendLine("No characters without a Group of Interest.");
             }
 
             newField.WithValue(sb.ToString());
 
             eb.AddField(newField);
 
-            await RespondAsync(embed: eb.Build());
+            await RespondAsync(embed: eb.Build(), ephemeral: false);
         }
     }
 }

@@ -4,6 +4,7 @@ using Icarus.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Icarus.Migrations
 {
     [DbContext(typeof(IcarusContext))]
-    partial class IcarusContextModelSnapshot : ModelSnapshot
+    [Migration("20230627195043_token-composite-pk")]
+    partial class tokencompositepk
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -449,31 +452,6 @@ namespace Icarus.Migrations
                     b.HasKey("ValueRelationShipId");
 
                     b.ToTable("Relationships");
-                });
-
-            modelBuilder.Entity("Icarus.Context.Models.VoteMessage", b =>
-                {
-                    b.Property<decimal>("MessageId")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<decimal>("ChannelId")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<decimal>("CreatorId")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<long>("EndTime")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("TimeSpan")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.HasKey("MessageId");
-
-                    b.ToTable("VoteMessages");
                 });
 
             modelBuilder.Entity("Icarus.Context.Models.CharacterToken", b =>
