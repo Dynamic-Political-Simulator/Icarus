@@ -204,7 +204,11 @@ namespace Icarus.Discord.EconCommands
                 heights.Add(hist.Height);
             }
 
-            await GenChart(heights, valueGoal);
+            MemoryStream m = await GenChart(heights, valueGoal);
+            if (m == null) 
+            {
+                await FollowupAsync("Could not retrieve Chart!");
+            }
 
             try
             {
@@ -216,7 +220,8 @@ namespace Icarus.Discord.EconCommands
                 //await Context.Channel.SendMessageAsync(embed:emb.Build());
 
                 //await FollowupWithFileAsync(@"\publish\Images\.chart.png", embed: emb.Build());
-                await FollowupWithFileAsync(@".\Image\Chart.png", embed: emb.Build());
+                FileAttachment f = new FileAttachment(m, "Chart.png");
+                await FollowupWithFileAsync(f, embed: emb.Build());
             }
             catch (Exception ex)
             {
@@ -226,7 +231,7 @@ namespace Icarus.Discord.EconCommands
             
         }
 
-        public async Task GenChart(List<float> values, float goal)
+        public async Task<MemoryStream> GenChart(List<float> values, float goal)
         {
             var icarusConfig = ConfigFactory.GetConfig();
 
@@ -239,6 +244,8 @@ namespace Icarus.Discord.EconCommands
                 byte[] bytes = Convert.FromBase64String(chart.Base64String);
 
                 SixLabors.ImageSharp.Image image;
+
+                return new MemoryStream(bytes);
 
                 using (MemoryStream ms = new MemoryStream(bytes))
                 {
@@ -255,6 +262,7 @@ namespace Icarus.Discord.EconCommands
             {
                 _ = _debugService.PrintToChannels(ex.Message);
                 Console.WriteLine(ex.ToString());
+                return null;
             }
 
             /*const string cmd = "bash";
