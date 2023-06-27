@@ -81,7 +81,8 @@ That being said, all PG's also must fall within an empowered Group of Interest (
                 if (character.GoIid != null)
                 {
                     embedBuilder.AddField("Group of Interest", character.GroupOfInterest.Name);
-                }
+				}
+				embedBuilder.AddField("Age", _characterService.GetCharacterAge(character.CharacterId));
 
                 await RespondAsync(embed: embedBuilder.Build());
             }

@@ -34,7 +34,22 @@ namespace Icarus.Services
             }
 
             return active;
-        }
+		}
+
+		public async Task<int> GetCharacterAge(string characterId)
+		{
+			PlayerCharacter character = await GetCharacter(characterId);
+
+			if (character.YearOfDeath > 0) {
+				return character.YearOfDeath - character.YearOfBirth;
+			} else {
+				using var db = new IcarusContext();
+
+				GameState state = db.GameStates.FirstOrDefault();
+				if (state == null) return -1; // Something went awry
+				return state.Year - character.YearOfBirth;
+			}
+		}
 
         public async Task CreateNewCharacter(string discordId, string characterName, int startingAge)
         {
