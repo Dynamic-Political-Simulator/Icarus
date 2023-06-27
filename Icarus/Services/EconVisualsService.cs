@@ -163,6 +163,7 @@ namespace Icarus.Services
             {
                 modTable[row][0] = mod.Name;
                 modTable[row][1] = mod.WealthMod.ToString();
+                row++;
             }
 
             return modTable;
