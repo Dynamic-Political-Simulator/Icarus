@@ -70,7 +70,7 @@ namespace Icarus.Services
         {
             using var db = new IcarusContext();
 
-            var activeCharacterTokens = db.Tokens.Include(ac => ac.TokenTypeId).Where(ac => ac.PlayerCharacterId == discordId);
+            var activeCharacterTokens = db.Tokens.Include(ac => ac.TokenType).Where(ac => ac.PlayerCharacterId == discordId);
 
             if (activeCharacterTokens.Count() == 0)
             {

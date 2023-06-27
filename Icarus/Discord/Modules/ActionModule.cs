@@ -33,7 +33,7 @@ namespace Icarus.Discord.Modules
 
             var embedBuilder = new EmbedBuilder();
 
-            embedBuilder.WithTitle("Your Tokens");
+            embedBuilder.WithTitle("Your Favours");
 
             if (tokens.Any())
             {
