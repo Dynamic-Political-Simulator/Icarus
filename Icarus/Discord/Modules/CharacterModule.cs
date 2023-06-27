@@ -76,10 +76,6 @@ namespace Icarus.Discord.Modules
                 {
                     embedBuilder.AddField("Career", character.Career);
                 }
-                if (character.GoIid != null)
-                {
-                    embedBuilder.AddField("Assembly Representation", character.GroupOfInterest.Name);
-                }
                 if (character.PrivilegedGroup != null)
                 {
                     embedBuilder.AddField("Patronage Group", character.PrivilegedGroup);
