@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using Icarus.Discord.CustomPreconditions;
 using System.IO;
 using Icarus.Utils;
+using System.Net.Http;
 
 namespace Icarus.Discord.EconCommands
 {
@@ -202,7 +203,7 @@ namespace Icarus.Discord.EconCommands
                 heights.Add(hist.Height);
             }
 
-            GenChart(heights, valueGoal);
+            await GenChart(heights, valueGoal);
 
             try
             {
@@ -212,8 +213,9 @@ namespace Icarus.Discord.EconCommands
                 emb.AddField(Goal);
                 emb.AddField(Change);
                 //await Context.Channel.SendMessageAsync(embed:emb.Build());
-                
-                await FollowupWithFileAsync(@"\publish\Images\.chart.png", embed: emb.Build());
+
+                //await FollowupWithFileAsync(@"\publish\Images\.chart.png", embed: emb.Build());
+                await FollowupWithFileAsync(@"D:\SeasonDPS\Icarus\Icarus\Images\.chart.png", embed: emb.Build());
             }
             catch (Exception ex)
             {
@@ -222,11 +224,27 @@ namespace Icarus.Discord.EconCommands
             
         }
 
-        public void GenChart(List<float> values, float goal)
+        public async Task GenChart(List<float> values, float goal)
         {
             var icarusConfig = ConfigFactory.GetConfig();
 
-            const string cmd = "bash";
+            try
+            {
+                using HttpClient client = new();
+                var m = await client.GetAsync($"http://127.0.0.1:5000/genChart/{string.Join(",", values)}/{goal}/");
+                string t = await m.Content.ReadAsStringAsync();
+                _ = _debugService.PrintToChannels(t);
+                Console.WriteLine(t);
+
+
+            }
+            catch (Exception ex)
+            {
+                _ = _debugService.PrintToChannels(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+
+            /*const string cmd = "bash";
             string args = $"";
             const string activateVenv = "source .python/bin/activate";
             var commandsToExecute = new List<string>(){
@@ -279,7 +297,7 @@ namespace Icarus.Discord.EconCommands
             {
                 Console.WriteLine(ex.ToString());
                 _ = _debugService.PrintToChannels(ex.Message);
-            }
+            }*/
         }
     }
 }

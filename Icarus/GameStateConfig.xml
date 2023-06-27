@@ -211,77 +211,77 @@
   <ValueTemplates>
     <ValueTemplate>
       <Name>Base Crop Yield</Name>
-      <Description>Base Crop Yield represents the fresh water, soil fertility, etc. for a basis of how rich a place is in crop</Description>
+      <Description>BCY represents the fresh water, soil fertility, etc. for a basis of how rich a place is in crop</Description>
       <Tag>BCY</Tag>
     </ValueTemplate>
     <ValueTemplate>
       <Name>Infrastructure</Name>
-      <Description>Infrastructure is the amount and quality and modernity of roads, communications and services around these.</Description>
+      <Description>I is the amount and quality and modernity of roads, communications, and services around these.</Description>
       <Tag>I</Tag>
     </ValueTemplate>
     <ValueTemplate>
       <Name>Urbanisation</Name>
-      <Description>The size and population of the regions cities.</Description>
+      <Description>U The size and population of the regions cities.</Description>
       <Tag>U</Tag>
     </ValueTemplate>
     <ValueTemplate>
       <Name>Mechanisation</Name>
-      <Description></Description>
+      <Description>M is the automatisation of labour, both rural and urban. From powertools to tractors, all would fall under here.</Description>
       <Tag>M</Tag>
     </ValueTemplate>
     <ValueTemplate>
       <Name>Agricultural Output</Name>
-      <Description></Description>
+      <Description>AGR is simply the economic strength coming from the fields.</Description>
       <Tag>AGR</Tag>
     </ValueTemplate>
     <ValueTemplate>
       <Name>Industrial Output</Name>
-      <Description></Description>
+      <Description>IND is the economic strength from factories and minor industries.</Description>
       <Tag>IND</Tag>
     </ValueTemplate>
     <ValueTemplate>
       <Name>Economic Strength</Name>
-      <Description></Description>
+      <Description>ES All goods and services provided in a region.</Description>
       <Tag>ES</Tag>
     </ValueTemplate>
     <ValueTemplate>
       <Name>Trade</Name>
-      <Description></Description>
+      <Description>T represents how trading allows for a better profit in the sale of goods and services.</Description>
       <Tag>T</Tag>
     </ValueTemplate>
     <ValueTemplate>
       <Name>Wealth</Name>
-      <Description></Description>
+      <Description>W is the ultimate value of the economic side of the SoL values. How much does each pop on average have?</Description>
       <Tag>W</Tag>
     </ValueTemplate>
     <ValueTemplate>
       <Name>Health</Name>
-      <Description></Description>
+      <Description>H is the general wellbeing and health of the populace. From local hygiene, access to hospitals, cleanliness of water and so on.</Description>
       <Tag>H</Tag>
     </ValueTemplate>
     <ValueTemplate>
       <Name>Security</Name>
-      <Description></Description>
+      <Description>SEC represents generally understood legal and economic security such as lack of crime, general feeling of safety, security of investments, etc.</Description>
       <Tag>SEC</Tag>
     </ValueTemplate>
     <ValueTemplate>
       <Name>Education Access</Name>
-      <Description></Description>
+      <Description>EDU represents the base access to education which all pops have, irrespective of their wealth.</Description>
       <Tag>EDU</Tag>
     </ValueTemplate>
     <ValueTemplate>
       <Name>Literacy</Name>
-      <Description></Description>
+      <Description>LIT represents the amount of people able to read within a province.</Description>
       <Tag>LIT</Tag>
     </ValueTemplate>
     <ValueTemplate>
       <Name>Welfare</Name>
-      <Description></Description>
+      <Description>WEL represents the ability of an individual to not worry about certain basic necessities such as a social safety net and housing.</Description>
       <Tag>WEL</Tag>
     </ValueTemplate>
     <ValueTemplate>
       <Name>Destitution</Name>
-      <Description></Description>
+      <Description>DES represents the amount of Urban and Industrial decay in a region</Description>
       <Tag>DES</Tag>
     </ValueTemplate>
   </ValueTemplates>

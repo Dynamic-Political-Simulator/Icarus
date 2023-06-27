@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{447E7FF4-D62B-43C8-A024-2F65547B7AD4}"
 	ProjectSection(SolutionItems) = preProject
 		PythonScripts\ChartGen.py = PythonScripts\ChartGen.py
+		PythonScripts\requirements.txt = PythonScripts\requirements.txt
 	EndProjectSection
 EndProject
 Global
