@@ -26,7 +26,7 @@ namespace Icarus.Services
         {
             using var db = new IcarusContext();
 
-            var active = await db.Characters.Include(c => c.GroupOfInterest).Include(c => c.Tokens).ThenInclude(c => c.TokenType).SingleOrDefaultAsync(c => c.DiscordUserId == discordId && c.YearOfDeath == -1);
+            var active = await db.Characters.Include(c => c.GroupOfInterest).SingleOrDefaultAsync(c => c.DiscordUserId == discordId && c.YearOfDeath == -1);
 
             if (active == null)
             {
