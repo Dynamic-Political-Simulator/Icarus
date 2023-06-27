@@ -16,6 +16,7 @@ using Icarus.Discord.CustomPreconditions;
 using System.IO;
 using Icarus.Utils;
 using System.Net.Http;
+using SixLabors.ImageSharp;
 
 namespace Icarus.Discord.EconCommands
 {
@@ -215,11 +216,12 @@ namespace Icarus.Discord.EconCommands
                 //await Context.Channel.SendMessageAsync(embed:emb.Build());
 
                 //await FollowupWithFileAsync(@"\publish\Images\.chart.png", embed: emb.Build());
-                await FollowupWithFileAsync(@"D:\SeasonDPS\Icarus\Icarus\Images\.chart.png", embed: emb.Build());
+                await FollowupWithFileAsync(@".\Image\Chart.png", embed: emb.Build());
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
+                await FollowupAsync(ex.Message);
             }
             
         }
@@ -233,6 +235,17 @@ namespace Icarus.Discord.EconCommands
                 using HttpClient client = new();
                 var m = await client.GetAsync($"http://127.0.0.1:5000/genChart/{string.Join(",", values)}/{goal}/");
                 string t = await m.Content.ReadAsStringAsync();
+                ChartDTO? chart = JsonSerializer.Deserialize<ChartDTO>(t);
+                byte[] bytes = Convert.FromBase64String(chart.Base64String);
+
+                SixLabors.ImageSharp.Image image;
+
+                using (MemoryStream ms = new MemoryStream(bytes))
+                {
+                    image = SixLabors.ImageSharp.Image.Load(ms);
+                }
+                string path = @".\Image\Chart.png";
+                image.SaveAsPng(path);
                 _ = _debugService.PrintToChannels(t);
                 Console.WriteLine(t);
 
@@ -299,5 +312,10 @@ namespace Icarus.Discord.EconCommands
                 _ = _debugService.PrintToChannels(ex.Message);
             }*/
         }
+    }
+
+    public class ChartDTO
+    {
+        public string Base64String { get; set; }
     }
 }
