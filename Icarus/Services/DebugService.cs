@@ -52,7 +52,7 @@ namespace Icarus.Services
                 try
                 {
                     var discordTextChannel = (SocketTextChannel)await _client.GetChannelAsync(channel.ChannelId);
-                    _ = discordTextChannel.SendMessageAsync(message);
+                    _ = discordTextChannel.SendMessageAsync($"[{DateTime.UtcNow}] {message}");
                 }
                 catch
                 {
@@ -61,7 +61,7 @@ namespace Icarus.Services
             }
 
             db.DebugChannels.RemoveRange(errorList);
-            db.SaveChangesAsync();
+            await db.SaveChangesAsync();
         }
     }
 }

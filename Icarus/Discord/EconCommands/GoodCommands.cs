@@ -23,13 +23,15 @@ namespace Icarus.Discord.EconCommands
         private readonly ValueManagementService _valueManagementService;
         private readonly DiscordInteractionHelpers _interactionHelpers;
         private readonly InteractionService _interactionService;
+        private readonly DebugService _debugService;
 
-        public GoodCommands(DiscordSocketClient client, ValueManagementService valueManagementService, DiscordInteractionHelpers interactionHelpers)
+        public GoodCommands(DiscordSocketClient client, ValueManagementService valueManagementService, DiscordInteractionHelpers interactionHelpers, DebugService debugService)
         {
             _client = client;
             _valueManagementService = valueManagementService;
             _interactionHelpers = interactionHelpers;
             _interactionService = new InteractionService(_client.Rest);
+            _debugService = debugService;
 
             //_client.ModalSubmitted += ModifierHeightHandling;
         }
@@ -101,7 +103,7 @@ namespace Icarus.Discord.EconCommands
 
             if (response == null) 
             {
-                Console.WriteLine("Responds was null");
+                _ = _debugService.PrintToChannels("Response was null");
                 return;
             }
 
