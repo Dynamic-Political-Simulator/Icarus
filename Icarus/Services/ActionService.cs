@@ -79,14 +79,7 @@ namespace Icarus.Services
 
             var activeCharacter = await _characterService.GetActiveCharacter(discordId);
 
-            var activeCharacterTokens = db.Tokens.Include(ac => ac.TokenType).Where(ac => ac.PlayerCharacterId == activeCharacter.CharacterId);
-
-            if (activeCharacterTokens.Count() == 0)
-            {
-                return null;
-            }
-
-            return activeCharacterTokens.ToList();
+            return activeCharacter.Tokens;
         }
 
         public List<string> GetTokenTypes()
