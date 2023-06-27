@@ -43,7 +43,7 @@ namespace Icarus.Services
                 {
                     var discordChannel = (SocketTextChannel) _client.GetChannel(channel.ChannelId);
 
-                    _ = discordChannel.SendMessageAsync($"{character.CharacterName} ({character.YearOfBirth - character.YearOfDeath})");
+                    _ = discordChannel.SendMessageAsync($"{character.CharacterName} ({character.YearOfBirth}-{character.YearOfDeath})");
                 }
                 catch
                 { 
