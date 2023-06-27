@@ -29,7 +29,7 @@ namespace Icarus.Discord.Modules
         [RequireProfile]
         public async Task ListMyTokens()
         {
-            var tokens = _actionService.GetAllTokensForProfileActiveCharacter(Context.User.Id.ToString());
+            var tokens = await _actionService.GetAllTokensForProfileActiveCharacter(Context.User.Id.ToString());
 
             var embedBuilder = new EmbedBuilder();
 
