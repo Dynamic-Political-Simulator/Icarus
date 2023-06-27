@@ -214,8 +214,8 @@ namespace Icarus.Discord.EconCommands
                 emb.AddField(Change);
                 //await Context.Channel.SendMessageAsync(embed:emb.Build());
 
-                //await FollowupWithFileAsync(@"\publish\Images\.chart.png", embed: emb.Build());
-                await FollowupWithFileAsync(@"D:\SeasonDPS\Icarus\Icarus\Images\.chart.png", embed: emb.Build());
+                await FollowupWithFileAsync(@"\publish\Images\.chart.png", embed: emb.Build());
+                //await FollowupWithFileAsync(@"D:\SeasonDPS\Icarus\Icarus\Images\.chart.png", embed: emb.Build());
             }
             catch (Exception ex)
             {
