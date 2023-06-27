@@ -19,7 +19,7 @@ namespace Icarus.Discord.CustomPreconditions
 
             var hasAdmin = await db.Users.SingleOrDefaultAsync(du => du.DiscordId == context.User.Id.ToString());
 
-            if (!hasAdmin.CanUseAdminCommands)
+            if (hasAdmin == null || !hasAdmin.CanUseAdminCommands)
             {
                 return await Task.FromResult(PreconditionResult.FromError("Command requires command permissions."));
             }
