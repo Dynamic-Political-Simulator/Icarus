@@ -97,7 +97,7 @@ namespace Icarus.Services
             int row = 0;
             foreach(Modifier Good in province.Modifiers.Where(m => m.isGood == true))
             {
-                goodTable[0][row] = Good.Name;
+                goodTable[row][0] = Good.Name;
 
                 int col = 1;
                 foreach(ValueModifier mod in Good.Modifiers)
