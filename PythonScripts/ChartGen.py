@@ -15,6 +15,7 @@ def GenChart(values, valueGoal):
     df.plot()
     plt.axhline(y = float(valueGoal), color = 'b', label = 'Goal')
     plt.legend().remove()
+
     #os.chdir("..")
     #os.chdir("./Icarus/Images/")
     #plt.savefig(f"{os.curdir}chart")
@@ -28,8 +29,6 @@ def GenChart(values, valueGoal):
     }
     return m
 
-
-
 @app.route("/ping/")
 def Pong():
     return "Pong"        
@@ -41,4 +40,4 @@ def Pong():
 #GenChart(df,10)
 
 
-app.run(port= os.getenv("PORT",5000))
+app.run()

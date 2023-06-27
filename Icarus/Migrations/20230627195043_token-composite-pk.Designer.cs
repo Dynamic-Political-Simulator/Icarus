@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Icarus.Migrations
 {
     [DbContext(typeof(IcarusContext))]
-    [Migration("20230627175454_NewNewNew")]
-    partial class NewNewNew
+    [Migration("20230627195043_token-composite-pk")]
+    partial class tokencompositepk
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,13 +33,13 @@ namespace Icarus.Migrations
                     b.Property<string>("PlayerCharacterId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
-
                     b.Property<string>("TokenTypeId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("PlayerCharacterId");
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
+
+                    b.HasKey("PlayerCharacterId", "TokenTypeId");
 
                     b.HasIndex("TokenTypeId");
 
@@ -464,7 +464,9 @@ namespace Icarus.Migrations
 
                     b.HasOne("Icarus.Context.Models.CharacterTokenType", "TokenType")
                         .WithMany()
-                        .HasForeignKey("TokenTypeId");
+                        .HasForeignKey("TokenTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Character");
 

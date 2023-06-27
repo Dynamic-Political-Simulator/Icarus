@@ -13,6 +13,13 @@ namespace Icarus.Services
 {
     public class ActionService
     {
+        private readonly CharacterService _characterService;
+
+        public ActionService(CharacterService characterService)
+        {
+            _characterService = characterService;
+        }
+
         public string ExampleAction(PlayerCharacter character)
         {
             return "Example aciton.";
@@ -27,7 +34,7 @@ namespace Icarus.Services
 
             using var db = new IcarusContext();
 
-            var tokenTypeExists = db.TokenTypes.FirstOrDefault(tt => tt.TokenTypeName.ToLowerInvariant() == tokenType.ToLowerInvariant());
+            var tokenTypeExists = db.TokenTypes.FirstOrDefault(tt => tt.TokenTypeName.ToLower() == tokenType.ToLower());
 
             if (tokenTypeExists == null)
             {
@@ -66,11 +73,13 @@ namespace Icarus.Services
             return "Added favours.";
         }
 
-        public List<CharacterToken> GetAllTokensForProfileActiveCharacter(string discordId)
+        public async Task<List<CharacterToken>> GetAllTokensForProfileActiveCharacter(string discordId)
         {
             using var db = new IcarusContext();
 
-            var activeCharacterTokens = db.Tokens.Include(ac => ac.TokenTypeId).Where(ac => ac.PlayerCharacterId == discordId);
+            var activeCharacter = await _characterService.GetActiveCharacter(discordId);
+
+            var activeCharacterTokens = db.Tokens.Include(ac => ac.TokenType).Where(ac => ac.PlayerCharacterId == activeCharacter.CharacterId);
 
             if (activeCharacterTokens.Count() == 0)
             {

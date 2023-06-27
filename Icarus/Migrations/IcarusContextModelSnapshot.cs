@@ -30,13 +30,13 @@ namespace Icarus.Migrations
                     b.Property<string>("PlayerCharacterId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
-
                     b.Property<string>("TokenTypeId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("PlayerCharacterId");
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
+
+                    b.HasKey("PlayerCharacterId", "TokenTypeId");
 
                     b.HasIndex("TokenTypeId");
 
@@ -461,7 +461,9 @@ namespace Icarus.Migrations
 
                     b.HasOne("Icarus.Context.Models.CharacterTokenType", "TokenType")
                         .WithMany()
-                        .HasForeignKey("TokenTypeId");
+                        .HasForeignKey("TokenTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Character");
 
