@@ -101,11 +101,22 @@ namespace Icarus.Discord.EconCommands
 
             response = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), GoodSelection);
 
+            Console.WriteLine(response.ToString());
+
             if (response == null) 
             {
                 _ = _debugService.PrintToChannels("Response was null");
                 return;
             }
+            try
+            {
+                await response.DeferAsync(ephemeral: true);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            
 
             StringBuilder answer = new StringBuilder();
 
@@ -114,36 +125,42 @@ namespace Icarus.Discord.EconCommands
                 Province province = db.Provinces.FirstOrDefault(p => p.Name.Equals(prID));
                 if (province != null)
                 {
-                    foreach (string good in response.Data.Values)
+                    try
                     {
-                        Good GoodTemplate = db.Goods.FirstOrDefault(g => g.TAG == good);
-                        if (GoodTemplate == null)
+                        foreach (string good in response.Data.Values)
                         {
-                            await RespondAsync($"{good} could not be found");
-                        }
-                        else
-                        {
-                            if (province.Modifiers.Any(m => m.Name.Equals(good)))
+                            Good GoodTemplate = db.Goods.FirstOrDefault(g => g.Name == good);
+                            if (GoodTemplate == null)
                             {
-                                answer.AppendLine($"Good {good} was not added as province {province.Name} alread has the good {good}");
-                                continue;
+                                await response.FollowupAsync($"{good} could not be found", ephemeral:true);
                             }
-                            answer.AppendLine($"Good {good} was added to province {province.Name}");
-                            _valueManagementService.AddGoodToProvince(GoodTemplate, province);
+                            else
+                            {
+                                if (province.Modifiers.Any(m => m.Name.Equals(good)))
+                                {
+                                    answer.AppendLine($"Good {good} was not added as province {province.Name} alread has the good {good}");
+                                    continue;
+                                }
+                                answer.AppendLine($"Good {good} was added to province {province.Name}");
+                                _valueManagementService.AddGoodToProvince(GoodTemplate, province);
+                            }
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        await response.FollowupAsync(ex.ToString() );
+                    }
+                    
                 }
                 else
                 {
-                    await RespondAsync($"{prID} could not be found");
+                    await response.FollowupAsync($"{prID} could not be found", ephemeral: true);
                 }
             }
-
+            await response.FollowupAsync(answer.ToString(), ephemeral: true);
             await db.SaveChangesAsync();
-            await response.UpdateAsync(x => {
-                x.Content = answer.ToString();
-                x.Components = null;
-            });
+            
 
         }
 
