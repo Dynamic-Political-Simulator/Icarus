@@ -24,7 +24,7 @@ namespace Icarus.Utils
             _characterService = characterService;
             _debugService = debugService;
 
-            _client.SelectMenuExecuted += HandleSelectMenu;
+            //_client.SelectMenuExecuted += HandleSelectMenu;
         }
 
         public async Task HandleSelectMenu(SocketMessageComponent arg)

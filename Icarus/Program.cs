@@ -102,6 +102,10 @@ namespace Icarus
 				}
 			};
 
+			ComponentReactionHandlerService selectMenuHandler = (ComponentReactionHandlerService)_services.GetService(typeof(ComponentReactionHandlerService));
+
+			_client.SelectMenuExecuted += selectMenuHandler.HandleSelectMenu;
+
 			await Task.Delay(-1);
 		}
 
