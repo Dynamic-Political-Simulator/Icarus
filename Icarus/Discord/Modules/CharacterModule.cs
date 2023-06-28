@@ -66,7 +66,7 @@ That being said, all PG's also must fall within an empowered Group of Interest (
                 {
                     embedBuilder.AddField("Character Biography", character.CharacterDescription);
 				}
-				embedBuilder.AddField("Age", _characterService.GetCharacterAge(character.CharacterId));
+				embedBuilder.AddField("Age", await _characterService.GetCharacterAge(character.CharacterId));
                 if (character.Culture != null)
                 {
                     embedBuilder.AddField("Culture", character.Culture);
