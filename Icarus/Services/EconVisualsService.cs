@@ -47,6 +47,8 @@ namespace Icarus.Services
 
                 //This province is donzo!
             }
+
+            sheetContext.Update($"Nation!H10:Q22", GenerateGlobalModifierTable(db.Nations.First(), _valueManagementService));
         }
 
         public List<List<string>> GenEmpty(int row, int col)
@@ -139,6 +141,49 @@ namespace Icarus.Services
                     }
 
                     if ( Mod.Type == ModifierType.Permanent)
+                    {
+                        modTable[row][9] = "Permanent";
+                    }
+                    else
+                    {
+                        modTable[row][9] = Mod.Duration.ToString();
+                    }
+                }
+
+                row++;
+            }
+
+            return modTable;
+        }
+
+        public List<List<string>> GenerateGlobalModifierTable(Nation nation, ValueManagementService _valueManagementService)
+        {
+            List<List<string>> modTable = GenEmpty(12, 10);
+            int row = 0;
+            foreach (Modifier Mod in nation.Modifiers.Where(m => m.isGood == false))
+            {
+                modTable[row][0] = Mod.Name;
+
+                int col = 1;
+                if (Mod.Type == ModifierType.Decaying)
+                {
+                    foreach (ValueModifier mod in Mod.Modifiers)
+                    {
+                        modTable[row][col] = $"{mod.ValueTag}: {mod.Modifier} ({mod.Decay})";
+                        col++;
+                    }
+
+                    modTable[row][9] = "Decaying";
+                }
+                else
+                {
+                    foreach (ValueModifier mod in Mod.Modifiers)
+                    {
+                        modTable[row][col] = $"{mod.ValueTag}: {mod.Modifier}";
+                        col++;
+                    }
+
+                    if (Mod.Type == ModifierType.Permanent)
                     {
                         modTable[row][9] = "Permanent";
                     }

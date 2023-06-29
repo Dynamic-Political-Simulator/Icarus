@@ -402,6 +402,7 @@ namespace Icarus.Discord.EconCommands
             using var db = new IcarusContext();
 
             List<string> provinces = new List<string>();
+            provinces.Add("Global");
             foreach (Province province in db.Provinces.Where(p => p.Modifiers.Any(m => m.isGood == false)))
             {
                 provinces.Add(province.Name);
@@ -417,7 +418,7 @@ namespace Icarus.Discord.EconCommands
 
 
             // Respond to the modal.
-            await RespondAsync("Choose Province", components: builder.Build());
+            await RespondAsync("Choose Province", components: builder.Build(), ephemeral: true);
 
             Predicate<SocketInteraction> ProvinceSelection = s =>
             {
@@ -429,28 +430,58 @@ namespace Icarus.Discord.EconCommands
             SocketMessageComponent response = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), ProvinceSelection);
 
             if (response == null) { return; }
-
-            Province _province = db.Provinces.FirstOrDefault(p => p.Name == response.Data.Values.First());
-            if (_province == null)
+            Province _province = null;
+            Nation nation = null;
+            if (response.Data.Values.First() == "Global")
             {
-                await RespondAsync("Province not found!");
-                return;
+                nation = db.Nations.FirstOrDefault();
+            }
+            else
+            {
+                _province = db.Provinces.FirstOrDefault(p => p.Name == response.Data.Values.First());
+                if (_province == null)
+                {
+                    await RespondAsync("Province not found!");
+                    return;
+                }
             }
 
             List<string> modifiers = new List<string>();
-            foreach (Modifier modifier in _province.Modifiers.Where(m => m.isGood == false))
+            if(_province != null)
             {
-                modifiers.Add(modifier.Name);
-                Debug.WriteLine(modifier.Name);
-            }
+                foreach (Modifier modifier in _province.Modifiers.Where(m => m.isGood == false))
+                {
+                    modifiers.Add(modifier.Name);
+                    Debug.WriteLine(modifier.Name);
+                }
 
-            if (modifiers.Count == 0)
-            {
-                await response.UpdateAsync(x => {
-                    x.Content = $"{_province.Name} has no Modifiers which can be removed.";
-                    x.Components = null;
-                });
+                if (modifiers.Count == 0)
+                {
+                    await response.UpdateAsync(x => {
+                        x.Content = $"{_province.Name} has no Modifiers which can be removed.";
+                        x.Components = null;
+                    });
+                }
             }
+            else
+            {
+                foreach (Modifier modifier in nation.Modifiers.Where(m => m.isGood == false))
+                {
+                    modifiers.Add(modifier.Name);
+                    Debug.WriteLine(modifier.Name);
+                }
+
+                if (modifiers.Count == 0)
+                {
+                    await response.UpdateAsync(x => {
+                        x.Content = $"{nation.Name} has no Modifiers which can be removed.";
+                        x.Components = null;
+                    });
+                }
+            }
+            
+
+            
 
             sm = _interactionHelpers.CreateSelectMenu(messageId.ToString(), "ModifierSelection", modifiers, "Select Modifier");
             sm.MinValues = 1;
@@ -477,12 +508,25 @@ namespace Icarus.Discord.EconCommands
 
             foreach (string modifier in response.Data.Values)
             {
-                Modifier Modifier = _province.Modifiers.FirstOrDefault(m => m.Name == modifier);
-                if (Modifier == null)
+                if(nation == null)
                 {
-                    await RespondAsync($"{modifier} not found");
+                    Modifier Modifier = _province.Modifiers.FirstOrDefault(m => m.Name == modifier);
+                    if (Modifier == null)
+                    {
+                        await RespondAsync($"{modifier} not found");
+                    }
+                    db.Modifiers.Remove(Modifier);
                 }
-                db.Modifiers.Remove(Modifier);
+                else
+                {
+                    Modifier Modifier = nation.Modifiers.FirstOrDefault(m => m.Name == modifier);
+                    if (Modifier == null)
+                    {
+                        await RespondAsync($"{modifier} not found");
+                    }
+                    db.Modifiers.Remove(Modifier);
+                }
+                
             }
 
             await db.SaveChangesAsync();
@@ -493,7 +537,7 @@ namespace Icarus.Discord.EconCommands
         }
 
         [SlashCommand("showmodifier", "Displays Information about a modifier")]
-        public async Task ShowModifier(string province = null)
+        public async Task ShowModifier(string province)
         {
             using var db = new IcarusContext();
 
@@ -509,18 +553,30 @@ namespace Icarus.Discord.EconCommands
             }
             else
             {
-                Province _province = db.Provinces.FirstOrDefault(p => p.Name == province);
-                if (_province == null)
+                if (province == "global")
                 {
-                    await RespondAsync("Province not found!");
-                    return;
+                    Nation nation = db.Nations.First();
+                    foreach (Modifier modifier in nation.Modifiers.Where(m => m.isGood == false))
+                    {
+                        modifiers.Add(modifier.Name);
+                        Debug.WriteLine(modifier.Name);
+                    }
                 }
-
-                
-                foreach (Modifier modifier in _province.Modifiers.Where(m => m.isGood == false))
+                else
                 {
-                    modifiers.Add(modifier.Name);
-                    Debug.WriteLine(modifier.Name);
+                    Province _province = db.Provinces.FirstOrDefault(p => p.Name == province);
+                    if (_province == null)
+                    {
+                        await RespondAsync("Province not found!");
+                        return;
+                    }
+
+
+                    foreach (Modifier modifier in _province.Modifiers.Where(m => m.isGood == false))
+                    {
+                        modifiers.Add(modifier.Name);
+                        Debug.WriteLine(modifier.Name);
+                    }
                 }
             }
 
