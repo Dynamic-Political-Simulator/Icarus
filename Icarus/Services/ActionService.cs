@@ -25,7 +25,7 @@ namespace Icarus.Services
             return "Example aciton.";
         }
 
-        public async Task<string> GiveToken(SocketGuildUser Target, string tokenType, int amount, string userId)
+        public async Task<string> GiveToken(SocketGuildUser Target, string tokenType, int amount)
         {
             if (amount > 7)
             {
@@ -41,8 +41,8 @@ namespace Icarus.Services
                 return $"Could not find favour of type {tokenType}.";
             }
 
-            var character = db.Characters.Include(c => c.Tokens)
-                .FirstOrDefault(c => c.DiscordUserId == userId && c.YearOfDeath != -1);
+            var character = db.Characters.Include(c => c.Tokens).ThenInclude(t => t.TokenType)
+                .FirstOrDefault(c => c.DiscordUserId == Target.Id.ToString() && c.YearOfDeath == -1);
 
             if (character == null)
             {
