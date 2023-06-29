@@ -27,7 +27,7 @@ namespace Icarus.Discord.Modules
 
         [SlashCommand("show-player-favours", "Lists the pinged player's favours.")]
         [RequireAdmin]
-        public async Task ShowPlayerTokens(SocketGuildUser mention = null)
+        public async Task ShowPlayerTokens(SocketGuildUser mention)
         {
             var tokens = await _actionService.GetAllTokensForProfileActiveCharacter(mention.Id.ToString());
 
