@@ -75,7 +75,7 @@ namespace Icarus.Discord.Modules
         [RequireAdmin]
         public async Task GiveToken(SocketGuildUser mention, string tokenType, int amount)
         {
-            var result = await _actionService.GiveToken(mention, tokenType, amount, Context.User.Id.ToString());
+            var result = await _actionService.GiveToken(mention, tokenType, amount);
 
             await RespondAsync(result);
         }
