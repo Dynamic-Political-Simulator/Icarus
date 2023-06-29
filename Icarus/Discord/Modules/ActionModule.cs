@@ -25,6 +25,35 @@ namespace Icarus.Discord.Modules
             _interactionHelpers = interactionHelpers;
         }
 
+        [SlashCommand("show-player-favours", "Lists the pinged player's favours.")]
+        [RequireAdmin]
+        public async Task ShowPlayerTokens(SocketGuildUser mention = null)
+        {
+            var tokens = await _actionService.GetAllTokensForProfileActiveCharacter(mention.Id.ToString());
+
+            var embedBuilder = new EmbedBuilder();
+
+            embedBuilder.WithTitle($"{mention.Username}'s Favours");
+
+            if (tokens.Any())
+            {
+                var sb = new StringBuilder();
+
+                foreach (var token in tokens)
+                {
+                    sb.AppendLine(token.TokenTypeId + ": " + token.Amount);
+                }
+
+                embedBuilder.WithDescription(sb.ToString());
+            }
+            else
+            {
+                embedBuilder.WithDescription($"{mention.Username} has no favours.");
+            }
+
+            await RespondAsync(embed: embedBuilder.Build());
+        }
+
         [SlashCommand("my-favours", "Lists your tokens.")]
         [RequireProfile]
         public async Task ListMyTokens()
