@@ -260,7 +260,7 @@ namespace Icarus.Services
                             if (vm.Modifier > 0)
                             {
                                 vm.Modifier += vm.Decay;
-                                if (vm.Modifier < 0)
+                                if (vm.Modifier <= 0)
                                 {
                                     //modifier.Modifiers.Remove(vm);
                                     //db.ValueModifiers.Remove(vm);
@@ -270,7 +270,7 @@ namespace Icarus.Services
                             else
                             {
                                 vm.Modifier -= vm.Decay;
-                                if (vm.Modifier > 0)
+                                if (vm.Modifier >= 0)
                                 {
                                     //modifier.Modifiers.Remove(vm);
                                     //db.ValueModifiers.Remove(vm);
