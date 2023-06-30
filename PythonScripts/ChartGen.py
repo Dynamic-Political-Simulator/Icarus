@@ -6,7 +6,7 @@ import os
 import sys
 import base64
 import json
-from cairosvg import svg2png
+
 
 
 app = Flask(__name__)
@@ -31,15 +31,6 @@ def GenChart(values, valueGoal):
     }
     return m
 
-@app.route("/genMap/", methods = ['POST'])
-def GenMap():
-    data = request.get_json()
-    svg_data = base64.b64decode(data['Base64String'])
-    png_string = base64.b64encode(svg2png(svg_data))
-    m = {
-        "Base64String" : png_string
-    }
-    return m
 
 @app.route("/ping/")
 def Pong():
