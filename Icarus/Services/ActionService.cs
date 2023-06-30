@@ -65,6 +65,8 @@ namespace Icarus.Services
                 tokenEntry = newTokenEntry;
             }
 
+            tokenEntry.Amount += amount;
+
             if (tokenEntry.Amount > 7) tokenEntry.Amount = 7;
 
             db.Update(character);
