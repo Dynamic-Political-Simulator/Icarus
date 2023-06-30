@@ -325,7 +325,7 @@ namespace Icarus.Discord.EconCommands
             }*/
         }
 
-        [SlashCommand("update-sheet","")]
+        [SlashCommand("update-sheet","update sheet")]
         [RequireAdmin]
         public async Task UpdateSheet()
         {
