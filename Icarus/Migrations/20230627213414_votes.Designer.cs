@@ -4,6 +4,7 @@ using Icarus.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Icarus.Migrations
 {
     [DbContext(typeof(IcarusContext))]
-    partial class IcarusContextModelSnapshot : ModelSnapshot
+    [Migration("20230627213414_votes")]
+    partial class votes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,13 +33,13 @@ namespace Icarus.Migrations
                     b.Property<string>("PlayerCharacterId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("TokenTypeId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
-                    b.HasKey("PlayerCharacterId", "TokenTypeId");
+                    b.Property<string>("TokenTypeId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("PlayerCharacterId");
 
                     b.HasIndex("TokenTypeId");
 
@@ -486,9 +489,7 @@ namespace Icarus.Migrations
 
                     b.HasOne("Icarus.Context.Models.CharacterTokenType", "TokenType")
                         .WithMany()
-                        .HasForeignKey("TokenTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TokenTypeId");
 
                     b.Navigation("Character");
 
