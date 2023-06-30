@@ -56,6 +56,7 @@ namespace Icarus.Context
         public DbSet<GraveyardChannel> GraveyardChannels { get; set; }
         public DbSet<DebugChannel> DebugChannels { get; set; }
         public DbSet<GroupOfInterest> GroupOfInterests { get; set; }
+		public DbSet<VoteMessage> VoteMessages { get; set; }
 
 
         // Default Data

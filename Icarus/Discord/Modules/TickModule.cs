@@ -8,7 +8,7 @@ using System;
 using Discord;
 using Icarus.Context.Models;
 
-namespace Bailiff.Discord.Modules
+namespace Icarus.Discord.Modules
 {
 	[Group("tick", "Tick commands")]
 	public class TickModule : InteractionModuleBase<SocketInteractionContext>

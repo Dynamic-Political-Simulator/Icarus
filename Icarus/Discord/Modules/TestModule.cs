@@ -11,7 +11,7 @@ using Icarus.Context.Models;
 using System.Xml;
 using Icarus.Discord.CustomPreconditions;
 
-namespace Bailiff.Discord.Modules
+namespace Icarus.Discord.Modules
 {
 	public class TestModule : InteractionModuleBase<SocketInteractionContext>
 	{
