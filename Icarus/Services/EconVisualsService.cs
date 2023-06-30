@@ -1,12 +1,16 @@
 ﻿using Icarus.Context;
 using Icarus.Context.Models;
 using Icarus.Utils;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.Formats.Asn1;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Icarus.Services
 {
@@ -212,6 +216,69 @@ namespace Icarus.Services
             }
 
             return modTable;
+        }
+
+        public string GenMapColorCoded(string ValueTag)
+        {
+            string DataPath = @"./rawislandmap.svg";
+            using var db = new IcarusContext();
+            XmlDocument xmlDocument = new XmlDocument();
+            xmlDocument.Load(DataPath);
+            Dictionary<string, float> values = new Dictionary<string, float>();
+            Dictionary<string,Color> map = new Dictionary<string,Color>();
+            Color lowColor = new Color(new Abgr32(255,0,0));
+            Color highColor = new Color(new Abgr32(0,255,0));
+            float lowest = 50;
+            float highest = 50;
+            foreach ( Province province in db.Provinces)
+            {
+                Value v = province.Values.FirstOrDefault(v => v.TAG == ValueTag);
+                if (v.CurrentValue > highest)
+                {
+                    highest = v.CurrentValue;
+                }
+                else if (v.CurrentValue < lowest)
+                {
+                    lowest = v.CurrentValue;
+                }
+
+                values.Add(province.Name, v.CurrentValue);
+            }
+            foreach(KeyValuePair<string, float> kvp in values)
+            {
+
+                map.Add(kvp.Key, InterpolateColor(lowColor, highColor, highest, lowest, kvp.Value));
+            }
+            foreach(XmlElement layer in xmlDocument.SelectNodes("g"))
+            {
+                string Province = layer.GetAttribute("inkscape: label");
+                foreach(XmlElement path in layer.SelectNodes("path"))
+                {
+                    path.SetAttribute("fill", map[Province].ToHex());
+                }
+            }
+            
+            MemoryStream s = new MemoryStream();
+            xmlDocument.Save(s);
+
+            return Convert.ToBase64String(s.ToArray());
+        }
+
+        private float Lerp(float from, float to, float step)
+        {
+            return from + (to - from) * step;
+        }
+
+        private Color InterpolateColor(Color from, Color to, float max, float min, float current)
+        {
+            var fromRgba = from.ToPixel<Rgba32>();
+            var toRgba = to.ToPixel<Rgba32>();
+            float percent = (current -  min)/max;
+            var intervalR = Lerp(fromRgba.R, toRgba.R, percent);
+            var intervalG = Lerp(fromRgba.G, toRgba.G, percent);
+            var intervalB = Lerp(fromRgba.B, toRgba.B, percent);
+            var intervalA = Lerp(fromRgba.A, toRgba.A, percent);
+            return Color.FromRgba((byte)intervalR, (byte)intervalG, (byte)intervalB, (byte)intervalA);
         }
     }
 }

@@ -1,11 +1,13 @@
 from pandas import DataFrame, Series
 import matplotlib.pyplot as plt
 from numpy.random import randn
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import os
 import sys
 import base64
 import json
+from cairosvg import svg2png
+
 
 app = Flask(__name__)
 
@@ -26,6 +28,16 @@ def GenChart(values, valueGoal):
     my_base64_jpgData = base64.b64encode(my_stringIObytes.read()).decode()
     m = {
         "Base64String" : my_base64_jpgData
+    }
+    return m
+
+@app.route("/genMap/", methods = ['POST'])
+def GenMap():
+    data = request.get_json()
+    svg_data = base64.b64decode(data['Base64String'])
+    png_string = base64.b64encode(svg2png(svg_data))
+    m = {
+        "Base64String" : png_string
     }
     return m
 

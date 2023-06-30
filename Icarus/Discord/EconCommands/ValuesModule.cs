@@ -17,6 +17,8 @@ using System.IO;
 using Icarus.Utils;
 using System.Net.Http;
 using SixLabors.ImageSharp;
+using Newtonsoft.Json.Linq;
+using System.Text.Json.Nodes;
 
 namespace Icarus.Discord.EconCommands
 {
@@ -25,12 +27,14 @@ namespace Icarus.Discord.EconCommands
         private readonly DiscordSocketClient _client;
         private readonly ValueManagementService _valueManagementService;
         private readonly DebugService _debugService;
+        private readonly EconVisualsService _visualsService;
 
-        public ValuesModule(DiscordSocketClient client, ValueManagementService valueManagementService, DebugService debugService)
+        public ValuesModule(DiscordSocketClient client, ValueManagementService valueManagementService, DebugService debugService, EconVisualsService visualsService)
         {
             _client = client;
             _valueManagementService = valueManagementService;
             _debugService = debugService;
+            _visualsService = visualsService;
         }
 
         [SlashCommand("setvalue","Set the specified Value to a certain Number.")]
@@ -319,6 +323,22 @@ namespace Icarus.Discord.EconCommands
                 Console.WriteLine(ex.ToString());
                 _ = _debugService.PrintToChannels(ex.Message);
             }*/
+        }
+
+        [SlashCommand("update-sheet","")]
+        [RequireAdmin]
+        public async Task UpdateSheet()
+        {
+            try
+            {
+                await DeferAsync();
+                await _visualsService.UpdateProvinceView(_valueManagementService);
+                await FollowupAsync("Success!", ephemeral:true);
+            }
+            catch(Exception ex)
+            {
+                _ = _debugService.PrintToChannels(ex.ToString());
+            }
         }
     }
 

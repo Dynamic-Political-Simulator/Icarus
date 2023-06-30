@@ -17,12 +17,14 @@ namespace Icarus.Services
     {
         private readonly TickService _tickService;
         private readonly EconVisualsService _visualsService;
-        public ValueManagementService(TickService tickService, EconVisualsService econVisualsService)
+        private readonly DebugService _debugService;
+        public ValueManagementService(TickService tickService, EconVisualsService econVisualsService, DebugService debugService)
         {
             _tickService = tickService;
-            _visualsService= econVisualsService;
+            _visualsService = econVisualsService;
 
             _tickService.TickEvent += ValueTick;
+            _debugService = debugService;
         }
 
         /// <summary>
@@ -30,11 +32,19 @@ namespace Icarus.Services
         /// </summary>
         public async void ValueTick()
         {
-            await UpdateValues();
-            await UpdateModifiers();
-            Console.WriteLine("Values Ticked! Generating Sheets!");
-            await _visualsService.UpdateProvinceView(this);
-            Console.WriteLine("Updated Sheets!");
+            try
+            {
+                await UpdateValues();
+                await UpdateModifiers();
+                Console.WriteLine("Values Ticked! Generating Sheets!");
+                await _visualsService.UpdateProvinceView(this);
+                Console.WriteLine("Updated Sheets!");
+            }
+            catch (Exception ex)
+            {
+                _ = _debugService.PrintToChannels(ex.ToString());
+            }
+            
 
         }
 
@@ -230,7 +240,8 @@ namespace Icarus.Services
         public async Task UpdateModifiers()
         {
             using var db = new IcarusContext();
-
+            List<Modifier> MarkedForRemovalModifiers = new List<Modifier>();
+            List<ValueModifier> ValueModifiersMarkedForRemoval = new List<ValueModifier>();
             foreach (Modifier modifier in db.Modifiers)
             {
                 switch (modifier.Type)
@@ -239,38 +250,57 @@ namespace Icarus.Services
                         modifier.Duration -= 1;
                         if (modifier.Duration == 0)
                         {
-                            db.Modifiers.Remove(modifier);
+                            MarkedForRemovalModifiers.Add(modifier);
+                            //db.Modifiers.Remove(modifier);
                         }
                         break;
                     case ModifierType.Decaying:
                         foreach(ValueModifier vm in modifier.Modifiers)
                         {
-                            if (vm.Decay > 0)
+                            if (vm.Modifier > 0)
                             {
                                 vm.Modifier += vm.Decay;
-                                if (vm.Modifier > 0)
+                                if (vm.Modifier < 0)
                                 {
-                                    modifier.Modifiers.Remove(vm);
-                                    db.ValueModifiers.Remove(vm);
+                                    //modifier.Modifiers.Remove(vm);
+                                    //db.ValueModifiers.Remove(vm);
+                                    ValueModifiersMarkedForRemoval.Add(vm);
                                 }
                             }
                             else
                             {
                                 vm.Modifier -= vm.Decay;
-                                if (vm.Modifier < 0)
+                                if (vm.Modifier > 0)
                                 {
-                                    modifier.Modifiers.Remove(vm);
-                                    db.ValueModifiers.Remove(vm);
+                                    //modifier.Modifiers.Remove(vm);
+                                    //db.ValueModifiers.Remove(vm);
+                                    ValueModifiersMarkedForRemoval.Add(vm);
                                 }
                             }
                         }
+
+                        foreach(ValueModifier vm in ValueModifiersMarkedForRemoval)
+                        {
+                            modifier.Modifiers.Remove(vm);
+                            db.ValueModifiers.Remove(vm);
+                        }
+
+                        ValueModifiersMarkedForRemoval = new List<ValueModifier>();
+
                         if (modifier.Modifiers.Count == 0)
                         {
-                            db.Modifiers.Remove(modifier);
+                            MarkedForRemovalModifiers.Add(modifier);
+                            //db.Modifiers.Remove(modifier);
                         }
                         break;
                 }
             }
+
+            foreach(var modifier in MarkedForRemovalModifiers)
+            {
+                db.Modifiers.Remove(modifier);
+            }
+
             await db.SaveChangesAsync();
         }
 
