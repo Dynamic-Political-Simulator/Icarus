@@ -4,12 +4,14 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
+using Discord;
 using Discord.WebSocket;
 using Icarus.Context;
 using Icarus.Context.Models;
 using Icarus.Discord.EconCommands;
 using Icarus.Utils;
 using Microsoft.Identity.Client;
+using Newtonsoft.Json.Linq;
 
 namespace Icarus.Services
 {
@@ -139,6 +141,54 @@ namespace Icarus.Services
                 return 0f;
             }
             return goal;
+        }
+
+        /// <summary>
+        /// Generate a List of the origin of the varios Modifiers on a Goal
+        /// </summary>
+        /// <param name="Value"></param>
+        /// <returns></returns>
+        public Dictionary<string, float> GetValueGoalDesc(Value Value)
+        {
+            Dictionary<string,float> desc = new Dictionary<string,float>();
+            desc.Add("Base", Value.BaseBalue);
+            ValueModifier vm;
+            foreach (Modifier modifier in Value.Province.Modifiers.Where(m => m.Modifiers.FirstOrDefault(vm => vm.ValueTag == Value.TAG) != null))
+            {
+                vm = modifier.Modifiers.FirstOrDefault(vm => vm.ValueTag == Value.TAG);
+                desc.Add(modifier.Name, vm.Modifier);
+
+            }
+            //Aggregate the global Modifiers
+            foreach (Modifier modifier in Value.Province.Nation.Modifiers.Where(m => m.Modifiers.FirstOrDefault(vm => vm.ValueTag == Value.TAG) != null))
+            {
+                vm = modifier.Modifiers.FirstOrDefault(vm => vm.ValueTag == Value.TAG);
+                desc.Add(modifier.Name, vm.Modifier);
+            }
+
+            using var db = new IcarusContext();
+
+            //First float is Value second float is Weight
+            //Tuple Value1 = Current Value ; Value2 = Weighting
+            List<Tuple<float, float, string>> ValueWeightPair = new List<Tuple<float, float, string>>();
+            float TotalWeight = 0f;
+
+            // Added AsQueryable here because it bitched about the Where being ambiguous
+            //List of every relationship where the current Value is the Target
+            List<ValueRelationship> Relationships = db.Relationships.AsQueryable().Where(vr => vr.TargetTag == Value.TAG).ToList();
+            foreach (ValueRelationship relationship in Relationships)
+            {
+                Value origin = Value.Province.Values.FirstOrDefault(v => v.TAG == relationship.OriginTag);
+                ValueWeightPair.Add(new Tuple<float, float,string>(origin.CurrentValue, relationship.Weight,relationship.OriginTag));
+                TotalWeight += Math.Abs(relationship.Weight);
+            }
+
+            foreach (Tuple<float, float, string> tuple in ValueWeightPair)
+            {
+                desc.Add(tuple.Item3, (tuple.Item1 * tuple.Item2) / TotalWeight);
+            }
+
+            return desc;
         }
 
         /// <summary>

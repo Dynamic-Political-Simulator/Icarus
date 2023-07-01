@@ -189,6 +189,7 @@ namespace Icarus.Discord.EconCommands
             };
 
             float valueGoal = _valueManagementService.GetValueGoal(value);
+            Dictionary<string,float> valueGoalDesc = _valueManagementService.GetValueGoalDesc(value);
 
             EmbedFieldBuilder CurrentValue = new EmbedFieldBuilder()
                 .WithName("Current Value")
@@ -201,6 +202,15 @@ namespace Icarus.Discord.EconCommands
             EmbedFieldBuilder Change = new EmbedFieldBuilder()
                 .WithName("Change")
                 .WithValue(_valueManagementService.GetValueChange(value).ToString());
+
+            EmbedFieldBuilder MakeUp = new EmbedFieldBuilder()
+                .WithName("MakeUp");
+            StringBuilder stringBuilder= new StringBuilder();
+            foreach(KeyValuePair<string,float> kvp in valueGoalDesc)
+            {
+                stringBuilder.AppendLine($"{kvp.Key} : {kvp.Value}");
+            }
+            MakeUp.Value = stringBuilder.ToString();
 
             List<float> heights = new List<float>();
 
@@ -222,6 +232,7 @@ namespace Icarus.Discord.EconCommands
                 emb.AddField(CurrentValue);
                 emb.AddField(Goal);
                 emb.AddField(Change);
+                emb.AddField(MakeUp);
                 //await Context.Channel.SendMessageAsync(embed:emb.Build());
 
                 //await FollowupWithFileAsync(@"\publish\Images\.chart.png", embed: emb.Build());
