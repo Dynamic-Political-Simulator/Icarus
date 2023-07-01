@@ -57,6 +57,8 @@ namespace Icarus.Context
         public DbSet<DebugChannel> DebugChannels { get; set; }
         public DbSet<GroupOfInterest> GroupOfInterests { get; set; }
 		public DbSet<VoteMessage> VoteMessages { get; set; }
+		public DbSet<StaffAction> StaffActions { get; set; }
+		public DbSet<StaffActionChannel> StaffActionChannels { get; set; }
 
 
         // Default Data
@@ -124,6 +126,16 @@ namespace Icarus.Context
                 .HasForeignKey(pc => pc.GoIid);
 
             modelBuilder.Entity<CharacterToken>().HasKey(ct => new { ct.PlayerCharacterId, ct.TokenTypeId });
+
+			modelBuilder.Entity<StaffAction>()
+				.HasOne(sa => sa.Submitter)
+				.WithMany(du => du.CreatedStaffActions)
+				.HasForeignKey(sa => sa.SubmitterId);
+
+			modelBuilder.Entity<StaffAction>()
+				.HasOne(sa => sa.AssignedTo)
+				.WithMany(du => du.AssignedStaffActions)
+				.HasForeignKey(sa => sa.AssignedToId);
         }
     }
 }
