@@ -57,7 +57,7 @@ namespace Icarus.Services
                 {
                     PlayerCharacterId = character.CharacterId,
                     TokenTypeId = tokenTypeExists.TokenTypeName,
-                    Amount = amount
+                    Amount = 0
                 };
 
                 character.Tokens.Add(newTokenEntry);
