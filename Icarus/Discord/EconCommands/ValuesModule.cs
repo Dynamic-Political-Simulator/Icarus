@@ -329,15 +329,25 @@ namespace Icarus.Discord.EconCommands
         [RequireAdmin]
         public async Task UpdateSheet()
         {
+            await DeferAsync();
             try
             {
-                await DeferAsync();
+                
                 await _visualsService.UpdateProvinceView(_valueManagementService);
                 await FollowupAsync("Success!", ephemeral:true);
             }
             catch(Exception ex)
             {
                 _ = _debugService.PrintToChannels(ex.ToString());
+                if (ex.GetType() == typeof(Google.GoogleApiException)) 
+                {
+                    await FollowupAsync("There has been an issue with the GoogleAPI. We have propably reached our write limit. Please wait a few minutes and try again.")
+                }
+                else
+                {
+                    await FollowupAsync("Something went wrong. Please contact an admin.");
+                }
+                
             }
         }
     }
