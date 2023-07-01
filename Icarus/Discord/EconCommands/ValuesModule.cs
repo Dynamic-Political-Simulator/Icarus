@@ -348,7 +348,7 @@ namespace Icarus.Discord.EconCommands
                 {
                    m = await FollowupAsync("Something went wrong. Please contact an admin.");
                 }
-                _ = _debugService.PrintToChannels($"{ex.Message} at {m.ReferencedMessage.GetJumpUrl()}");
+                _ = _debugService.PrintToChannels($"{ex.ToString()} at {m.GetJumpUrl()}");
             }
         }
     }
