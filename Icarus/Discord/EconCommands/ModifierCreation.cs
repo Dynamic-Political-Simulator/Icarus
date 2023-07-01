@@ -567,7 +567,7 @@ namespace Icarus.Discord.EconCommands
                     Province _province = db.Provinces.FirstOrDefault(p => p.Name == province);
                     if (_province == null)
                     {
-                        await RespondAsync("Province not found!");
+                        await RespondAsync("Province not found!", ephemeral:true);
                         return;
                     }
 
@@ -582,7 +582,7 @@ namespace Icarus.Discord.EconCommands
 
             if (modifiers.Count == 0)
             {
-                await RespondAsync($"{province} has no Modifiers which can be displayed.");
+                await RespondAsync($"{province} has no Modifiers which can be displayed.",ephemeral:true);
             }
 
             SelectMenuBuilder sm = _interactionHelpers.CreateSelectMenu(messageId.ToString(), "ModifierSelection", modifiers, "Select Modifier");
@@ -592,7 +592,7 @@ namespace Icarus.Discord.EconCommands
             ComponentBuilder builder = new ComponentBuilder()
                 .WithSelectMenu(sm);
 
-            await RespondAsync("Choose Modifier",components:builder.Build());
+            await RespondAsync("Choose Modifier",components:builder.Build(), ephemeral:true);
 
             Predicate<SocketInteraction> GoodSelection = s =>
             {
