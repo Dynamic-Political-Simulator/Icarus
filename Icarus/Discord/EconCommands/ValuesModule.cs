@@ -368,6 +368,7 @@ namespace Icarus.Discord.EconCommands
         }
 
         [SlashCommand("edit-relationship", "Edit a Value Relationship")]
+        [RequireAdmin]
         public async Task EditRel(string Origin, string Target)
         {
             using var db = new IcarusContext();
@@ -411,6 +412,7 @@ namespace Icarus.Discord.EconCommands
         }
 
         [SlashCommand("add-relationship", "Add a new Relationship")]
+        [RequireAdmin]
         public async Task AddRel()
         {
             using var db = new IcarusContext();
@@ -465,6 +467,7 @@ namespace Icarus.Discord.EconCommands
         }
 
         [SlashCommand("remove-relationship", "Remove a Value Relationship")]
+        [RequireAdmin]
         public async Task RemoveRel(string Origin, string Target)
         {
             using var db = new IcarusContext();
