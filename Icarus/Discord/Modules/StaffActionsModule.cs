@@ -69,16 +69,16 @@ namespace Icarus.Discord.Modules
 
 			if (staffAction == null)
 			{
-				await RespondAsync($"No Staff Action with ID: {id}");
+				await RespondAsync($"No Staff Action with ID: {id}", ephemeral:true);
 			}
 			if (response.Length > 1800)
 			{
-				await RespondAsync("Description must be shorter than 1000 characters.");
+				await RespondAsync("Description must be shorter than 1000 characters.", ephemeral: true);
 				return;
 			}
 			if (!Enum.TryParse(stringStatus, true, out StaffActionStatus status))
 			{
-				await RespondAsync("Not a valid attribute.");
+				await RespondAsync("Not a valid attribute.", ephemeral: true);
 				return;
 			}
 
@@ -107,7 +107,7 @@ namespace Icarus.Discord.Modules
 
 			await _staffActionService.NotifyUser(staffAction);
 
-			await RespondAsync("Response received.");
+			await RespondAsync("Response received.", ephemeral: true);
 		}
 
 		[SlashCommand("assign", "Assigns a user to a staff action")]
@@ -125,18 +125,18 @@ namespace Icarus.Discord.Modules
 
 			if (staffAction == null)
 			{
-				await RespondAsync($"No Staff Action with ID: {id}");
+				await RespondAsync($"No Staff Action with ID: {id}", ephemeral: true);
 			}
 
 			if (mentionedUser == null)
 			{
-				await RespondAsync("Could not find mentioned user.");
+				await RespondAsync("Could not find mentioned user.", ephemeral: true);
 				return;
 			}
 
 			if (!mentionedUser.CanUseAdminCommands)
 			{
-				await RespondAsync("This user is not allowed to use staff commands.");
+				await RespondAsync("This user is not allowed to use staff commands.", ephemeral: true);
 				return;
 			}
 
@@ -165,7 +165,7 @@ namespace Icarus.Discord.Modules
 
 			await _staffActionService.NotifyStaff(staffAction);
 
-			await RespondAsync($"Asigned Staff Action to {mention}");
+			await RespondAsync($"Asigned Staff Action to {mention}", ephemeral: true);
 		}
 
 		[SlashCommand("submit", "Submits a staff action")]

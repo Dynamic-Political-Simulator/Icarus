@@ -1,6 +1,6 @@
 ﻿using Azure;
 using Discord;
-using Discord.Commands;
+//using Discord.Commands;
 using Discord.Interactions;
 using Discord.Net;
 using Discord.WebSocket;
@@ -20,17 +20,20 @@ using Icarus.Discord.CustomPreconditions;
 
 namespace Icarus.Discord.EconCommands
 {
+    [Group("modifier", "Modifier commands")]
     public class ModifierCreation : InteractionModuleBase<SocketInteractionContext>
     {
         private readonly DiscordSocketClient _client;
         private readonly ValueManagementService _valueManagementService;
         private readonly DiscordInteractionHelpers _interactionHelpers;
+        private readonly DebugService _debugService;
 
-        public ModifierCreation(DiscordSocketClient client, ValueManagementService valueManagementService, DiscordInteractionHelpers interactionHelpers)
+        public ModifierCreation(DiscordSocketClient client, ValueManagementService valueManagementService, DiscordInteractionHelpers interactionHelpers, DebugService debugService)
         {
             _client = client;
             _valueManagementService = valueManagementService;
             _interactionHelpers = interactionHelpers;
+            _debugService = debugService;
             
             
             
@@ -80,7 +83,7 @@ namespace Icarus.Discord.EconCommands
         }
 
         //First Command
-        [SlashCommand("createmodifier", "Starts the Process of Adding a Modifier")]
+        [SlashCommand("create", "Starts the Process of Adding a Modifier")]
         [RequireAdmin]
         public async Task CreateModifer()
         {
@@ -354,7 +357,8 @@ namespace Icarus.Discord.EconCommands
                 foreach(string province in modifier.Provinces)
                 {
                     Province Province = db.Provinces.FirstOrDefault(p => p.Name == province);
-                    Province.Modifiers.Add(CreateModifier(modifier));
+                    Modifier m = CreateModifier(modifier);
+                    Province.Modifiers.Add(m);
                 }
             }
             await db.SaveChangesAsync();
@@ -395,7 +399,7 @@ namespace Icarus.Discord.EconCommands
             return Modifier;
         }
 
-        [SlashCommand("removemodifier", "Starts the Process of removing a good from a province!")]
+        [SlashCommand("remove", "Starts the Process of removing a good from a province!")]
         //[RequireAdmin]
         public async Task RemoveModifier()
         {
@@ -536,11 +540,12 @@ namespace Icarus.Discord.EconCommands
             });
         }
 
-        [SlashCommand("showmodifier", "Displays Information about a modifier")]
+        [SlashCommand("show", "Displays Information about a modifier")]
         public async Task ShowModifier(string province)
         {
             using var db = new IcarusContext();
-
+            Province _province = null;
+            Nation nation = null;
             int messageId = Random.Shared.Next(0, 9999);
             List<string> modifiers = new List<string>();
             if (province == null)
@@ -555,7 +560,7 @@ namespace Icarus.Discord.EconCommands
             {
                 if (province == "global")
                 {
-                    Nation nation = db.Nations.First();
+                    nation = db.Nations.First();
                     foreach (Modifier modifier in nation.Modifiers.Where(m => m.isGood == false))
                     {
                         modifiers.Add(modifier.Name);
@@ -564,7 +569,7 @@ namespace Icarus.Discord.EconCommands
                 }
                 else
                 {
-                    Province _province = db.Provinces.FirstOrDefault(p => p.Name == province);
+                    _province = db.Provinces.FirstOrDefault(p => p.Name == province);
                     if (_province == null)
                     {
                         await RespondAsync("Province not found!", ephemeral:true);
@@ -604,8 +609,16 @@ namespace Icarus.Discord.EconCommands
             SocketMessageComponent response = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), GoodSelection);
 
             if (response == null) { return; }
-
-            Modifier Modifier = db.Modifiers.FirstOrDefault(m => m.Name == response.Data.Values.First());
+            Modifier Modifier;
+            if (_province != null)
+            {
+                Modifier = _province.Modifiers.FirstOrDefault(m => m.Name == response.Data.Values.First());
+            }
+            else
+            {
+                Modifier = nation.Modifiers.FirstOrDefault(m => m.Name == response.Data.Values.First());
+            }
+            
 
             if (Modifier == null)
             {
@@ -644,6 +657,364 @@ namespace Icarus.Discord.EconCommands
                 x.Embed = emb.Build();
             });
         }
+
+        [SlashCommand("edit-desc", "Edit an existing modifier")]
+        public async Task EditDescModifier(string province)
+        {
+            try
+            {
+                using var db = new IcarusContext();
+                Province _province = null;
+                Nation nation = null;
+                int messageId = Random.Shared.Next(0, 9999);
+                List<string> modifiers = new List<string>();
+
+                if (province == "global")
+                {
+                    nation = db.Nations.First();
+                    foreach (Modifier modifier in nation.Modifiers.Where(m => m.isGood == false))
+                    {
+                        modifiers.Add(modifier.Name);
+                        Debug.WriteLine(modifier.Name);
+                    }
+                }
+                else
+                {
+                    _province = db.Provinces.FirstOrDefault(p => p.Name == province);
+                    if (_province == null)
+                    {
+                        await RespondAsync("Province not found!", ephemeral: true);
+                        return;
+                    }
+
+
+                    foreach (Modifier modifier in _province.Modifiers.Where(m => m.isGood == false))
+                    {
+                        modifiers.Add(modifier.Name);
+                        Debug.WriteLine(modifier.Name);
+                    }
+                }
+
+                if (modifiers.Count == 0)
+                {
+                    await RespondAsync($"{province} has no Modifiers which can be displayed.", ephemeral: true);
+                }
+
+                SelectMenuBuilder sm = _interactionHelpers.CreateSelectMenu(messageId.ToString(), "ModifierSelection", modifiers, "Select Modifier");
+                sm.MinValues = 1;
+                sm.MaxValues = 1;
+                Console.WriteLine("Building Menu");
+                ComponentBuilder builder = new ComponentBuilder()
+                    .WithSelectMenu(sm);
+
+                await RespondAsync("Choose Modifier", components: builder.Build(), ephemeral: true);
+
+                Predicate<SocketInteraction> GoodSelection = s =>
+                {
+                    if (s.GetType() != typeof(SocketMessageComponent)) return false;
+                    SocketMessageComponent d = (SocketMessageComponent)s;
+                    return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "ModifierSelection");
+                };
+
+                SocketMessageComponent response = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), GoodSelection);
+
+                if (response == null) { return; }
+
+                Modifier Modifier;
+                if (_province != null)
+                {
+                    Modifier = _province.Modifiers.FirstOrDefault(m => m.Name == response.Data.Values.First());
+                }
+                else
+                {
+                    Modifier = nation.Modifiers.FirstOrDefault(m => m.Name == response.Data.Values.First());
+                }
+
+                ModalBuilder mb = new ModalBuilder()
+                    .WithTitle("Name and Description of Modifiers")
+                    .WithCustomId(_interactionHelpers.GenerateCompoundId(messageId.ToString(), "NameDescModal"))
+                    .AddTextInput("Name", "ModifierName", placeholder: "Enter Name", value: Modifier.Name)
+                    .AddTextInput("Description", "ModifierDescription", TextInputStyle.Paragraph, value: Modifier.Description);
+
+
+                try
+                {
+                    await response.RespondWithModalAsync(mb.Build());
+                }
+                catch (ArgumentException ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                    throw ex;
+                }
+
+                Predicate<SocketInteraction> NameDesc = s =>
+                {
+                    if (s.GetType() != typeof(SocketModal)) return false;
+                    SocketModal d = (SocketModal)s;
+                    return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "NameDescModal");
+                };
+
+                var responseModal = (SocketModal)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 5, 0), NameDesc);
+
+                if (responseModal == null) { return; }
+
+                
+
+                Modifier.Name = responseModal.Data.Components.FirstOrDefault(c => c.CustomId == "ModifierName").Value;
+                Modifier.Description = responseModal.Data.Components.FirstOrDefault(c => c.CustomId == "ModifierDescription").Value;
+
+                await db.SaveChangesAsync();
+                await responseModal.RespondAsync("Success!", ephemeral: true);
+            }
+            catch (Exception ex)
+            {
+                _ = _debugService.PrintToChannels(ex.ToString());
+            }
+        }
+
+        [SlashCommand("edit-values", "Edit an existing modifier")]
+        public async Task EditValuesModifier(string province)
+        {
+            try
+            {
+                using var db = new IcarusContext();
+                Province _province = null;
+                Nation nation = null;
+                int messageId = Random.Shared.Next(0, 9999);
+                List<string> modifiers = new List<string>();
+
+                if (province == "global")
+                {
+                    nation = db.Nations.First();
+                    foreach (Modifier modifier in nation.Modifiers.Where(m => m.isGood == false))
+                    {
+                        modifiers.Add(modifier.Name);
+                        Debug.WriteLine(modifier.Name);
+                    }
+                }
+                else
+                {
+                    _province = db.Provinces.FirstOrDefault(p => p.Name == province);
+                    if (_province == null)
+                    {
+                        await RespondAsync("Province not found!", ephemeral: true);
+                        return;
+                    }
+
+
+                    foreach (Modifier modifier in _province.Modifiers.Where(m => m.isGood == false))
+                    {
+                        modifiers.Add(modifier.Name);
+                        Debug.WriteLine(modifier.Name);
+                    }
+                }
+
+                if (modifiers.Count == 0)
+                {
+                    await RespondAsync($"{province} has no Modifiers which can be displayed.", ephemeral: true);
+                }
+
+                SelectMenuBuilder sm = _interactionHelpers.CreateSelectMenu(messageId.ToString(), "ModifierSelection", modifiers, "Select Modifier");
+                sm.MinValues = 1;
+                sm.MaxValues = 1;
+                Console.WriteLine("Building Menu");
+                ComponentBuilder builder = new ComponentBuilder()
+                    .WithSelectMenu(sm);
+
+                await RespondAsync("Choose Modifier", components: builder.Build(), ephemeral: true);
+
+                Predicate<SocketInteraction> GoodSelection = s =>
+                {
+                    if (s.GetType() != typeof(SocketMessageComponent)) return false;
+                    SocketMessageComponent d = (SocketMessageComponent)s;
+                    return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "ModifierSelection");
+                };
+
+                SocketMessageComponent response = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), GoodSelection);
+
+                if (response == null) { return; }
+
+                Modifier Modifier;
+                if (_province != null)
+                {
+                    Modifier = _province.Modifiers.FirstOrDefault(m => m.Name == response.Data.Values.First());
+                }
+                else
+                {
+                    Modifier = nation.Modifiers.FirstOrDefault(m => m.Name == response.Data.Values.First());
+                }
+
+                Dictionary<string, float> values = new Dictionary<string, float>();
+                foreach (ValueModifier vm in Modifier.Modifiers)
+                {
+                    values.Add(vm.ValueTag, vm.Modifier);
+                }
+                values.Add("TaxModifier", Modifier.WealthMod);
+
+                TextInputBuilder tb;
+                ModalBuilder mb = new ModalBuilder()
+                    .WithTitle("Set Height of Modifiers")
+                    .WithCustomId(_interactionHelpers.GenerateCompoundId(messageId.ToString(), "ValueHeight"));
+                foreach (KeyValuePair<string, float> kvp in values)
+                {
+                    tb = new TextInputBuilder()
+                        .WithLabel(kvp.Key)
+                        .WithCustomId(kvp.Key)
+                        .WithValue(kvp.Value.ToString());
+                    mb.AddTextInput(tb);
+                }
+                try
+                {
+
+                    await response.RespondWithModalAsync(mb.Build());
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Console.WriteLine(ex.Message);
+                }
+
+
+                Predicate<SocketInteraction> ValueHeight = s =>
+                {
+                    if (s.GetType() != typeof(SocketModal)) return false;
+                    SocketModal d = (SocketModal)s;
+                    return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "ValueHeight");
+                };
+
+                var responseModal = (SocketModal)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 10, 0), ValueHeight);
+
+                if (responseModal == null) { return; }
+
+
+
+                foreach (var Component in responseModal.Data.Components)
+                {
+                    Debug.WriteLine(Component.CustomId + ": " + Component.Value);
+                    ValueModifier vm = Modifier.Modifiers.FirstOrDefault(vm => vm.ValueTag == Component.CustomId);
+                    vm.Modifier = float.Parse(Component.Value, System.Globalization.CultureInfo.InvariantCulture);
+
+                }
+
+                await db.SaveChangesAsync();
+                await responseModal.RespondAsync("Success!", ephemeral: true);
+            }
+            catch (Exception ex)
+            {
+                _ = _debugService.PrintToChannels(ex.ToString());
+            }
+        }
+
+        [SlashCommand("update-time","Update Time of temporary modifier")]
+        public async Task UpdateTime(string province)
+        {
+            using var db = new IcarusContext();
+            Province _province = null;
+            Nation nation = null;
+            int messageId = Random.Shared.Next(0, 9999);
+            List<string> modifiers = new List<string>();
+
+            if (province == "global")
+            {
+                nation = db.Nations.First();
+                foreach (Modifier modifier in nation.Modifiers.Where(m => m.isGood == false))
+                {
+                    modifiers.Add(modifier.Name);
+                    Debug.WriteLine(modifier.Name);
+                }
+            }
+            else
+            {
+                _province = db.Provinces.FirstOrDefault(p => p.Name == province);
+                if (_province == null)
+                {
+                    await RespondAsync("Province not found!", ephemeral: true);
+                    return;
+                }
+
+
+                foreach (Modifier modifier in _province.Modifiers.Where(m => m.isGood == false && m.Type == ModifierType.Temporary))
+                {
+                    modifiers.Add(modifier.Name);
+                    Debug.WriteLine(modifier.Name);
+                }
+            }
+
+            if (modifiers.Count == 0)
+            {
+                await RespondAsync($"{province} has no temporary Modifiers which can be displayed.", ephemeral: true);
+            }
+
+            SelectMenuBuilder sm = _interactionHelpers.CreateSelectMenu(messageId.ToString(), "ModifierSelection", modifiers, "Select Modifier");
+            sm.MinValues = 1;
+            sm.MaxValues = 1;
+            Console.WriteLine("Building Menu");
+            ComponentBuilder builder = new ComponentBuilder()
+                .WithSelectMenu(sm);
+
+            await RespondAsync("Choose Modifier", components: builder.Build(), ephemeral: true);
+
+            Predicate<SocketInteraction> GoodSelection = s =>
+            {
+                if (s.GetType() != typeof(SocketMessageComponent)) return false;
+                SocketMessageComponent d = (SocketMessageComponent)s;
+                return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "ModifierSelection");
+            };
+
+            SocketMessageComponent response = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), GoodSelection);
+
+            if (response == null) { return; }
+
+            Modifier Modifier;
+            if (_province != null)
+            {
+                Modifier = _province.Modifiers.FirstOrDefault(m => m.Name == response.Data.Values.First());
+            }
+            else
+            {
+                Modifier = nation.Modifiers.FirstOrDefault(m => m.Name == response.Data.Values.First());
+            }
+
+            if (Modifier.Type != ModifierType.Temporary) 
+            {
+                await RespondAsync("Not a temporary Modifier");
+                return;
+            }
+
+            ModalBuilder mb = new ModalBuilder()
+                .WithTitle("Set Height of Modifiers")
+                .WithCustomId(_interactionHelpers.GenerateCompoundId(messageId.ToString(), "TimeModal"))
+                .AddTextInput(label: "Tick Amount", customId: "Time", placeholder: "Enter Tick Amount", maxLength: 20, value:Modifier.Duration.ToString());
+
+
+            try
+            {
+                await response.RespondWithModalAsync(mb.Build());
+            }
+            catch (ArgumentException ex)
+            {
+                Debug.WriteLine(ex.Message);
+                throw ex;
+            }
+
+            Predicate<SocketInteraction> NameDesc = s =>
+            {
+                if (s.GetType() != typeof(SocketModal)) return false;
+                SocketModal d = (SocketModal)s;
+                return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "TimeModal");
+            };
+
+            var responseModal = (SocketModal)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 5, 0), NameDesc);
+
+            if (responseModal == null) { return; }
+
+
+            Modifier.Duration = int.Parse(responseModal.Data.Components.FirstOrDefault(c => c.CustomId == "Time").Value, System.Globalization.CultureInfo.InvariantCulture);
+
+            await db.SaveChangesAsync();
+            await responseModal.RespondAsync("Success!", ephemeral: true);
+        }
+
     }
 
     public class ModifierCreationDTO

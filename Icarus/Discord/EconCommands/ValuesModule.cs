@@ -1,5 +1,5 @@
 ﻿using Discord;
-using Discord.Commands;
+//using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Icarus.Context;
@@ -20,25 +20,29 @@ using SixLabors.ImageSharp;
 using Newtonsoft.Json.Linq;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions.Generated;
+using Icarus.Migrations;
 
 namespace Icarus.Discord.EconCommands
 {
+    [Group("value", "Value Commands")]
     public class ValuesModule : InteractionModuleBase<SocketInteractionContext>
     {
         private readonly DiscordSocketClient _client;
         private readonly ValueManagementService _valueManagementService;
         private readonly DebugService _debugService;
         private readonly EconVisualsService _visualsService;
+        private readonly DiscordInteractionHelpers _interactionHelpers;
 
-        public ValuesModule(DiscordSocketClient client, ValueManagementService valueManagementService, DebugService debugService, EconVisualsService visualsService)
+        public ValuesModule(DiscordSocketClient client, ValueManagementService valueManagementService, DebugService debugService, EconVisualsService visualsService, DiscordInteractionHelpers interactionHelpers)
         {
             _client = client;
             _valueManagementService = valueManagementService;
             _debugService = debugService;
             _visualsService = visualsService;
+            _interactionHelpers = interactionHelpers;
         }
 
-        [SlashCommand("setvalue","Set the specified Value to a certain Number.")]
+        [SlashCommand("set","Set the specified Value to a certain Number.")]
         [RequireAdmin]
         public async Task SetValue(string ProvinceName,string ValueName, float Number)
         {
@@ -67,7 +71,7 @@ namespace Icarus.Discord.EconCommands
 
         }
 
-        [SlashCommand("showvalues", "Show Values of a Province")]
+        [SlashCommand("show-many", "Show Values of a Province")]
         public async Task ShowValues(string ProvinceName)
         {
             using var db = new IcarusContext();
@@ -94,7 +98,7 @@ namespace Icarus.Discord.EconCommands
             await RespondAsync(stringBuilder.ToString());
         }
 
-        [SlashCommand("showprovince","Show general Province Info")]
+        [SlashCommand("show-province","Show general Province Info")]
         public async Task ShowProvince(string ProvinceName)
         {
             using var db = new IcarusContext();
@@ -168,7 +172,7 @@ namespace Icarus.Discord.EconCommands
             await RespondAsync(embed: emb.Build());
         }
 
-        [SlashCommand("showvalue", "Show specific info about a Value")]
+        [SlashCommand("show", "Show specific info about a Value")]
         public async Task ShowValue(string ProvinceName, string ValueTAG)
         {
             using var db = new IcarusContext();
@@ -362,6 +366,145 @@ namespace Icarus.Discord.EconCommands
                 _ = _debugService.PrintToChannels($"{ex.ToString()}");
             }
         }
+
+        [SlashCommand("edit-relationship", "Edit a Value Relationship")]
+        public async Task EditRel(string Origin, string Target)
+        {
+            using var db = new IcarusContext();
+            string messageId = Random.Shared.Next(9999).ToString();
+            var rel = db.Relationships.FirstOrDefault(rl => rl.OriginTag== Origin && rl.TargetTag == Target);
+            if (rel == null)
+            {
+                await RespondAsync("Relationship not found");
+                return;
+            }
+
+            ModalBuilder mb = new ModalBuilder()
+                .WithTitle("Edit Relationship")
+                .WithCustomId(_interactionHelpers.GenerateCompoundId(messageId, "editrel"))
+                .AddTextInput("Origin", "Origin", value: rel.OriginTag)
+                .AddTextInput("Target", "Target", value: rel.TargetTag)
+                .AddTextInput("Weight", "Weight", value: rel.Weight.ToString());
+
+            await RespondWithModalAsync(mb.Build());
+
+            Predicate<SocketInteraction> modalPred = s =>
+            {
+                if (s.GetType() != typeof(SocketModal)) return false;
+                SocketModal d = (SocketModal)s;
+                return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId, "editrel");
+            };
+
+            var responseModal = (SocketModal)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 10, 0), modalPred);
+
+            if (responseModal == null)
+            {
+                return;
+            }
+
+            rel.Weight = float.Parse(responseModal.Data.Components.FirstOrDefault(c => c.CustomId == "Weight").Value, System.Globalization.CultureInfo.InvariantCulture);
+            rel.TargetTag = responseModal.Data.Components.FirstOrDefault(c => c.CustomId == "Target").Value;
+            rel.OriginTag = responseModal.Data.Components.FirstOrDefault(c => c.CustomId == "Origin").Value;
+
+            await db.SaveChangesAsync();
+            await responseModal.RespondAsync("Success", ephemeral: true);
+        }
+
+        [SlashCommand("add-relationship", "Add a new Relationship")]
+        public async Task AddRel()
+        {
+            using var db = new IcarusContext();
+            string messageId = Random.Shared.Next(9999).ToString();
+            ModalBuilder mb = new ModalBuilder()
+                .WithTitle("Edit Relationship")
+                .WithCustomId(_interactionHelpers.GenerateCompoundId(messageId, "editrel"))
+                .AddTextInput("Origin", "Origin" )
+                .AddTextInput("Target", "Target" )
+                .AddTextInput("Weight", "Weight", value: "1");
+
+            await RespondWithModalAsync(mb.Build());
+
+            Predicate<SocketInteraction> modalPred = s =>
+            {
+                if (s.GetType() != typeof(SocketModal)) return false;
+                SocketModal d = (SocketModal)s;
+                return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId, "editrel");
+            };
+
+            var responseModal = (SocketModal)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 10, 0), modalPred);
+
+            if (responseModal == null)
+            {
+                return;
+            }
+
+            string TargetTag = responseModal.Data.Components.FirstOrDefault(c => c.CustomId == "Target").Value;
+            string OriginTag = responseModal.Data.Components.FirstOrDefault(c => c.CustomId == "Origin").Value;
+
+            if (db.Relationships.FirstOrDefault(rel => rel.TargetTag == TargetTag && rel.OriginTag == OriginTag) != null)
+            {
+                await responseModal.RespondAsync("Relationship already exists");
+                return;
+            }
+            if (db.Values.FirstOrDefault(v => v.TAG == TargetTag || v.TAG == OriginTag)== null)
+            {
+                await responseModal.RespondAsync("Not a valid Tag");
+                return;
+            }
+
+            var rel = new ValueRelationship()
+            {
+                OriginTag = OriginTag,
+                TargetTag = TargetTag,
+                Weight = float.Parse(responseModal.Data.Components.FirstOrDefault(c => c.CustomId == "Weight").Value, System.Globalization.CultureInfo.InvariantCulture)
+            };
+
+            db.Relationships.Add(rel);
+            await db.SaveChangesAsync();
+            await responseModal.RespondAsync("Success", ephemeral: true);
+        }
+
+        [SlashCommand("remove-relationship", "Remove a Value Relationship")]
+        public async Task RemoveRel(string Origin, string Target)
+        {
+            using var db = new IcarusContext();
+            string messageId = Random.Shared.Next(9999).ToString();
+            var rel = db.Relationships.FirstOrDefault(rl => rl.OriginTag == Origin && rl.TargetTag == Target);
+            if (rel == null)
+            {
+                await RespondAsync("Relationship not found");
+                return;
+            }
+
+            db.Relationships.Remove(rel);
+
+            await db.SaveChangesAsync();
+            await RespondAsync("Success", ephemeral: true);
+        }
+
+        [SlashCommand("show-relationships", "Show Relationships")]
+        public async Task ShowRel()
+        {
+            using var db = new IcarusContext();
+            List<ValueRelationship> rels = db.Relationships.ToList();
+            EmbedBuilder emb = new EmbedBuilder()
+            {
+                Title = $"Relationsships",
+                Description = "List of all Relationships and their Weights",
+            };
+
+            EmbedFieldBuilder f = new EmbedFieldBuilder();
+            StringBuilder stringBuilder= new StringBuilder();
+            foreach(var r in rels)
+            {
+                stringBuilder.AppendLine($"{r.OriginTag}->{r.TargetTag} : {r.Weight}");
+            }
+            f.WithName("List");
+            f.WithValue(stringBuilder.ToString());
+            emb.AddField(f);
+            await RespondAsync(embed: emb.Build());
+        }
+
     }
 
     public class ChartDTO

@@ -17,6 +17,7 @@ using Icarus.Discord.CustomPreconditions;
 
 namespace Icarus.Discord.EconCommands
 {
+    [Group("good", "Commands for manage Goods!")]
     public class GoodCommands : InteractionModuleBase<SocketInteractionContext>
     {
         private readonly DiscordSocketClient _client;
@@ -36,7 +37,7 @@ namespace Icarus.Discord.EconCommands
             //_client.ModalSubmitted += ModifierHeightHandling;
         }
 
-        [SlashCommand("addgood", "Starts the Process to add a good to a province!")]
+        [SlashCommand("add", "Starts the Process to add a good to a province!")]
         [RequireAdmin]
         public async Task CreateGood()
         {
@@ -165,7 +166,7 @@ namespace Icarus.Discord.EconCommands
         }
 
 
-        [SlashCommand("removegood", "Starts the Process of removing a good from a province!")]
+        [SlashCommand("remove", "Starts the Process of removing a good from a province!")]
         [RequireAdmin]
         public async Task RemoveGood()
         {
@@ -259,7 +260,7 @@ namespace Icarus.Discord.EconCommands
             });
         }
 
-        [SlashCommand("showgood", "Displays Information about a good")]
+        [SlashCommand("show", "Displays Information about a good")]
         public async Task ShowModifier(string province = null)
         {
             using var db = new IcarusContext();
