@@ -34,19 +34,15 @@ namespace Icarus.Services
             await guildUser.RemoveRolesAsync(roleIdsToCheck);
         }
 
-        public async Task AddRole(ulong discordId, ulong roleId, ulong guildId)
+        public async Task AddRole(ulong roleId, ulong discordId, ulong guildId)
         {
             try
             {
-                _ = _debugService.PrintToChannels($"AddRole triggered with args {discordId} {roleId} {guildId}");
-
                 var guild = _client.GetGuild(guildId);
 
                 var guildUser = guild.GetUser(discordId);
 
                 var roleIds = guildUser.Roles.Select(r => r.Id);
-
-                _ = _debugService.PrintToChannels($"RoleIds are: {roleIds.ToString()}");
 
                 if (!roleIds.Contains(roleId))
                 {
