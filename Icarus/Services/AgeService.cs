@@ -10,7 +10,7 @@ namespace Icarus.Services
     public class AgeService
     {
         const int CHANCE_AGE_START = 60;
-        const double DEATH_CHANCE = 0.5;
+        const double DEATH_CHANCE = 0.05;
 
         const int YEARS_PER_DAY = 1;
 
@@ -45,7 +45,8 @@ namespace Icarus.Services
                     var onDeathTimer = db.DeathTimer.SingleOrDefault(dt => dt.CharacterId == character.CharacterId);
 
                     // ADJUST YEARS PER DAY HERE
-                    if (onDeathTimer != null) _ = CalcDeathChance(character, YEARS_PER_DAY);
+                    // Only fire if the character doesn't already have a death timer
+                    if (onDeathTimer == null) _ = CalcDeathChance(character, YEARS_PER_DAY);
                 }
 
                 gameState.LastAgingEvent = DateTime.UtcNow;
@@ -83,6 +84,12 @@ namespace Icarus.Services
 
             var charAge = gameState.Year - character.YearOfBirth;
 
+            // Return if the character is not old enough for death chance yet
+            if (charAge < CHANCE_AGE_START)
+            {
+                return;
+            }
+
             var yearsToCalc = charAge - CHANCE_AGE_START;
 
             if (amountOfYears < yearsToCalc)
@@ -94,7 +101,7 @@ namespace Icarus.Services
 
             var death = false;
 
-            foreach(var x in Enumerable.Range(0, 5))
+            foreach(var x in Enumerable.Range(0, yearsToCalc))
             {
                 if(rand.NextDouble() < DEATH_CHANCE)
                 {
