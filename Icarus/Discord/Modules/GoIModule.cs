@@ -1,7 +1,9 @@
 ﻿using Discord;
 using Discord.Interactions;
+using Discord.WebSocket;
 using Icarus.Context;
 using Icarus.Discord.CustomPreconditions;
+using Icarus.Exceptions;
 using Icarus.Services;
 using System.Linq;
 using System.Text;
@@ -18,6 +20,21 @@ namespace Icarus.Discord.Modules
         {
             _characterService = characterService;
             _goiService = goiService;
+        }
+
+        public async Task LinkGoiRole(int goiId, SocketRole role)
+        {
+            try
+            {
+                await _goiService.LinkGoiRole(goiId, role.Id);
+            }
+            catch (GroupOfInterestNotFoundException )
+            {
+                await RespondAsync($"Could not find GoI with ID {goiId}.");
+                return;
+            }
+            
+            await RespondAsync($"Linked GoI with ID {goiId}, to role {role.Name}.");
         }
 
         [SlashCommand("create-goi", "Adds a new GoI to the database.")]

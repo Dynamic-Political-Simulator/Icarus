@@ -151,7 +151,7 @@ namespace Icarus.Services
         {
             using var db = new IcarusContext();
 
-            var allChars = await db.Characters.Include(c => c.GroupOfInterest).ToListAsync();
+            var allChars = await db.Characters.Include(c => c.GroupOfInterest).Where(c => c.YearOfDeath == -1).ToListAsync();
 
             return allChars;
         }
