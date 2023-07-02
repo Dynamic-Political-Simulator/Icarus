@@ -890,6 +890,11 @@ namespace Icarus.Discord.EconCommands
 
                 foreach (var Component in responseModal.Data.Components)
                 {
+                    if (Component.CustomId == "TaxModifier")
+                    {
+                        Modifier.WealthMod = float.Parse(Component.Value, System.Globalization.CultureInfo.InvariantCulture);
+                        continue;
+                    }
                     Debug.WriteLine(Component.CustomId + ": " + Component.Value);
                     ValueModifier vm = Modifier.Modifiers.FirstOrDefault(vm => vm.ValueTag == Component.CustomId);
                     vm.Modifier = float.Parse(Component.Value, System.Globalization.CultureInfo.InvariantCulture);
