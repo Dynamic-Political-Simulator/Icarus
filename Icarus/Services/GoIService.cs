@@ -105,12 +105,12 @@ namespace Icarus.Services
 
             var allGroups = await GetAllGroups();
 
-            var unwantedRoleIds = allGroups.Where(ag => ag.DiscordRoleId != null).Select(ag => ag.DiscordRoleId).ToList();
-            unwantedRoleIds.Remove(desiredRoleId);
+            var unwantedRoleIds = allGroups.Where(ag => ag.DiscordRoleId != null).Select(ag => (ulong) ag.DiscordRoleId).ToList();
+            unwantedRoleIds.Remove((ulong)desiredRoleId);
 
             await _roleService.RemoveRoles(unwantedRoleIds, discordId, guildId);
 
-            await _roleService.AddRole(desiredRoleId, discordId, guildId);
+            await _roleService.AddRole((ulong) desiredRoleId, discordId, guildId);
         }
     }
 }
