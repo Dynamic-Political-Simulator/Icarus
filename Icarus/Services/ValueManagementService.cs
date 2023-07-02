@@ -163,7 +163,7 @@ namespace Icarus.Services
             foreach (Modifier modifier in Value.Province.Nation.Modifiers.Where(m => m.Modifiers.FirstOrDefault(vm => vm.ValueTag == Value.TAG) != null))
             {
                 vm = modifier.Modifiers.FirstOrDefault(vm => vm.ValueTag == Value.TAG);
-                desc.Add(modifier.Name, vm.Modifier);
+                desc.Add(modifier.Name, (float)Math.Round(vm.Modifier,2));
             }
 
             using var db = new IcarusContext();
@@ -311,6 +311,7 @@ namespace Icarus.Services
                             if (vm.Modifier > 0)
                             {
                                 vm.Modifier += vm.Decay;
+                                Math.Round(vm.Modifier, 2);
                                 if (vm.Modifier <= 0)
                                 {
                                     //modifier.Modifiers.Remove(vm);
@@ -321,6 +322,7 @@ namespace Icarus.Services
                             else
                             {
                                 vm.Modifier -= vm.Decay;
+                                Math.Round(vm.Modifier,2);
                                 if (vm.Modifier >= 0)
                                 {
                                     //modifier.Modifiers.Remove(vm);
