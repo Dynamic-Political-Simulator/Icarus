@@ -46,6 +46,33 @@ That being said, all PG's also must fall within an empowered Group of Interest (
             {
                 await RespondAsync($"Character names may not be longer than 64 characters.");
             }
+
+            var gois = await _goiService.GetAllGroups();
+
+            var smb = new SelectMenuBuilder()
+                .WithPlaceholder("Group of Interest")
+                .WithMinValues(1)
+                .WithMaxValues(1)
+                .WithCustomId("char-goi-selection");
+
+            foreach (var group in gois)
+            {
+                var smob = new SelectMenuOptionBuilder();
+
+                smob.WithValue(group.Id.ToString());
+                smob.WithLabel(group.Name);
+
+                smb.AddOption(smob);
+            }
+
+            var noneSmob = new SelectMenuOptionBuilder();
+            noneSmob.WithValue("none");
+            noneSmob.WithLabel("None");
+            smb.AddOption(noneSmob);
+
+            var componentBuilder = new ComponentBuilder().WithSelectMenu(smb);
+
+            await RespondAsync("Select your Group of Interest", components: componentBuilder.Build(), ephemeral: true);
         }
 
         [RequireProfile]
@@ -179,6 +206,11 @@ That being said, all PG's also must fall within an empowered Group of Interest (
 
                 smb.AddOption(smob);
             }
+
+            var noneSmob = new SelectMenuOptionBuilder();
+            noneSmob.WithValue("none");
+            noneSmob.WithLabel("None");
+            smb.AddOption(noneSmob);
 
             var componentBuilder = new ComponentBuilder().WithSelectMenu(smb);
 
