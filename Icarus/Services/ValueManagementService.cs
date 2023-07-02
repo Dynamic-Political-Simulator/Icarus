@@ -185,7 +185,8 @@ namespace Icarus.Services
 
             foreach (Tuple<float, float, string> tuple in ValueWeightPair)
             {
-                desc.Add(tuple.Item3, (tuple.Item1 * tuple.Item2) / TotalWeight);
+                var goal = (tuple.Item1 * tuple.Item2) / TotalWeight;
+                desc.Add(tuple.Item3, (float)Math.Round(goal, 2));
             }
 
             return desc;
