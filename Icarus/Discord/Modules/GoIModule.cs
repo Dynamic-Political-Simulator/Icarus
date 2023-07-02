@@ -22,6 +22,8 @@ namespace Icarus.Discord.Modules
             _goiService = goiService;
         }
 
+        [SlashCommand("link-goi-role", "Links a Group of Interest role to the bot.")]
+        [RequireAdmin]
         public async Task LinkGoiRole(int goiId, SocketRole role)
         {
             try
