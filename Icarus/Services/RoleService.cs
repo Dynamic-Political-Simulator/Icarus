@@ -1,4 +1,5 @@
-﻿using Discord.WebSocket;
+﻿using Discord;
+using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +12,12 @@ namespace Icarus.Services
     {
         private readonly DiscordSocketClient _client;
 
-        public RoleService(DiscordSocketClient client)
+        private readonly DebugService _debugService;
+
+        public RoleService(DiscordSocketClient client, DebugService debugService)
         {
             _client = client;
+            _debugService = debugService;
         }
 
         public async Task RemoveRoles(List<ulong> roleIdsToCheck, ulong discordId, ulong guildId)
@@ -39,7 +43,11 @@ namespace Icarus.Services
 
             if (!roleIds.Contains(roleId))
             {
-                await guildUser.AddRoleAsync(roleId);
+                var role = guild.GetRole(roleId);
+
+                await guildUser.AddRoleAsync(role);
+
+                _ = _debugService.PrintToChannels($"Gave role {role.Name} to user {guildUser.Username}");
             }
         }
     }
