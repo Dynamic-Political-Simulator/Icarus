@@ -44,6 +44,8 @@ namespace Icarus.Services
 
             var roleIds = guildUser.Roles.Select(r => r.Id);
 
+            _ = _debugService.PrintToChannels($"RoleIds are: {roleIds.ToString()}");
+
             if (!roleIds.Contains(roleId))
             {
                 var role = guild.GetRole(roleId);
