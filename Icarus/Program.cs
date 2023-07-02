@@ -160,6 +160,7 @@ namespace Icarus
 				.AddSingleton<MessagingService>()
 				.AddSingleton<ComponentReactionHandlerService>()
 				.AddSingleton<VoteService>()
+				.AddSingleton<StaffActionService>()
 				.AddDbContext<IcarusContext>(ServiceLifetime.Transient)
 			.BuildServiceProvider();
 

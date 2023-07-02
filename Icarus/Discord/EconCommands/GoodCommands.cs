@@ -187,7 +187,7 @@ namespace Icarus.Discord.EconCommands
 
 
             // Respond to the modal.
-            await RespondAsync("Choose Province", components: builder.Build());
+            await RespondAsync("Choose Province", components: builder.Build(), ephemeral: true);
 
             Predicate<SocketInteraction> ProvinceSelection = s =>
             {
@@ -246,7 +246,8 @@ namespace Icarus.Discord.EconCommands
                 Modifier goodModifier = _province.Modifiers.FirstOrDefault(m => m.Name == good);
                 if (goodModifier == null)
                 {
-                    await RespondAsync($"{good} not found");
+                    await RespondAsync($"{good} not found", ephemeral: true);
+                    return;
                 }
                 db.Modifiers.Remove(goodModifier);
             }
@@ -278,7 +279,7 @@ namespace Icarus.Discord.EconCommands
                 Province _province = db.Provinces.FirstOrDefault(p => p.Name == province);
                 if (_province == null)
                 {
-                    await RespondAsync("Province not found!");
+                    await RespondAsync("Province not found!", ephemeral: true);
                     return;
                 }
 
@@ -292,7 +293,7 @@ namespace Icarus.Discord.EconCommands
 
             if (modifiers.Count == 0)
             {
-                await RespondAsync($"{province} has no Good which can be displayed.");
+                await RespondAsync($"{province} has no Good which can be displayed.", ephemeral: true);
             }
 
             SelectMenuBuilder sm = _interactionHelpers.CreateSelectMenu(messageId.ToString(), "ModifierSelection", modifiers, "Select Modifier");
@@ -302,7 +303,7 @@ namespace Icarus.Discord.EconCommands
             ComponentBuilder builder = new ComponentBuilder()
                 .WithSelectMenu(sm);
 
-            await RespondAsync("Choose Good", components: builder.Build());
+            await RespondAsync("Choose Good", components: builder.Build(), ephemeral: true);
 
             Predicate<SocketInteraction> GoodSelection = s =>
             {

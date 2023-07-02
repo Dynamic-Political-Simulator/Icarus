@@ -19,6 +19,7 @@ using System.Net.Http;
 using SixLabors.ImageSharp;
 using Newtonsoft.Json.Linq;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions.Generated;
 
 namespace Icarus.Discord.EconCommands
 {
@@ -329,15 +330,25 @@ namespace Icarus.Discord.EconCommands
         [RequireAdmin]
         public async Task UpdateSheet()
         {
+            await DeferAsync();
             try
             {
-                await DeferAsync();
+                
                 await _visualsService.UpdateProvinceView(_valueManagementService);
                 await FollowupAsync("Success!", ephemeral:true);
             }
             catch(Exception ex)
             {
-                _ = _debugService.PrintToChannels(ex.ToString());
+                IUserMessage m;
+                if (ex.GetType() == typeof(Google.GoogleApiException)) 
+                {
+                   m = await FollowupAsync("There has been an issue with the GoogleAPI. We have propably reached our write limit. Please wait a few minutes and try again.", ephemeral:true);
+                }
+                else
+                {
+                   m = await FollowupAsync("Something went wrong. Please contact an admin.", ephemeral:true);
+                }
+                _ = _debugService.PrintToChannels($"{ex.ToString()}");
             }
         }
     }
