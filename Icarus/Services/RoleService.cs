@@ -2,6 +2,7 @@
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,6 +36,8 @@ namespace Icarus.Services
 
         public async Task AddRole(ulong discordId, ulong roleId, ulong guildId)
         {
+            _ = _debugService.PrintToChannels($"AddRole triggered with args {discordId} {roleId} {guildId}");
+
             var guild = _client.GetGuild(guildId);
 
             var guildUser = guild.GetUser(discordId);
