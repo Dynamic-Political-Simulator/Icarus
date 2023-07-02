@@ -400,7 +400,7 @@ namespace Icarus.Discord.EconCommands
         }
 
         [SlashCommand("remove", "Starts the Process of removing a good from a province!")]
-        //[RequireAdmin]
+        [RequireAdmin]
         public async Task RemoveModifier()
         {
             using var db = new IcarusContext();
@@ -659,6 +659,7 @@ namespace Icarus.Discord.EconCommands
         }
 
         [SlashCommand("edit-desc", "Edit an existing modifier")]
+        [RequireAdmin]
         public async Task EditDescModifier(string province)
         {
             try
@@ -773,6 +774,7 @@ namespace Icarus.Discord.EconCommands
         }
 
         [SlashCommand("edit-values", "Edit an existing modifier")]
+        [RequireAdmin]
         public async Task EditValuesModifier(string province)
         {
             try
@@ -911,6 +913,7 @@ namespace Icarus.Discord.EconCommands
         }
 
         [SlashCommand("update-time","Update Time of temporary modifier")]
+        [RequireAdmin]
         public async Task UpdateTime(string province)
         {
             using var db = new IcarusContext();
