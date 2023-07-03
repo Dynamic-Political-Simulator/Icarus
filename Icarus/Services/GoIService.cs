@@ -86,7 +86,7 @@ namespace Icarus.Services
 
             foreach (var character in allLivingCharacters)
             {
-                _ = SyncGoiRoles(ulong.Parse(character.DiscordUserId), settings.GuildId);
+                await SyncGoiRoles(ulong.Parse(character.DiscordUserId), settings.GuildId);
             }
         }
 
