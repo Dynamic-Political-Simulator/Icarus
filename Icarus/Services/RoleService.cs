@@ -40,13 +40,23 @@ namespace Icarus.Services
             {
                 var guild = _client.GetGuild(guildId);
 
+                _ = _debugService.PrintToChannels($"1");
+
                 var guildUser = guild.GetUser(discordId);
+
+                _ = _debugService.PrintToChannels($"2");
 
                 var roleIds = guildUser.Roles.Select(r => r.Id);
 
+                _ = _debugService.PrintToChannels($"3");
+
                 if (!roleIds.Contains(roleId))
                 {
+                    _ = _debugService.PrintToChannels($"4");
+
                     var role = guild.GetRole(roleId);
+
+                    _ = _debugService.PrintToChannels($"5");
 
                     await guildUser.AddRoleAsync(role);
 
