@@ -27,6 +27,12 @@ namespace Icarus.Services
 
             var guildUser = guild.GetUser(discordId);
 
+            if (guildUser == null)
+            {
+                _ = _debugService.PrintToChannels($"Could not find user with id {discordId}, they likely left the server.");
+                return;
+            }
+
             var roleIds = guildUser.Roles.Select(r => r.Id);
 
             var roleIdsToRemove = roleIdsToCheck.Where(r => roleIds.Contains(r));
@@ -41,6 +47,12 @@ namespace Icarus.Services
                 var guild = _client.GetGuild(guildId);
 
                 var guildUser = guild.GetUser(discordId);
+
+                if (guildUser == null)
+                {
+                    _ = _debugService.PrintToChannels($"Could not find user with id {discordId}, they likely left the server.");
+                    return;
+                }
 
                 var roleIds = guildUser.Roles.Select(r => r.Id);
 
