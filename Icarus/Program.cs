@@ -24,15 +24,22 @@ namespace Icarus
 {
 	internal class Program
 	{
-		private readonly DiscordSocketClient _client = new DiscordSocketClient();
+		private static readonly DiscordSocketConfig discordSocketConfig = new DiscordSocketConfig()
+		{
+            GatewayIntents = GatewayIntents.All
+        };
+
+		private DiscordSocketClient _client;
 		// private readonly InteractionService _commands = new InteractionService(_client.Rest);
 
 		private IServiceProvider _services;
 
 		static Task Main(string[] args) => new Program().Start();
-
+		
 		public async Task Start()
 		{
+            _client = new DiscordSocketClient(discordSocketConfig);
+
             CultureInfo culture;
 
 			culture = CultureInfo.CreateSpecificCulture("en-US");
