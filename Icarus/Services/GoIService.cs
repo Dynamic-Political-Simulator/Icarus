@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Icarus.Services
@@ -87,6 +88,7 @@ namespace Icarus.Services
             foreach (var character in allLivingCharacters)
             {
                 await SyncGoiRoles(ulong.Parse(character.DiscordUserId), settings.GuildId);
+                Thread.Sleep(100);
             }
         }
 
