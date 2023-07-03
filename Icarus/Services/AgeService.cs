@@ -27,7 +27,7 @@ namespace Icarus.Services
             _tickService.TickEvent += DoAging;
         }
 
-        public void DoAging()
+        public async void DoAging()
         {
             using var db = new IcarusContext();
 
@@ -51,7 +51,7 @@ namespace Icarus.Services
 
                 gameState.LastAgingEvent = DateTime.UtcNow;
                 gameState.Year += YEARS_PER_DAY;
-                db.SaveChangesAsync();
+                await db.SaveChangesAsync();
 
                 _ = _debugService.PrintToChannels($"Aging event done, the year is now {gameState.Year}.");
             }

@@ -29,7 +29,7 @@ namespace Icarus.Services
 
             var roleIds = guildUser.Roles.Select(r => r.Id);
 
-            var roleIdsToRemove = roleIdsToCheck.Select(r => !roleIds.Contains(r));
+            var roleIdsToRemove = roleIdsToCheck.Where(r => roleIds.Contains(r));
 
             await guildUser.RemoveRolesAsync(roleIdsToCheck);
         }
