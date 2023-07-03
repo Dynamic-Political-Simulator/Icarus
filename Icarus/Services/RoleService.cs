@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Icarus.Services
@@ -37,7 +38,12 @@ namespace Icarus.Services
 
             var roleIdsToRemove = roleIdsToCheck.Where(r => roleIds.Contains(r));
 
-            await guildUser.RemoveRolesAsync(roleIdsToCheck);
+            // I hate to do this but Discord's rate limit leaves me no choice
+            foreach ( var roleIdToRemove in roleIdsToRemove)
+            {
+                await guildUser.RemoveRoleAsync(roleIdToRemove);
+                Thread.Sleep(100);
+            }
         }
 
         public async Task AddRole(ulong roleId, ulong discordId, ulong guildId)
