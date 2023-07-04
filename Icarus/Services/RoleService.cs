@@ -24,25 +24,32 @@ namespace Icarus.Services
 
         public async Task RemoveRoles(List<ulong> roleIdsToCheck, ulong discordId, ulong guildId)
         {
-            var guild = _client.GetGuild(guildId);
-
-            var guildUser = guild.GetUser(discordId);
-
-            if (guildUser == null)
+            try
             {
-                _ = _debugService.PrintToChannels($"Could not find user with id {discordId}, they likely left the server.");
-                return;
+                var guild = _client.GetGuild(guildId);
+
+                var guildUser = guild.GetUser(discordId);
+
+                if (guildUser == null)
+                {
+                    _ = _debugService.PrintToChannels($"Could not find user with id {discordId}, they likely left the server.");
+                    return;
+                }
+
+                var roleIds = guildUser.Roles.Select(r => r.Id);
+
+                var roleIdsToRemove = roleIdsToCheck.Where(r => roleIds.Contains(r));
+
+                // I hate to do this but Discord's rate limit leaves me no choice
+                foreach (var roleIdToRemove in roleIdsToRemove)
+                {
+                    await guildUser.RemoveRoleAsync(roleIdToRemove);
+                    Thread.Sleep(100);
+                }
             }
-
-            var roleIds = guildUser.Roles.Select(r => r.Id);
-
-            var roleIdsToRemove = roleIdsToCheck.Where(r => roleIds.Contains(r));
-
-            // I hate to do this but Discord's rate limit leaves me no choice
-            foreach ( var roleIdToRemove in roleIdsToRemove)
+            catch (Exception ex)
             {
-                await guildUser.RemoveRoleAsync(roleIdToRemove);
-                Thread.Sleep(100);
+                _ = _debugService.PrintToChannels($"Exception occured in RemoveRoles: {ex.Message}");
             }
         }
 
@@ -75,7 +82,6 @@ namespace Icarus.Services
             {
                 _ = _debugService.PrintToChannels($"Exception occured in AddRole: {ex.Message}");
             }
-            
         }
     }
 }
