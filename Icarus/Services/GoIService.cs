@@ -98,12 +98,12 @@ namespace Icarus.Services
 
             var character = await _characterService.GetActiveCharacter(discordId.ToString());
 
-            var desiredRoleId = character.GroupOfInterest.DiscordRoleId;
-
-            if (desiredRoleId == null) 
+            if (character.GoIid == null)
             {
                 return;
             }
+
+            var desiredRoleId = character.GroupOfInterest.DiscordRoleId;
 
             var allGroups = await GetAllGroups();
 
