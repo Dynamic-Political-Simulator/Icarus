@@ -51,6 +51,7 @@ namespace Icarus.Services
 
                 gameState.LastAgingEvent = DateTime.UtcNow;
                 gameState.Year += YEARS_PER_DAY;
+                db.Update(gameState);
                 await db.SaveChangesAsync();
 
                 _ = _debugService.PrintToChannels($"Aging event done, the year is now {gameState.Year}.");
