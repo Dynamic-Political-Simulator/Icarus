@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 
 namespace Icarus.Services
 {
@@ -22,13 +23,42 @@ namespace Icarus.Services
 			_debugService = debugService;
 		}
 
-		public EmbedBuilder BuildStaffActionMessage(StaffAction staffAction)
+		private Color GetStaffActionColour(StaffActionStatus status)
+		{
+            switch (status)
+            {
+                case StaffActionStatus.TODO: return Color.Red;
+                case StaffActionStatus.IN_PROGRESS: return Color.Gold;
+                case StaffActionStatus.DONE: return Color.Green;
+                default: return Color.Red;
+            }
+        }
+
+		public List<StaffAction> GetTodoStaffActions()
+		{
+			using var db = new IcarusContext();
+
+			var saTodo = db.StaffActions.Where(s => s.Status == StaffActionStatus.TODO || s.Status == StaffActionStatus.IN_PROGRESS);
+
+			return saTodo.ToList();
+		}
+
+		public StaffAction GetOldestTodoStaffAction()
+		{
+			using var db = new IcarusContext();
+
+			var oldest = db.StaffActions.Where(sa => sa.Status == StaffActionStatus.TODO || sa.Status == StaffActionStatus.IN_PROGRESS).OrderBy(sa => sa.StaffActionId).First();
+
+			return oldest;
+		}
+
+        public EmbedBuilder BuildStaffActionMessage(StaffAction staffAction)
 		{
 			var submitter = _client.GetUser(ulong.Parse(staffAction.SubmitterId));
 
 			var embedBuilder = new EmbedBuilder
 			{
-				Color = Color.Purple,
+				Color = GetStaffActionColour(staffAction.Status),
 				Title = staffAction.ActionTitle + " - " + staffAction.StaffActionId.ToString() + " - " + submitter.Username,
 			};
 
@@ -143,7 +173,7 @@ namespace Icarus.Services
 			}
 
 		}
-	}
+    }
 
 
 }

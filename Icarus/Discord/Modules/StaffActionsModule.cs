@@ -26,6 +26,38 @@ namespace Icarus.Discord.Modules
 			_client = client;
 		}
 
+        [SlashCommand("staff-action-oldest", "Shows the oldest Staff Action.")]
+        [RequireAdmin]
+        public async Task ViewOldestStaffAction()
+		{
+			var sa = _staffActionService.GetOldestTodoStaffAction();
+
+			var embedBuilder = _staffActionService.BuildStaffActionMessage(sa);
+
+			await RespondAsync(embed: embedBuilder.Build(), ephemeral: false);
+		}
+
+        [SlashCommand("staff-action-todo", "Shows all todo and in progress Staff Actions.")]
+        [RequireAdmin]
+        public async Task ViewTodoStaffActions()
+		{
+			var result = _staffActionService.GetTodoStaffActions();
+
+			var embedBuilder = new EmbedBuilder();
+
+			var sb = new StringBuilder();
+
+			foreach (var action in result)
+			{
+				sb.AppendLine($"{action.StaffActionId} - {action.Status} - Submitted by: {action.Submitter}");
+			}
+
+			embedBuilder.WithTitle("Staff Actions TODO");
+			embedBuilder.WithDescription(sb.ToString());
+
+			await RespondAsync(embed: embedBuilder.Build(), ephemeral: false);
+		}
+
 		[SlashCommand("add-channel", "Adds the current channel as the staff action channel")]
 		[RequireAdmin]
 		public async Task CreateStaffActionChannel()

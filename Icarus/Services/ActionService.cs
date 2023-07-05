@@ -1,6 +1,7 @@
 ﻿using Discord.WebSocket;
 using Icarus.Context;
 using Icarus.Context.Models;
+using Icarus.Dto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -116,6 +117,38 @@ namespace Icarus.Services
             await db.SaveChangesAsync();
 
             return $"Added favour type with name {name}";
+        }
+
+        public async IAsyncEnumerable<CharacterWithDebtDto> GetLivingCharactersWithDebt()
+        {
+            using var db = new IcarusContext();
+
+            var characters = await _characterService.GetAllCharactersIncludeGoI();
+
+            foreach (var character in characters)
+            {
+                var favours = db.Tokens.Include(t => t.TokenType)
+                    .Where(t => t.PlayerCharacterId == character.CharacterId && t.Amount < 0).ToList();
+
+                if (!favours.Any())
+                {
+                    continue;
+                }
+
+                var newDto = new CharacterWithDebtDto()
+                {
+                    CharacterName = character.CharacterName,
+                    DiscordId = character.DiscordUserId,
+                    FavourDebtLines = new List<FavourDebtLine>()
+                };
+
+                foreach (var favour in favours)
+                {
+                    newDto.FavourDebtLines.Add(new FavourDebtLine { FavourName = favour.TokenType.TokenTypeName, Amount = favour.Amount });
+                }
+
+                yield return newDto;
+            }
         }
     }
 }

@@ -54,6 +54,29 @@ namespace Icarus.Discord.Modules
             await RespondAsync(embed: embedBuilder.Build());
         }
 
+        [SlashCommand("favour-debt-list", "Lists the living characters with favour debt.")]
+        public async Task ShowLivingCharactersWithDebt()
+        {
+            var embedBuilder = new EmbedBuilder();
+
+            var sb  = new StringBuilder();
+
+            await foreach (var line in _actionService.GetLivingCharactersWithDebt())
+            {
+                var user = await _client.GetUserAsync(ulong.Parse(line.DiscordId));
+                sb.AppendLine($"{user.Username} - {line.CharacterName}");
+                foreach (var debt in line.FavourDebtLines)
+                {
+                    sb.AppendLine($"{debt.FavourName}: {debt.Amount}");
+                }
+            }
+
+            embedBuilder.WithTitle("Favour Debt");
+            embedBuilder.WithDescription(sb.ToString());
+
+            await RespondAsync(embed: embedBuilder.Build(), ephemeral: false);
+        }
+
         [SlashCommand("my-favours", "Lists your tokens.")]
         [RequireProfile]
         public async Task ListMyTokens()
@@ -80,7 +103,7 @@ namespace Icarus.Discord.Modules
                 embedBuilder.WithDescription("You have no favours.");
             }
             
-            await RespondAsync(embed: embedBuilder.Build());
+            await RespondAsync(embed: embedBuilder.Build(), ephemeral: true);
         }
 
         [SlashCommand("action-example", "action example please ignore")]
