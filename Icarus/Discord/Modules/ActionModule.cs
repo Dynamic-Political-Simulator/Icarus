@@ -64,7 +64,7 @@ namespace Icarus.Discord.Modules
             await foreach (var line in _actionService.GetLivingCharactersWithDebt())
             {
                 var user = await _client.GetUserAsync(ulong.Parse(line.DiscordId));
-                sb.AppendLine($"{user.Username} - {line.CharacterName}");
+                sb.AppendLine(Format.Bold($"{user.Username} - {line.CharacterName}"));
                 foreach (var debt in line.FavourDebtLines)
                 {
                     sb.AppendLine($"{debt.FavourName}: {debt.Amount}");
