@@ -26,7 +26,7 @@ namespace Icarus.Discord.Modules
 			_client = client;
 		}
 
-        [SlashCommand("staff-action-oldest", "Shows the oldest Staff Action.")]
+        [SlashCommand("oldest", "Shows the oldest Staff Action.")]
         [RequireAdmin]
         public async Task ViewOldestStaffAction()
 		{
@@ -37,7 +37,7 @@ namespace Icarus.Discord.Modules
 			await RespondAsync(embed: embedBuilder.Build(), ephemeral: false);
 		}
 
-        [SlashCommand("staff-action-todo", "Shows all todo and in progress Staff Actions.")]
+        [SlashCommand("todo", "Shows all todo and in progress Staff Actions.")]
         [RequireAdmin]
         public async Task ViewTodoStaffActions()
 		{
@@ -49,7 +49,8 @@ namespace Icarus.Discord.Modules
 
 			foreach (var action in result)
 			{
-				sb.AppendLine($"{action.StaffActionId} - {action.Status} - Submitted by: {action.Submitter}");
+				var user = await _client.GetUserAsync(ulong.Parse(action.SubmitterId));
+				sb.AppendLine($"{action.StaffActionId} - {action.Status} - Submitted by: {user.Username}");
 			}
 
 			embedBuilder.WithTitle("Staff Actions TODO");
