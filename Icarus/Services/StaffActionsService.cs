@@ -38,7 +38,8 @@ namespace Icarus.Services
 		{
 			using var db = new IcarusContext();
 
-			var saTodo = db.StaffActions.Where(s => s.Status == StaffActionStatus.TODO || s.Status == StaffActionStatus.IN_PROGRESS);
+			var saTodo = db.StaffActions.Include(sa => sa.Submitter).Include(sa => sa.AssignedTo)
+                .Where(s => s.Status == StaffActionStatus.TODO || s.Status == StaffActionStatus.IN_PROGRESS);
 
 			return saTodo.ToList();
 		}
