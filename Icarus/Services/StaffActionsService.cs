@@ -47,7 +47,8 @@ namespace Icarus.Services
 		{
 			using var db = new IcarusContext();
 
-			var oldest = db.StaffActions.Where(sa => sa.Status == StaffActionStatus.TODO || sa.Status == StaffActionStatus.IN_PROGRESS).OrderBy(sa => sa.StaffActionId).First();
+			var oldest = db.StaffActions.Include(sa => sa.Submitter).Include(sa => sa.AssignedTo)
+				.Where(sa => sa.Status == StaffActionStatus.TODO || sa.Status == StaffActionStatus.IN_PROGRESS).OrderBy(sa => sa.StaffActionId).First();
 
 			return oldest;
 		}
