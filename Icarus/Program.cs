@@ -19,6 +19,7 @@ using Icarus.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using IResult = Discord.Interactions.IResult;
+using RunMode = Discord.Interactions.RunMode;
 
 namespace Icarus
 {
@@ -69,7 +70,13 @@ namespace Icarus
 		{
 			var icarusConfig = ConfigFactory.GetConfig();
 
-			InteractionService interactionService = new InteractionService(_client.Rest);
+			var interactionServiceConfig = new InteractionServiceConfig()
+			{
+				DefaultRunMode = RunMode.Async,
+				LogLevel = LogSeverity.Debug
+			};
+
+			InteractionService interactionService = new InteractionService(_client.Rest, interactionServiceConfig);
 			// Register slash commands defined in modules
 			await interactionService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), _services);
 			await interactionService.RegisterCommandsToGuildAsync(icarusConfig.GuildId); // TODO: Register commands globally when this reaches production (otherwise they will not be usable in DMs)
