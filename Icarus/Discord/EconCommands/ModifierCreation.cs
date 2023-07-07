@@ -124,6 +124,11 @@ namespace Icarus.Discord.EconCommands
                 Description = responseModal.Data.Components.FirstOrDefault(c => c.CustomId == "ModifierDescription").Value
             };
 
+            if(db.Modifiers.FirstOrDefault(m => m.Name == modifier.Name) != null)
+            {
+                await responseModal.RespondAsync("Can't have multiple modifiers with the same Name.", ephemeral: true);
+                return;
+            }
 
             //On to the next stage
             List<string> provinces = new List<string>();
