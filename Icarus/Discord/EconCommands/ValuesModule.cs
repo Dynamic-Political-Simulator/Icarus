@@ -173,11 +173,32 @@ namespace Icarus.Discord.EconCommands
         }
 
         [SlashCommand("show", "Show specific info about a Value")]
-        public async Task ShowValue(string ProvinceName, string ValueTAG)
+        public async Task ShowValue([Summary("Province-Name","Name of the Province")]string ProvinceName,
+            [Summary("Value-Tag", "The Tag of the Value to show"),
+			Choice("Base Crop Yield", "BCY"),
+			Choice("Infrastructure", "I"),
+			Choice("Urbanisation", "U"),
+            Choice("Mechanisation", "M"),
+            Choice("Agr. Output","AGR"),
+            Choice("Ind. Output", "IND"),
+            Choice("Economic Strength", "ES"),
+            Choice("Trade", "T"),
+            Choice("Wealth", "W"),
+            Choice("Health", "H"),
+            Choice("Security", "SEC"),
+            Choice("Education Access","EDU"),
+            Choice("Literacy", "LIT"),
+            Choice("Welfare", "WEL"),
+            Choice("Destitution", "DES")] string ValueTAG)
         {
             using var db = new IcarusContext();
-
-            Value value = db.Provinces.FirstOrDefault(p => p.Name == ProvinceName).Values.FirstOrDefault(v => v.TAG == ValueTAG);
+            Province province = db.Provinces.FirstOrDefault(p => p.Name == ProvinceName);
+            if (province == null)
+            {
+                await RespondAsync($"{ProvinceName} was not found.");
+                return;
+            }
+            Value value = province.Values.FirstOrDefault(v => v.TAG == ValueTAG);
             if (value == null)
             {
                 await RespondAsync($"{ValueTAG} was not found in {ProvinceName}");

@@ -104,7 +104,7 @@ namespace Icarus.Services
             float Change;
             if (value.CurrentValue < ValueGoal) //The change needs to be positive
             {
-                Change = 0.5f + ((ValueGoal - value.CurrentValue) * config.ValueChangeRatio);
+                Change = 0.2f + ((ValueGoal - value.CurrentValue) * config.ValueChangeRatio);
                 //If the change would move us above the goal then just change by enough to give us the exact Goal
                 if ((value.CurrentValue + Change) > ValueGoal)
                 { 
