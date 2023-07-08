@@ -15,6 +15,18 @@ namespace Icarus.Services
 {
     public class CharacterService
     {
+        public async Task DisableRoleSync(ulong discordId)
+        {
+            var character = await GetActiveCharacter(discordId.ToString());
+
+            character.GoiRoleSync = false;
+
+            using var db = new IcarusContext();
+
+            db.Characters.Update(character);
+            await db.SaveChangesAsync();
+        }
+
         public async Task<PlayerCharacter> GetCharacter(string characterId)
         {
             using var db = new IcarusContext();

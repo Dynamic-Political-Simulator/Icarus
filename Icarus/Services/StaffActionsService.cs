@@ -34,6 +34,40 @@ namespace Icarus.Services
             }
         }
 
+		public async Task Cleanup()
+		{
+			using var db = new IcarusContext();
+
+			var saChannel = db.StaffActionChannels.FirstOrDefault();
+
+			var channel = (ITextChannel) await _client.GetChannelAsync(ulong.Parse(saChannel.ChannelId));
+
+			var amountOfStaffActions = db.StaffActions.Count();
+
+			var staffActionsId = await db.StaffActions.Select(sa => sa.MessageId).ToListAsync();
+
+			await foreach(var messageBatch in channel.GetMessagesAsync(amountOfStaffActions + 100))
+			{
+				foreach (var message in messageBatch)
+				{
+					if (!staffActionsId.Contains(message.Id.ToString()))
+					{
+						await message.DeleteAsync();
+					}
+				}
+			}
+		}
+
+		public StaffAction GetStaffActionById(int id)
+		{
+            using var db = new IcarusContext();
+
+            var staffAction = db.StaffActions.Include(sa => sa.Submitter).Include(sa => sa.AssignedTo)
+                .SingleOrDefault(sa => sa.StaffActionId == id);
+
+            return staffAction;
+        }
+
 		public List<StaffAction> GetTodoStaffActions()
 		{
 			using var db = new IcarusContext();
