@@ -14,12 +14,14 @@ namespace Icarus.Services
     {
         private readonly DiscordSocketClient _client;
 
+        private readonly CharacterService _characterService;
         private readonly DebugService _debugService;
 
-        public RoleService(DiscordSocketClient client, DebugService debugService)
+        public RoleService(DiscordSocketClient client,  DebugService debugService, CharacterService characterService)
         {
             _client = client;
             _debugService = debugService;
+            _characterService = characterService;
         }
 
         public async Task RemoveRoles(List<ulong> roleIdsToCheck, ulong discordId, ulong guildId)
@@ -64,6 +66,7 @@ namespace Icarus.Services
                 if (guildUser == null)
                 {
                     _ = _debugService.PrintToChannels($"Could not find user with id {discordId}, they likely left the server.");
+                    DisableRoleSync(discordId);
                     return;
                 }
 
@@ -82,6 +85,11 @@ namespace Icarus.Services
             {
                 _ = _debugService.PrintToChannels($"Exception occured in AddRole: {ex.Message}");
             }
+        }
+
+        public async Task DisableRoleSync(ulong discordId)
+        {
+            _characterService.DisableRoleSync(discordId);
         }
     }
 }

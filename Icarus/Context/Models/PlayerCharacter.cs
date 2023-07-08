@@ -27,5 +27,7 @@ namespace Icarus.Context.Models
         public int YearOfDeath { get; set; } = -1;
 
         public virtual List<CharacterToken> Tokens { get; set; }
+
+        public bool? GoiRoleSync { get; set; }
     }
 }

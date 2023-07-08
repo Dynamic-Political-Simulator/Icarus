@@ -98,7 +98,7 @@ namespace Icarus.Services
 
             var character = await _characterService.GetActiveCharacter(discordId.ToString());
 
-            if (character.GoIid == null)
+            if (character.GoIid == null || character.GoiRoleSync == false)
             {
                 return;
             }

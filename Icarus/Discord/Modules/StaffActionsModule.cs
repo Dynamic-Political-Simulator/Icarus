@@ -26,6 +26,13 @@ namespace Icarus.Discord.Modules
 			_client = client;
 		}
 
+        [SlashCommand("cleanup", "Cleans up the SA channel.")]
+        [RequireAdmin]
+        public async Task Cleanup()
+		{
+
+		}
+
         [SlashCommand("fetch", "Gets the SA by ID.")]
         [RequireAdmin]
         public async Task Fetch(int id)
