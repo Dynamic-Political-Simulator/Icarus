@@ -163,7 +163,13 @@ namespace Icarus.Services
             foreach (Modifier modifier in Value.Province.Nation.Modifiers.Where(m => m.Modifiers.FirstOrDefault(vm => vm.ValueTag == Value.TAG) != null))
             {
                 vm = modifier.Modifiers.FirstOrDefault(vm => vm.ValueTag == Value.TAG);
-                desc.Add(modifier.Name, (float)Math.Round(vm.Modifier,2));
+                float LevelModifier = 1f;
+                if (modifier.isGood == true)
+                {
+                    LevelModifier = GetModifierFromLevel(modifier.Level);
+                    desc.Add($"{GetDescFromLevel(modifier.Level)} {modifier.Name} Industry", (float)Math.Round(vm.Modifier * LevelModifier, 2));
+                }
+                desc.Add($"{modifier.Name}", (float)Math.Round(vm.Modifier*LevelModifier,2));
             }
 
             using var db = new IcarusContext();
@@ -219,6 +225,55 @@ namespace Icarus.Services
         }   
 
         /// <summary>
+        /// Convert the enum Level to a float modifier.
+        /// </summary>
+        /// <param name="level"></param>
+        /// <returns></returns>
+        public float GetModifierFromLevel (Level level)
+        {
+            switch (level)
+            {
+                case Level.Miniscule: return 0.25f;
+                case Level.Small: return 0.5f;
+                case Level.Normal: return 1f;
+                case Level.Large: return 2f;
+                case Level.Massive: return 4f;
+                default: return 1f;
+            }
+        }
+
+        /// <summary>
+        /// Provide the description string for the enum level
+        /// </summary>
+        /// <param name="level"></param>
+        /// <returns></returns>
+        public string GetDescFromLevel(Level level)
+        {
+            switch (level)
+            {
+                case Level.Miniscule: return "Miniscule";
+                case Level.Small: return "Small";
+                case Level.Normal: return "";
+                case Level.Large: return "Large";
+                case Level.Massive: return "Massive";
+                default: return "";
+            }
+        }
+
+        public Level GetNextLevel(Level level)
+        {
+            switch (level)
+            {
+                case Level.Miniscule: return Level.Small;
+                case Level.Small: return Level.Normal;
+                case Level.Normal: return Level.Large;
+                case Level.Large: return Level.Massive;
+                case Level.Massive: return Level.Massive;
+                default: return Level.Normal;
+            }
+        }
+
+        /// <summary>
         /// Combine all modifiers affecting a certain Value.
         /// </summary>
         /// <param name="Value">Value to aggregate modifiers for.</param>
@@ -232,7 +287,12 @@ namespace Icarus.Services
             foreach (Modifier modifier in Value.Province.Modifiers.Where(m => m.Modifiers.FirstOrDefault(vm => vm.ValueTag == Value.TAG) != null)) 
             {
                 vm = modifier.Modifiers.FirstOrDefault(vm => vm.ValueTag == Value.TAG);
-                Total += vm.Modifier;
+                float LevelModifier = 1f;
+                if ( modifier.isGood == true)
+                {
+                    LevelModifier = GetModifierFromLevel(modifier.Level);
+                }
+                Total += vm.Modifier * LevelModifier;
             }
             //Aggregate the global Modifiers
             foreach (Modifier modifier in Value.Province.Nation.Modifiers.Where(m => m.Modifiers.FirstOrDefault(vm => vm.ValueTag == Value.TAG) != null))

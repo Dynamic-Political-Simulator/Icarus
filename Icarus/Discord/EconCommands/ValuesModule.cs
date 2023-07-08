@@ -44,7 +44,23 @@ namespace Icarus.Discord.EconCommands
 
         [SlashCommand("set","Set the specified Value to a certain Number.")]
         [RequireAdmin]
-        public async Task SetValue(string ProvinceName,string ValueName, float Number)
+        public async Task SetValue(string ProvinceName,
+            [Summary("Value-Tag", "The Tag of the Value to change"),
+            Choice("Base Crop Yield", "BCY"),
+            Choice("Infrastructure", "I"),
+            Choice("Urbanisation", "U"),
+            Choice("Mechanisation", "M"),
+            Choice("Agr. Output","AGR"),
+            Choice("Ind. Output", "IND"),
+            Choice("Economic Strength", "ES"),
+            Choice("Trade", "T"),
+            Choice("Wealth", "W"),
+            Choice("Health", "H"),
+            Choice("Security", "SEC"),
+            Choice("Education Access","EDU"),
+            Choice("Literacy", "LIT"),
+            Choice("Welfare", "WEL"),
+            Choice("Destitution", "DES")] string ValueTag, float Number)
         {
             using var db = new IcarusContext();
 
@@ -57,14 +73,59 @@ namespace Icarus.Discord.EconCommands
             {
                 await RespondAsync($"{ProvinceName} was not found!");
             }
-            Value Value = province.Values.FirstOrDefault(v => v.Name == ValueName);
+            Value Value = province.Values.FirstOrDefault(v => v.TAG == ValueTag);
             if (Value == null)
             {
-                await RespondAsync($"{ValueName} is not a Valid Value");
+                await RespondAsync($"{ValueTag} is not a Valid Value");
             }
             
 
             Value.CurrentValue = Number;
+
+            await db.SaveChangesAsync();
+            await RespondAsync("Success!");
+
+        }
+
+        [SlashCommand("set-base", "Set the specified Value to a certain Number.")]
+        [RequireAdmin]
+        public async Task SetBaseValue(string ProvinceName,
+            [Summary("Value-Tag", "The Tag of the Value to change"),
+            Choice("Base Crop Yield", "BCY"),
+            Choice("Infrastructure", "I"),
+            Choice("Urbanisation", "U"),
+            Choice("Mechanisation", "M"),
+            Choice("Agr. Output","AGR"),
+            Choice("Ind. Output", "IND"),
+            Choice("Economic Strength", "ES"),
+            Choice("Trade", "T"),
+            Choice("Wealth", "W"),
+            Choice("Health", "H"),
+            Choice("Security", "SEC"),
+            Choice("Education Access","EDU"),
+            Choice("Literacy", "LIT"),
+            Choice("Welfare", "WEL"),
+            Choice("Destitution", "DES")] string ValueTag, float Number)
+        {
+            using var db = new IcarusContext();
+
+            if (Number < 0)
+            {
+                await RespondAsync("A Value can not be smaller than Zero");
+            }
+            Province province = db.Provinces.FirstOrDefault(p => p.Name == ProvinceName);
+            if (province == null)
+            {
+                await RespondAsync($"{ProvinceName} was not found!");
+            }
+            Value Value = province.Values.FirstOrDefault(v => v.TAG == ValueTag);
+            if (Value == null)
+            {
+                await RespondAsync($"{ValueTag} is not a Valid Value");
+            }
+
+
+            Value.BaseBalue = Number;
 
             await db.SaveChangesAsync();
             await RespondAsync("Success!");
@@ -119,7 +180,7 @@ namespace Icarus.Discord.EconCommands
             StringBuilder GoodsList = new StringBuilder();
             foreach (Modifier good in province.Modifiers.Where(m => m.isGood == true))
             {
-                GoodsList.Append(good.Name+", ");
+                GoodsList.Append($"{_valueManagementService.GetDescFromLevel(good.Level)} {good.Name} Industry" + ", ");
             }
             if(province.Modifiers.FirstOrDefault(m => m.isGood == true) == null)
             {

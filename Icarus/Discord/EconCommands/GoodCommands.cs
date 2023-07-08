@@ -261,7 +261,7 @@ namespace Icarus.Discord.EconCommands
         }
 
         [SlashCommand("show", "Displays Information about a good")]
-        public async Task ShowModifier(string province = null)
+        public async Task ShowGood(string province)
         {
             using var db = new IcarusContext();
 
@@ -330,14 +330,14 @@ namespace Icarus.Discord.EconCommands
 
             EmbedBuilder emb = new EmbedBuilder()
             {
-                Title = Modifier.Name,
+                Title = $"{_valueManagementService.GetDescFromLevel(Modifier.Level)} {Modifier.Name} Industry",
                 Description = Modifier.Description,
             };
 
             StringBuilder Effects = new StringBuilder();
             foreach (ValueModifier vm in Modifier.Modifiers)
             {
-                Effects.AppendLine($"{vm.ValueTag}:{vm.Modifier}");
+                Effects.AppendLine($"{vm.ValueTag}:{Math.Round(vm.Modifier * _valueManagementService.GetModifierFromLevel(Modifier.Level),2)}");
                 if (vm.Decay != 0)
                 {
                     Effects.Append($" Decay: {vm.Decay}");
@@ -354,6 +354,185 @@ namespace Icarus.Discord.EconCommands
                 x.Content = $"Showing Modifier {Modifier.Name}";
                 x.Components = null;
                 x.Embed = emb.Build();
+            });
+        }
+
+        [SlashCommand("add-level", "Increases the level of a good by one.")]
+        [RequireAdmin]
+        public async Task AddGoodLevel()
+        {
+            using var db = new IcarusContext();
+
+            List<string> provinces = new List<string>();
+            foreach (Province province in db.Provinces.Where(p => p.Modifiers.Any(m => m.isGood == true)))
+            {
+                provinces.Add(province.Name);
+                Debug.WriteLine(province.Name);
+            }
+            int messageId = Random.Shared.Next(0, 9999);
+            SelectMenuBuilder sm = _interactionHelpers.CreateSelectMenu(messageId.ToString(), "ProvinceSelection", provinces, "Select Provinces");
+            sm.MinValues = 1;
+            sm.MaxValues = 1;
+            Console.WriteLine("Building Menu");
+            ComponentBuilder builder = new ComponentBuilder()
+                .WithSelectMenu(sm);
+
+
+            // Respond to the modal.
+            await RespondAsync("Choose Province", components: builder.Build(), ephemeral: true);
+
+            Predicate<SocketInteraction> ProvinceSelection = s =>
+            {
+                if (s.GetType() != typeof(SocketMessageComponent)) return false;
+                SocketMessageComponent d = (SocketMessageComponent)s;
+                return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "ProvinceSelection");
+            };
+
+            SocketMessageComponent response = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), ProvinceSelection);
+
+            Province _province = db.Provinces.FirstOrDefault(p => p.Name == response.Data.Values.First());
+            if (_province == null)
+            {
+                await RespondAsync("Province not found!");
+                return;
+            }
+
+            List<string> goods = new List<string>();
+            foreach (Modifier good in _province.Modifiers.Where(m => m.isGood == true))
+            {
+                goods.Add(good.Name);
+                Debug.WriteLine(good.Name);
+            }
+
+            if (goods.Count == 0)
+            {
+                await response.UpdateAsync(x => {
+                    x.Content = $"{_province.Name} has no Goods which can be removed.";
+                    x.Components = null;
+                });
+            }
+
+            sm = _interactionHelpers.CreateSelectMenu(messageId.ToString(), "GoodSelection", goods, "Select Good");
+            sm.MinValues = 1;
+            sm.MaxValues = 1;
+            Console.WriteLine("Building Menu");
+            builder = new ComponentBuilder()
+                .WithSelectMenu(sm);
+
+            await response.UpdateAsync(x => {
+                x.Content = "Select Goods!";
+                x.Components = builder.Build();
+            });
+
+            Predicate<SocketInteraction> GoodSelection = s =>
+            {
+                if (s.GetType() != typeof(SocketMessageComponent)) return false;
+                SocketMessageComponent d = (SocketMessageComponent)s;
+                return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "GoodSelection");
+            };
+
+            response = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), GoodSelection);
+
+            Modifier Good = _province.Modifiers.FirstOrDefault(m => m.Name == response.Data.Values.First());
+            Level old = Good.Level;
+            Good.Level = _valueManagementService.GetNextLevel(Good.Level);
+            await db.SaveChangesAsync();
+            await response.UpdateAsync(x => {
+                x.Content = $"Increased from {_valueManagementService.GetDescFromLevel(old)} {Good.Name} Industry to {_valueManagementService.GetDescFromLevel(Good.Level)} {Good.Name} Industry";
+                x.Components = null;
+            });
+        }
+
+        [SlashCommand("set-level", "Increases the level of a good by one.")]
+        [RequireAdmin]
+        public async Task SetGoodLevel(
+            [Summary("Good-Level", "The level of the good."),
+            Choice("Miniscule", "Miniscule"),
+            Choice("Small", "Small"),
+            Choice("Normal", "Normal"),
+            Choice("Large", "Large"),
+            Choice("Massive", "Massive"),]string level)
+        {
+            Level _level = (Level)Enum.Parse(typeof(Level), level);
+            using var db = new IcarusContext();
+
+            List<string> provinces = new List<string>();
+            foreach (Province province in db.Provinces.Where(p => p.Modifiers.Any(m => m.isGood == true)))
+            {
+                provinces.Add(province.Name);
+                Debug.WriteLine(province.Name);
+            }
+            int messageId = Random.Shared.Next(0, 9999);
+            SelectMenuBuilder sm = _interactionHelpers.CreateSelectMenu(messageId.ToString(), "ProvinceSelection", provinces, "Select Provinces");
+            sm.MinValues = 1;
+            sm.MaxValues = 1;
+            Console.WriteLine("Building Menu");
+            ComponentBuilder builder = new ComponentBuilder()
+                .WithSelectMenu(sm);
+
+
+            // Respond to the modal.
+            await RespondAsync("Choose Province", components: builder.Build(), ephemeral: true);
+
+            Predicate<SocketInteraction> ProvinceSelection = s =>
+            {
+                if (s.GetType() != typeof(SocketMessageComponent)) return false;
+                SocketMessageComponent d = (SocketMessageComponent)s;
+                return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "ProvinceSelection");
+            };
+
+            SocketMessageComponent response = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), ProvinceSelection);
+
+            Province _province = db.Provinces.FirstOrDefault(p => p.Name == response.Data.Values.First());
+            if (_province == null)
+            {
+                await RespondAsync("Province not found!");
+                return;
+            }
+
+            List<string> goods = new List<string>();
+            foreach (Modifier good in _province.Modifiers.Where(m => m.isGood == true))
+            {
+                goods.Add(good.Name);
+                Debug.WriteLine(good.Name);
+            }
+
+            if (goods.Count == 0)
+            {
+                await response.UpdateAsync(x => {
+                    x.Content = $"{_province.Name} has no Goods which can be removed.";
+                    x.Components = null;
+                });
+            }
+
+            sm = _interactionHelpers.CreateSelectMenu(messageId.ToString(), "GoodSelection", goods, "Select Good");
+            sm.MinValues = 1;
+            sm.MaxValues = 1;
+            Console.WriteLine("Building Menu");
+            builder = new ComponentBuilder()
+                .WithSelectMenu(sm);
+
+            await response.UpdateAsync(x => {
+                x.Content = "Select Goods!";
+                x.Components = builder.Build();
+            });
+
+            Predicate<SocketInteraction> GoodSelection = s =>
+            {
+                if (s.GetType() != typeof(SocketMessageComponent)) return false;
+                SocketMessageComponent d = (SocketMessageComponent)s;
+                return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "GoodSelection");
+            };
+
+            response = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), GoodSelection);
+
+            Modifier Good = _province.Modifiers.FirstOrDefault(m => m.Name == response.Data.Values.First());
+            Level old = Good.Level;
+            Good.Level = _level;
+            await db.SaveChangesAsync();
+            await response.UpdateAsync(x => {
+                x.Content = $"Changed from {_valueManagementService.GetDescFromLevel(old)} {Good.Name} Industry to {_valueManagementService.GetDescFromLevel(Good.Level)} {Good.Name} Industry";
+                x.Components = null;
             });
         }
     }
