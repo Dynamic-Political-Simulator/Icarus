@@ -34,6 +34,16 @@ namespace Icarus.Services
             }
         }
 
+		public StaffAction GetStaffActionById(int id)
+		{
+            using var db = new IcarusContext();
+
+            var staffAction = db.StaffActions.Include(sa => sa.Submitter).Include(sa => sa.AssignedTo)
+                .SingleOrDefault(sa => sa.StaffActionId == id);
+
+            return staffAction;
+        }
+
 		public List<StaffAction> GetTodoStaffActions()
 		{
 			using var db = new IcarusContext();

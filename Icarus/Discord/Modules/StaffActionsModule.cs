@@ -26,6 +26,17 @@ namespace Icarus.Discord.Modules
 			_client = client;
 		}
 
+        [SlashCommand("fetch", "Gets the SA by ID.")]
+        [RequireAdmin]
+        public async Task Fetch(int id)
+		{
+            var sa = _staffActionService.GetStaffActionById(id);
+
+            var embedBuilder = _staffActionService.BuildStaffActionMessage(sa);
+
+            await RespondAsync(embed: embedBuilder.Build(), ephemeral: false);
+        }
+
         [SlashCommand("oldest", "Shows the oldest Staff Action.")]
         [RequireAdmin]
         public async Task ViewOldestStaffAction()
