@@ -304,11 +304,13 @@ namespace Icarus.Discord.EconCommands
             {
                 heights.Add(hist.Height);
             }
+            heights.Add(value.CurrentValue);
 
-            MemoryStream m = await GenChart(heights, valueGoal);
+            MemoryStream m = await GenChart(heights, valueGoal, value.Name);
             if (m == null) 
             {
                 await FollowupAsync("Could not retrieve Chart!");
+                return;
             }
 
             try
@@ -333,14 +335,22 @@ namespace Icarus.Discord.EconCommands
             
         }
 
-        public async Task<MemoryStream> GenChart(List<float> values, float goal)
+        public async Task<MemoryStream> GenChart(List<float> values, float goal, string label)
         {
             var icarusConfig = ConfigFactory.GetConfig();
 
             try
             {
                 using HttpClient client = new();
-                var m = await client.GetAsync($"http://localhost:5000/genChart/{string.Join(",", values)}/{goal}/");
+                ChartInputDTO dto = new ChartInputDTO() 
+                {
+                    values= values,
+                    goal=goal,
+                    label= label
+                };
+                HttpContent content = new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json");
+                var m = await client.PostAsync($"http://localhost:5000/genChart/", content);
+                //var m = await client.GetAsync($"http://localhost:5000/genChart/{string.Join(",", values)}/{goal}/");
                 string t = await m.Content.ReadAsStringAsync();
                 ChartDTO? chart = JsonSerializer.Deserialize<ChartDTO>(t);
                 byte[] bytes = Convert.FromBase64String(chart.Base64String);
@@ -595,5 +605,12 @@ namespace Icarus.Discord.EconCommands
     public class ChartDTO
     {
         public string Base64String { get; set; }
+    }
+
+    public class ChartInputDTO
+    {
+        public List<float> values { get; set; }
+        public float goal { get; set; }
+        public string label { get; set; }
     }
 }

@@ -11,13 +11,18 @@ import json
 
 app = Flask(__name__)
 
-@app.route("/genChart/<values>/<valueGoal>/")
-def GenChart(values, valueGoal):
-    df = DataFrame([float(i) for i in values.split(',')])
+@app.route("/genChart/", methods = ["POST"])
+def GenChart():
+    r = request.get_json()
+    data : ChartInfoDto = ChartInfoDto(r)
+    df = data.values
+    print("here")
+    #df = DataFrame([float(i) for i in values.split(',')])
     df.plot()
-    plt.axhline(y = float(valueGoal), color = 'b', label = 'Goal')
+    plt.axhline(y = float(data.goal), color = 'b', label = 'Goal')
     plt.legend().remove()
-
+    plt.ylabel(ylabel=data.label)
+    plt.xlabel(xlabel='Ticks')
     #os.chdir("..")
     #os.chdir("./Icarus/Images/")
     #plt.savefig(f"{os.curdir}chart")
@@ -29,6 +34,7 @@ def GenChart(values, valueGoal):
     m = {
         "Base64String" : my_base64_jpgData
     }
+    
     return m
 
 
@@ -42,5 +48,16 @@ def Pong():
 #GenChart(df,float(sys.argv[2]))
 #GenChart(df,10)
 
+class ChartInfoDto:
+    values : DataFrame
+    goal : float
+    label : str
+
+    def __init__(self,j):
+        #dic = json.loads(j)
+        self.goal = j['goal']
+        l : list = j['values']
+        self.values = DataFrame(l)
+        self.label = j['label']
 
 app.run()
