@@ -52,7 +52,7 @@ namespace Icarus.Services
                 //This province is donzo!
             }
 
-            sheetContext.Update($"Nation!H10:Q22", GenerateGlobalModifierTable(db.Nations.First(), _valueManagementService));
+            sheetContext.Update($"Nation!H10:Q50", GenerateGlobalModifierTable(db.Nations.First(), _valueManagementService));
         }
 
         public List<List<string>> GenEmpty(int row, int col)
@@ -162,7 +162,7 @@ namespace Icarus.Services
 
         public List<List<string>> GenerateGlobalModifierTable(Nation nation, ValueManagementService _valueManagementService)
         {
-            List<List<string>> modTable = GenEmpty(12, 10);
+            List<List<string>> modTable = GenEmpty(50, 10);
             int row = 0;
             foreach (Modifier Mod in nation.Modifiers.Where(m => m.isGood == false))
             {
