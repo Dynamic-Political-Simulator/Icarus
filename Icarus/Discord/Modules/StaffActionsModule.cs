@@ -278,12 +278,12 @@ namespace Icarus.Discord.Modules
 			await RespondAsync("Action submitted.", ephemeral: true);
 		}
 
-		[SlashCommand("list", "Lists all the actions you have submitted")]
+		[SlashCommand("list", "Lists all the actions you have submitted.")]
 		[RequireProfile]
 		public async Task MyActions()
 		{
 			using var db = new IcarusContext();
-			var activeActions = db.StaffActions.Where(sa => sa.SubmitterId == Context.User.Id.ToString());
+			var activeActions = db.StaffActions.Where(sa => sa.SubmitterId == Context.User.Id.ToString()).OrderBy(sa => sa.StaffActionId).TakeLast(20);
 
 			var embedBuilder = new EmbedBuilder
 			{
