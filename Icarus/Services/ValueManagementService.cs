@@ -156,6 +156,13 @@ namespace Icarus.Services
             foreach (Modifier modifier in Value.Province.Modifiers.Where(m => m.Modifiers.FirstOrDefault(vm => vm.ValueTag == Value.TAG) != null))
             {
                 vm = modifier.Modifiers.FirstOrDefault(vm => vm.ValueTag == Value.TAG);
+                float LevelModifier = 1f;
+                if (modifier.isGood == true)
+                {
+                    LevelModifier = GetModifierFromLevel(modifier.Level);
+                    desc.Add($"{GetDescFromLevel(modifier.Level)} {modifier.Name} Industry", (float)Math.Round(vm.Modifier * LevelModifier, 2));
+                    continue;
+                }
                 desc.Add(modifier.Name, vm.Modifier);
 
             }
@@ -163,13 +170,8 @@ namespace Icarus.Services
             foreach (Modifier modifier in Value.Province.Nation.Modifiers.Where(m => m.Modifiers.FirstOrDefault(vm => vm.ValueTag == Value.TAG) != null))
             {
                 vm = modifier.Modifiers.FirstOrDefault(vm => vm.ValueTag == Value.TAG);
-                float LevelModifier = 1f;
-                if (modifier.isGood == true)
-                {
-                    LevelModifier = GetModifierFromLevel(modifier.Level);
-                    desc.Add($"{GetDescFromLevel(modifier.Level)} {modifier.Name} Industry", (float)Math.Round(vm.Modifier * LevelModifier, 2));
-                }
-                desc.Add($"{modifier.Name}", (float)Math.Round(vm.Modifier*LevelModifier,2));
+                
+                desc.Add($"{modifier.Name}", (float)Math.Round(vm.Modifier,2));
             }
 
             using var db = new IcarusContext();

@@ -309,7 +309,11 @@ namespace Icarus.Discord.EconCommands
             MemoryStream m = await GenChart(heights, valueGoal, value.Name);
             if (m == null) 
             {
-                await FollowupAsync("Could not retrieve Chart!");
+                emb.AddField(CurrentValue);
+                emb.AddField(Goal);
+                emb.AddField(Change);
+                emb.AddField(MakeUp);
+                await FollowupAsync("Could not retrieve Chart!", embed:emb.Build());
                 return;
             }
 
