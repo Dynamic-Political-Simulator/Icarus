@@ -52,7 +52,7 @@ namespace Icarus.Services
                 //This province is donzo!
             }
 
-            sheetContext.Update($"Nation!H10:Q50", GenerateGlobalModifierTable(db.Nations.First(), _valueManagementService));
+            sheetContext.Update($"Nation!H10:Q60", GenerateGlobalModifierTable(db.Nations.First(), _valueManagementService));
         }
 
         public List<List<string>> GenEmpty(int row, int col)
