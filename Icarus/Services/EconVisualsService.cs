@@ -106,9 +106,10 @@ namespace Icarus.Services
                 goodTable[row][0] = $"{_valueManagementService.GetDescFromLevel(Good.Level)} {Good.Name} Industry";
 
                 int col = 1;
+                float LevelModifier = _valueManagementService.GetModifierFromLevel(Good.Level);
                 foreach(ValueModifier mod in Good.Modifiers)
                 {
-                    goodTable[row][col] = $"{mod.ValueTag}: {mod.Modifier}";
+                    goodTable[row][col] = $"{mod.ValueTag}: {(float)Math.Round(mod.Modifier * LevelModifier, 2)}";
                     col ++;
                 }
                 row++;
