@@ -11,6 +11,7 @@ using Discord.WebSocket;
 using Icarus.Discord.CustomPreconditions;
 using Icarus.Services;
 using Discord.Interactions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Icarus.Discord.Modules
 {
@@ -283,7 +284,8 @@ namespace Icarus.Discord.Modules
 		public async Task MyActions()
 		{
 			using var db = new IcarusContext();
-			var activeActions = db.StaffActions.Where(sa => sa.SubmitterId == Context.User.Id.ToString()).OrderBy(sa => sa.StaffActionId).TakeLast(20);
+			var activeActions = await db.StaffActions.Where(sa => sa.SubmitterId == Context.User.Id.ToString()).OrderBy(sa => sa.StaffActionId).ToListAsync();
+			activeActions = activeActions.TakeLast(20).ToList();
 
 			var embedBuilder = new EmbedBuilder
 			{
