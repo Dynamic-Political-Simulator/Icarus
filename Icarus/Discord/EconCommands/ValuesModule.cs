@@ -342,7 +342,7 @@ namespace Icarus.Discord.EconCommands
         public async Task<MemoryStream> GenChart(List<float> values, float goal, string label)
         {
             var icarusConfig = ConfigFactory.GetConfig();
-
+            using var db = new IcarusContext();
             try
             {
                 using HttpClient client = new();
@@ -350,7 +350,8 @@ namespace Icarus.Discord.EconCommands
                 {
                     values= values,
                     goal=goal,
-                    label= label
+                    label= label,
+                    year = db.GameStates.First().Year,
                 };
                 HttpContent content = new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json");
                 var m = await client.PostAsync($"http://localhost:5000/genChart/", content);
@@ -616,5 +617,6 @@ namespace Icarus.Discord.EconCommands
         public List<float> values { get; set; }
         public float goal { get; set; }
         public string label { get; set; }
+        public int year { get; set; }
     }
 }

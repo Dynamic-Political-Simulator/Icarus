@@ -17,8 +17,9 @@ def GenChart():
     data : ChartInfoDto = ChartInfoDto(r)
     df = data.values
     df.rename(columns={ df.columns[0]: "value" }, inplace = True)
+    modifier = (data.year - 400)/len(df.index)
     df['year'] = df.index
-    df['year'] = df['year'].div(3)
+    df['year'] = df['year'].mul(modifier)
     df['year'] = df['year'].add(400)
     print(df.index)
     #df = DataFrame([float(i) for i in values.split(',')])
@@ -56,6 +57,7 @@ class ChartInfoDto:
     values : DataFrame
     goal : float
     label : str
+    year : float
 
     def __init__(self,j):
         #dic = json.loads(j)
@@ -63,5 +65,6 @@ class ChartInfoDto:
         l : list = j['values']
         self.values = DataFrame(l)
         self.label = j['label']
+        self.year = j['year']
 
 app.run()
