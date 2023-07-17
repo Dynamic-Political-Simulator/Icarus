@@ -49,17 +49,22 @@ namespace Icarus.Services
                     if (onDeathTimer == null) _ = CalcDeathChance(character, YEARS_PER_DAY);
                 }
 
-                gameState.LastAgingEvent = DateTime.UtcNow;
-                gameState.Year += YEARS_PER_DAY;
-                db.Update(gameState);
-                await db.SaveChangesAsync();
-
-                _ = _debugService.PrintToChannels($"Aging event done, the year is now {gameState.Year}.");
+                await AdvanceYear();
             }
             else if (!gameState.AgingEnabled && !tickToday)
             {
                 _ = _debugService.PrintToChannels("Tried to fire aging event, but aging was disabled.");
             }
+        }
+
+        private async Task AdvanceYear()
+        {
+            using var db = new IcarusContext();
+            var gameState = db.GameStates.First();
+            gameState.LastAgingEvent = DateTime.UtcNow;
+            gameState.Year += YEARS_PER_DAY;
+            await db.SaveChangesAsync();
+            _ = _debugService.PrintToChannels($"Aging event done, the year is now {gameState.Year}.");
         }
 
         public async Task<bool> ToggleAging()

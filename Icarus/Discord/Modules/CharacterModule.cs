@@ -33,7 +33,7 @@ namespace Icarus.Discord.Modules
             var gois = await _goiService.GetAllGroups();
 
             var smb = new SelectMenuBuilder()
-                .WithPlaceholder("Group of Interest")
+                .WithPlaceholder("Pop")
                 .WithMinValues(1)
                 .WithMaxValues(1)
                 .WithCustomId("char-goi-selection");
@@ -56,9 +56,9 @@ namespace Icarus.Discord.Modules
                 _ = RespondAsync(@$"Character {characterName} has been created. Remember there are also commands for setting your character description (set-bio), culture (set-culture), career (set-career), and PG (set-pg).
 
                     A Patronage Group (or PG for short) is the semi-organised entity which appointed you to the position of Notable. Their name, exact nature (a merchant house, a chamber of the Admiralty, an Olikost temple), and their ideological bend are entirely up to you, consider them part of your character's backstory. 
-That being said, all PG's also must fall within an empowered Group of Interest (GoI) which they reasonably correlate to (ex. The Gusto Merchant House falls under the Merchant Houses GoI). GoI's are overarching classifications of powerful interests such as Urban Guilds or Landed Estates. If a PG would not fit within any empowered GoI (for example pirates are a GoI but they represent various dregs and outlaws so they are not considered empowered), then it simply means that you cannot make it. PG's must also not be overly powerful, you cannot create a PG which is canonically the owner of half the land on an island - basically, keep it simple, keep it fair. All available empowered GoI’s are listed in the command.
+PG's must also not be overly powerful, you cannot create a PG which is canonically the owner of half the land on an island - basically, keep it simple, keep it fair. All available Pops are listed in the command.
 
-                Set your Group of Interest:",
+                Set your Pop group:",
                 ephemeral: true, components: componentBuilder.Build());
             }
             catch(ExistingActiveCharacterException)
@@ -104,7 +104,7 @@ That being said, all PG's also must fall within an empowered Group of Interest (
                 }
                 if (character.GoIid != null)
                 {
-                    embedBuilder.AddField("Group of Interest", character.GroupOfInterest.Name);
+                    embedBuilder.AddField("Pop", character.GroupOfInterest.Name);
 				}
 
                 await RespondAsync(embed: embedBuilder.Build());
@@ -128,6 +128,12 @@ That being said, all PG's also must fall within an empowered Group of Interest (
             catch (NoActiveCharacterException)
             {
                 await RespondAsync($"Could not find an active character for {user.DisplayName}.");
+                return;
+            }
+            catch (ArgumentException)
+            {
+                await RespondAsync("Cannot set a bio longer than 1024 characters.");
+                return;
             }
 
             await RespondAsync($"Bio updated.");
@@ -182,13 +188,13 @@ That being said, all PG's also must fall within an empowered Group of Interest (
         }
 
         [RequireProfile]
-        [SlashCommand("set-goi", "Sets your Group of Interest.")]
+        [SlashCommand("set-pop", "Sets your Pop group.")]
         public async Task SetAssemblyRep()
         {
             var gois = await _goiService.GetAllGroups();
 
             var smb = new SelectMenuBuilder()
-                .WithPlaceholder("Group of Interest")
+                .WithPlaceholder("Pop")
                 .WithMinValues(1)
                 .WithMaxValues(1)
                 .WithCustomId("char-goi-selection");
@@ -210,7 +216,7 @@ That being said, all PG's also must fall within an empowered Group of Interest (
 
             var componentBuilder = new ComponentBuilder().WithSelectMenu(smb);
 
-            await RespondAsync("Select your Group of Interest", components: componentBuilder.Build(), ephemeral: true);
+            await RespondAsync("Select your Pop", components: componentBuilder.Build(), ephemeral: true);
         }
     }
 }
