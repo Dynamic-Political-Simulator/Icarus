@@ -98,6 +98,11 @@ namespace Icarus.Services
 
         public async Task UpdateCharacterBio(string discordId, string bio)
         {
+            if (bio.Length > 1000)
+            {
+                throw new ArgumentException();
+            }
+
             using var db = new IcarusContext();
 
             var active = await GetActiveCharacter(discordId);

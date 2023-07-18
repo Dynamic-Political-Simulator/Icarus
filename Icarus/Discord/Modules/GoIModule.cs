@@ -22,31 +22,31 @@ namespace Icarus.Discord.Modules
             _goiService = goiService;
         }
 
-        [SlashCommand("link-goi-role", "Links a Group of Interest role to the bot.")]
+        [SlashCommand("link-pop-role", "Links a pop role to the bot.")]
         [RequireAdmin]
-        public async Task LinkGoiRole(int goiId, SocketRole role)
+        public async Task LinkGoiRole(int popId, SocketRole role)
         {
             try
             {
-                await _goiService.LinkGoiRole(goiId, role.Id);
+                await _goiService.LinkGoiRole(popId, role.Id);
             }
             catch (GroupOfInterestNotFoundException )
             {
-                await RespondAsync($"Could not find GoI with ID {goiId}.");
+                await RespondAsync($"Could not find pop with ID {popId}.");
                 return;
             }
             
-            await RespondAsync($"Linked GoI with ID {goiId}, to role {role.Name}.");
+            await RespondAsync($"Linked pop with ID {popId}, to role {role.Name}.");
         }
 
-        [SlashCommand("create-goi", "Adds a new GoI to the database.")]
+        [SlashCommand("create-pop", "Adds a new pop to the database.")]
         [RequireAdmin]
         public async Task AddGoI(string name)
         {
             await RespondAsync(await _goiService.AddGoI(name), ephemeral: true);
         }
 
-        [SlashCommand("gois", "Lists all gois.")]
+        [SlashCommand("pops", "Lists all pops.")]
         [RequireAdmin]
         public async Task ListGroups()
         {
@@ -61,17 +61,17 @@ namespace Icarus.Discord.Modules
 
             var resultString = sb.ToString();
 
-            if (gois.Count == 0) resultString = "No GoI's in database.";
+            if (gois.Count == 0) resultString = "No pops in database.";
 
             var eb = new EmbedBuilder();
 
-            eb.WithTitle("Groups of Interest");
+            eb.WithTitle("Pops");
             eb.WithDescription(resultString);
 
             await RespondAsync(embed: eb.Build(), ephemeral: false);
         }
 
-        [SlashCommand("character-gois", "Lists all characters grouped by assigned gois.")]
+        [SlashCommand("character-pops", "Lists all characters grouped by assigned pops.")]
         [RequireAdmin]
         public async Task GetCharacterGoIList()
         {
@@ -99,7 +99,7 @@ namespace Icarus.Discord.Modules
                 }
                 else
                 {
-                    sbLoop.AppendLine("No characters with this Group of Interest.");
+                    sbLoop.AppendLine("No characters with this pop.");
                 }
                 
 
@@ -109,7 +109,7 @@ namespace Icarus.Discord.Modules
             }
 
             var newField = new EmbedFieldBuilder();
-            newField.Name = "Without GoI";
+            newField.Name = "Without pop";
 
             var sb = new StringBuilder();
 
@@ -124,7 +124,7 @@ namespace Icarus.Discord.Modules
             }
             else
             {
-                sb.AppendLine("No characters without a Group of Interest.");
+                sb.AppendLine("No characters without a pop.");
             }
 
             newField.WithValue(sb.ToString());
