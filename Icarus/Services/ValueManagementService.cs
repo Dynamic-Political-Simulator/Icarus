@@ -383,7 +383,7 @@ namespace Icarus.Services
                             }
                             else
                             {
-                                vm.Modifier -= vm.Decay;
+                                vm.Modifier += vm.Decay;
                                 Math.Round(vm.Modifier,2);
                                 if (vm.Modifier >= 0)
                                 {
