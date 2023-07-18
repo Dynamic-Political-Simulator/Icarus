@@ -917,6 +917,139 @@ namespace Icarus.Discord.EconCommands
             }
         }
 
+        [SlashCommand("edit-decay", "Edit decay of an existing modifier")]
+        [RequireAdmin]
+        public async Task EditDecayModifier(string province)
+        {
+            try
+            {
+                using var db = new IcarusContext();
+                Province _province = null;
+                Nation nation = null;
+                int messageId = Random.Shared.Next(0, 9999);
+                List<string> modifiers = new List<string>();
+
+                if (province == "global")
+                {
+                    nation = db.Nations.First();
+                    foreach (Modifier modifier in nation.Modifiers.Where(m => m.isGood == false))
+                    {
+                        modifiers.Add(modifier.Name);
+                        Debug.WriteLine(modifier.Name);
+                    }
+                }
+                else
+                {
+                    _province = db.Provinces.FirstOrDefault(p => p.Name == province);
+                    if (_province == null)
+                    {
+                        await RespondAsync("Province not found!", ephemeral: true);
+                        return;
+                    }
+
+
+                    foreach (Modifier modifier in _province.Modifiers.Where(m => m.isGood == false && m.Type == ModifierType.Decaying))
+                    {
+                        modifiers.Add(modifier.Name);
+                        Debug.WriteLine(modifier.Name);
+                    }
+                }
+
+                if (modifiers.Count == 0)
+                {
+                    await RespondAsync($"{province} has no Modifiers which can be displayed.", ephemeral: true);
+                }
+
+                SelectMenuBuilder sm = _interactionHelpers.CreateSelectMenu(messageId.ToString(), "ModifierSelection", modifiers, "Select Modifier");
+                sm.MinValues = 1;
+                sm.MaxValues = 1;
+                Console.WriteLine("Building Menu");
+                ComponentBuilder builder = new ComponentBuilder()
+                    .WithSelectMenu(sm);
+
+                await RespondAsync("Choose Modifier", components: builder.Build(), ephemeral: true);
+
+                Predicate<SocketInteraction> GoodSelection = s =>
+                {
+                    if (s.GetType() != typeof(SocketMessageComponent)) return false;
+                    SocketMessageComponent d = (SocketMessageComponent)s;
+                    return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "ModifierSelection");
+                };
+
+                SocketMessageComponent response = (SocketMessageComponent)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 1, 0), GoodSelection);
+
+                if (response == null) { return; }
+
+                Modifier Modifier;
+                if (_province != null)
+                {
+                    Modifier = _province.Modifiers.FirstOrDefault(m => m.Name == response.Data.Values.First());
+                }
+                else
+                {
+                    Modifier = nation.Modifiers.FirstOrDefault(m => m.Name == response.Data.Values.First());
+                }
+
+                Dictionary<string, float> values = new Dictionary<string, float>();
+                foreach (ValueModifier vm in Modifier.Modifiers)
+                {
+                    values.Add(vm.ValueTag, vm.Decay);
+                }
+
+                TextInputBuilder tb;
+                ModalBuilder mb = new ModalBuilder()
+                    .WithTitle("Set Decay of Modifiers")
+                    .WithCustomId(_interactionHelpers.GenerateCompoundId(messageId.ToString(), "ValueHeight"));
+                foreach (KeyValuePair<string, float> kvp in values)
+                {
+                    tb = new TextInputBuilder()
+                        .WithLabel(kvp.Key)
+                        .WithCustomId(kvp.Key)
+                        .WithValue(kvp.Value.ToString());
+                    mb.AddTextInput(tb);
+                }
+                try
+                {
+
+                    await response.RespondWithModalAsync(mb.Build());
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Console.WriteLine(ex.Message);
+                }
+
+
+                Predicate<SocketInteraction> ValueHeight = s =>
+                {
+                    if (s.GetType() != typeof(SocketModal)) return false;
+                    SocketModal d = (SocketModal)s;
+                    return d.Data.CustomId == _interactionHelpers.GenerateCompoundId(messageId.ToString(), "ValueHeight");
+                };
+
+                var responseModal = (SocketModal)await InteractionUtility.WaitForInteractionAsync(_client, new TimeSpan(0, 10, 0), ValueHeight);
+
+                if (responseModal == null) { return; }
+
+
+
+                foreach (var Component in responseModal.Data.Components)
+                {
+                    Debug.WriteLine(Component.CustomId + ": " + Component.Value);
+                    ValueModifier vm = Modifier.Modifiers.FirstOrDefault(vm => vm.ValueTag == Component.CustomId);
+                    vm.Decay = (float)Math.Round(float.Parse(Component.Value, System.Globalization.CultureInfo.InvariantCulture),2);
+
+                }
+
+                await db.SaveChangesAsync();
+                await responseModal.RespondAsync("Success!", ephemeral: true);
+            }
+            catch (Exception ex)
+            {
+                _ = _debugService.PrintToChannels(ex.ToString());
+            }
+        }
+
         [SlashCommand("update-time","Update Time of temporary modifier")]
         [RequireAdmin]
         public async Task UpdateTime(string province)
