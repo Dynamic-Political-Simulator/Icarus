@@ -100,7 +100,7 @@ namespace Icarus.Services
             using var db = new IcarusContext();
             GameState state = db.GameStates.FirstOrDefault();
 
-			long currentEpoch = DateTime.Now.ToFileTimeUtc();
+			long currentEpoch = DateTimeOffset.Now.ToUnixTimeSeconds();
 			TickEvent?.Invoke();
 			state.LastTickEpoch = currentEpoch;
 
