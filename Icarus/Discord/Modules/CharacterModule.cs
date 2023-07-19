@@ -30,7 +30,7 @@ namespace Icarus.Discord.Modules
         [RequireProfile]
         public async Task CreateCharacter(string characterName, [Choice("20", 20), Choice("35", 35), Choice("50", 50)] int startingAge)
         {
-            await DeferAsync();
+            await DeferAsync(ephemeral: true);
 
             var gois = await _goiService.GetAllGroups();
 

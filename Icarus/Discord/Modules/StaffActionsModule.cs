@@ -221,7 +221,7 @@ namespace Icarus.Discord.Modules
 		[Summary("Description", "Action description (must be shorter than 1800 characters)")]
 		string description)
 		{
-			await DeferAsync();
+			await DeferAsync(ephemeral: true);
 
 			using var db = new IcarusContext();
 			var discordUser = db.Users.SingleOrDefault(du => du.DiscordId == Context.User.Id.ToString());
@@ -278,7 +278,7 @@ namespace Icarus.Discord.Modules
 		[RequireProfile]
 		public async Task MyActions()
 		{
-			await DeferAsync();
+			await DeferAsync(ephemeral: true);
 
 			using var db = new IcarusContext();
 			var activeActions = await db.StaffActions.Where(sa => sa.SubmitterId == Context.User.Id.ToString()).OrderBy(sa => sa.StaffActionId).ToListAsync();
