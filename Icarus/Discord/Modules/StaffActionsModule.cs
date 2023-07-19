@@ -27,13 +27,6 @@ namespace Icarus.Discord.Modules
 			_client = client;
 		}
 
-        [SlashCommand("cleanup", "Cleans up the SA channel.")]
-        [RequireAdmin]
-        public async Task Cleanup()
-		{
-
-		}
-
         [SlashCommand("fetch", "Gets the SA by ID.")]
         [RequireAdmin]
         public async Task Fetch(int id)
@@ -228,18 +221,20 @@ namespace Icarus.Discord.Modules
 		[Summary("Description", "Action description (must be shorter than 1800 characters)")]
 		string description)
 		{
+			await DeferAsync();
+
 			using var db = new IcarusContext();
 			var discordUser = db.Users.SingleOrDefault(du => du.DiscordId == Context.User.Id.ToString());
 
 			if (title.Length > 200)
 			{
-				await RespondAsync("Title must be shorter than 200 characters.", ephemeral: true);
+				await FollowupAsync("Title must be shorter than 200 characters.", ephemeral: true);
 				return;
 			}
 
 			if (description.Length > 1000)
 			{
-				await RespondAsync("Description must be shorter than 1800 characters.", ephemeral: true);
+				await FollowupAsync("Description must be shorter than 1800 characters.", ephemeral: true);
 				return;
 			}
 
@@ -276,13 +271,15 @@ namespace Icarus.Discord.Modules
 			db.StaffActions.Update(action);
 			await db.SaveChangesAsync();
 
-			await RespondAsync("Action submitted.", ephemeral: true);
+			await FollowupAsync("Action submitted.", ephemeral: true);
 		}
 
 		[SlashCommand("list", "Lists all the actions you have submitted.")]
 		[RequireProfile]
 		public async Task MyActions()
 		{
+			await DeferAsync();
+
 			using var db = new IcarusContext();
 			var activeActions = await db.StaffActions.Where(sa => sa.SubmitterId == Context.User.Id.ToString()).OrderBy(sa => sa.StaffActionId).ToListAsync();
 			activeActions = activeActions.TakeLast(20).ToList();
@@ -294,7 +291,7 @@ namespace Icarus.Discord.Modules
 
 			if (!activeActions.Any())
 			{
-				await RespondAsync("No actions found.", ephemeral: true);
+				await FollowupAsync("No actions found.", ephemeral: true);
 				return;
 			}
 
@@ -326,7 +323,7 @@ namespace Icarus.Discord.Modules
 				}
 			}
 
-			await RespondAsync(embed: embedBuilder.Build(), ephemeral: true);
+			await FollowupAsync(embed: embedBuilder.Build(), ephemeral: true);
 		}
 	}
 }

@@ -30,6 +30,8 @@ namespace Icarus.Discord.Modules
         [RequireProfile]
         public async Task CreateCharacter(string characterName, [Choice("20", 20), Choice("35", 35), Choice("50", 50)] int startingAge)
         {
+            await DeferAsync();
+
             var gois = await _goiService.GetAllGroups();
 
             var smb = new SelectMenuBuilder()
@@ -53,7 +55,7 @@ namespace Icarus.Discord.Modules
             try
             {
                 await _characterService.CreateNewCharacter(Context.User.Id.ToString(), characterName, startingAge);
-                _ = RespondAsync(@$"Character {characterName} has been created. Remember there are also commands for setting your character description (set-bio), culture (set-culture), career (set-career), and PG (set-pg).
+                _ = FollowupAsync(@$"Character {characterName} has been created. Remember there are also commands for setting your character description (set-bio), culture (set-culture), career (set-career), and PG (set-pg).
 
                     A Patronage Group (or PG for short) is the semi-organised entity which appointed you to the position of Notable. Their name, exact nature (a merchant house, a chamber of the Admiralty, an Olikost temple), and their ideological bend are entirely up to you, consider them part of your character's backstory. 
 PG's must also not be overly powerful, you cannot create a PG which is canonically the owner of half the land on an island - basically, keep it simple, keep it fair. All available Pops are listed in the command.
@@ -63,11 +65,11 @@ PG's must also not be overly powerful, you cannot create a PG which is canonical
             }
             catch(ExistingActiveCharacterException)
             {
-                await RespondAsync("Character could not be created as you still have an active character.");
+                await FollowupAsync("Character could not be created as you still have an active character.");
             }
             catch(ArgumentException)
             {
-                await RespondAsync($"Character names may not be longer than 64 characters.");
+                await FollowupAsync($"Character names may not be longer than 64 characters.");
             }
         }
 
@@ -75,6 +77,8 @@ PG's must also not be overly powerful, you cannot create a PG which is canonical
         [SlashCommand("me", "Shows your active character or the active character of a person you ping.")]
         public async Task Me([Remainder]SocketGuildUser mention = null)
         {
+            await DeferAsync();
+
             SocketGuildUser user = (SocketGuildUser)(mention ?? Context.User);
             try
             {
@@ -107,11 +111,11 @@ PG's must also not be overly powerful, you cannot create a PG which is canonical
                     embedBuilder.AddField("Pop", character.GroupOfInterest.Name);
 				}
 
-                await RespondAsync(embed: embedBuilder.Build());
+                await FollowupAsync(embed: embedBuilder.Build());
             }
             catch (NoActiveCharacterException)
             {
-                await RespondAsync($"Could not find an active character for {user.DisplayName}.");
+                await FollowupAsync($"Could not find an active character for {user.DisplayName}.");
             }
         }
 

@@ -19,9 +19,11 @@ namespace Icarus.Discord.Modules
         [RequireAdmin]
         public async Task KillCharacter(SocketGuildUser mention)
         {
+            await DeferAsync();
+
             var result = await _deathService.KillCharacter(mention.Id.ToString());
 
-            await RespondAsync(result);
+            await FollowupAsync(result);
         }
     }
 }
