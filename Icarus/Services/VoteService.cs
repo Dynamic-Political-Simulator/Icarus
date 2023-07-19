@@ -96,6 +96,9 @@ namespace Icarus.Services
 									case VoteType.TWOTHIRD:
 										pass = (yesVotes / ((float)yesVotes + noVotes)) > 0.66f;
 										break;
+									case VoteType.THREEFOURTHS:
+										pass = (yesVotes / ((float)yesVotes + noVotes)) > 0.75f;
+										break;
 									default:
 										pass = false;
 										Console.WriteLine("Undefined VoteType: " + vms.Type);

@@ -14,6 +14,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using Discord.Rest;
 using Icarus.Utils;
+using System.Runtime.InteropServices;
 
 namespace Icarus.Discord.Modules
 {
@@ -80,6 +81,7 @@ namespace Icarus.Discord.Modules
 				string when TwoThirdsRegex().IsMatch(type) => (VoteType?)VoteType.TWOTHIRD,
 				string when FPTPRegex().IsMatch(type) => (VoteType?)VoteType.FPTP,
 				string when TwoRoundsRegex().IsMatch(type) => (VoteType?)VoteType.TWOROUND,
+				string when type == "three-fourths" => VoteType.THREEFOURTHS,
 				_ => null,
 			};
 		}
@@ -130,23 +132,26 @@ namespace Icarus.Discord.Modules
 		public async Task MakeVote(
 			[Summary("Type", "The type of vote"), 
 			Choice("Majority", "majority"), 
-			Choice("Two-Thirds", "two-thirds"), 
+			Choice("Two-Thirds", "two-thirds"),
+			Choice("Three-Fourths", "three-fourths"),
 			Choice("First-Past-the-Post", "fptp"), 
-			Choice("Two Rounds", "two-rounds")] string type, 
-			[Summary("Time", "How long the time should last (XhYmin)")] string time, 
-			[Summary("Text", "Vote text, either Title | Decription or Title | Candidate 1 | Candidate 2 | etc.")] string text)
+			Choice("Two Rounds", "two-rounds")] string type,
+			// [Summary("Time", "How long the time should last (XhYmin)")] string time, 
+			[Summary("Text", "Vote text, either Title | Decription or Title | Candidate 1 | Candidate 2 | etc.")] string text,
+			[Summary("Hours", "How many hours the vote should last")] int? hours = null,
+			[Summary("Minutes", "How many minutes the vote should last")] int? minutes = null)
 		{
 			string[] textArgs = text.Split("|");
 			if (ParseType(type, out VoteType voteType))
 			{
 				// Vote type is certified epic :)
-				TimeSpan timeSpan = GetTimeSpan(time);
-				if (timeSpan == TimeSpan.Zero)
+				if (hours == null && minutes == null)
 				{
 					await RespondAsync("You have specified an invalid time.", ephemeral: true);
 				}
 				else
 				{
+					TimeSpan timeSpan = TimeSpan.FromMinutes((hours ?? 0) * 60 + (minutes ?? 0));
 					await DeferAsync(ephemeral: true);
 					if (!IsMultipleOption(voteType))
 					{

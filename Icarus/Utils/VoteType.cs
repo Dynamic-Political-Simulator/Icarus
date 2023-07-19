@@ -12,6 +12,7 @@ namespace Icarus.Utils
 	{
 		MAJORITY,
 		TWOTHIRD,
+		THREEFOURTHS,
 		FPTP,
 		TWOROUND,
 		TWOROUNDFINAL // For the second part of the two round
