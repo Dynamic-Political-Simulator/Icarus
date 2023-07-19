@@ -35,7 +35,8 @@ namespace Icarus.Context
                 + $"Password={config.SqlPassword};"
                 + "Trusted_Connection=false;"
                 + "MultipleActiveResultSets=true;"
-                + "trustServerCertificate=true;");
+                + "trustServerCertificate=true;")
+                .LogTo(Console.WriteLine);
         }
 
         public DbSet<GameState> GameStates { get; set; }
