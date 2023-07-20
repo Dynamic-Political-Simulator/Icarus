@@ -78,7 +78,17 @@ namespace Icarus.Services
 			return saTodo.ToList();
 		}
 
-		public StaffAction GetOldestTodoStaffAction()
+        public StaffAction GetMyOldestTodoStaffAction(ulong assginedId)
+        {
+            using var db = new IcarusContext();
+
+            var oldest = db.StaffActions.Include(sa => sa.Submitter).Include(sa => sa.AssignedTo)
+                .Where(sa => (sa.Status == StaffActionStatus.TODO || sa.Status == StaffActionStatus.IN_PROGRESS) && sa.AssignedToId == assginedId.ToString()).OrderBy(sa => sa.StaffActionId).First();
+
+            return oldest;
+        }
+
+        public StaffAction GetOldestTodoStaffAction()
 		{
 			using var db = new IcarusContext();
 
