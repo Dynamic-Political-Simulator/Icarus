@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Icarus.Context;
 using Icarus.Context.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Icarus.Services
 {
@@ -49,7 +50,7 @@ namespace Icarus.Services
                     if (onDeathTimer == null) _ = CalcDeathChance(character, YEARS_PER_DAY);
                 }
 
-                await AdvanceYear();
+                AdvanceYear();
             }
             else if (!gameState.AgingEnabled && !tickToday)
             {
@@ -57,14 +58,17 @@ namespace Icarus.Services
             }
         }
 
-        private async Task AdvanceYear()
+        private void AdvanceYear()
         {
             using var db = new IcarusContext();
             var gameState = db.GameStates.First();
-            gameState.LastAgingEvent = DateTime.UtcNow;
-            gameState.Year += YEARS_PER_DAY;
-            await db.SaveChangesAsync();
-            _ = _debugService.PrintToChannels($"Aging event done, the year is now {gameState.Year}.");
+
+            var newYear = gameState.Year + YEARS_PER_DAY;
+            var newTime = DateTime.UtcNow;
+
+            db.GameStates.FromSqlRaw("UPDATE [GameStates] SET [LastAgingEvent] = {0}, [Year] = {1}", newTime, newYear);
+
+            _ = _debugService.PrintToChannels($"Aging event done, the year is now {newYear}.");
         }
 
         public async Task<bool> ToggleAging()

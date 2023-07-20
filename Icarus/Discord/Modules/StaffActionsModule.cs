@@ -302,7 +302,7 @@ namespace Icarus.Discord.Modules
 					var embedFieldBuilder = new EmbedFieldBuilder
 					{
 						Value = sa.ActionResponse == null ? "No response yet." : $"Response: {sa.ActionResponse}",
-						Name = sa.ActionTitle + " - " + sa.Status.ToString(),
+						Name = sa.StaffActionId + " - " + sa.ActionTitle + " - " + sa.Status.ToString(),
 						IsInline = false
 					};
 
