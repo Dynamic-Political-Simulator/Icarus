@@ -81,7 +81,7 @@ namespace Icarus.Services
 
             db.SaveChanges();
 
-            _ = _debugService.PrintToChannels($"AgingEnabled was to {gameState.AgingEnabled}.");
+            _ = _debugService.PrintToChannels($"AgingEnabled was set to {gameState.AgingEnabled}.");
 
             return gameState.AgingEnabled;
         }

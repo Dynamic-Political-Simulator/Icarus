@@ -18,7 +18,7 @@ namespace Icarus.Discord.Modules
         [RequireAdmin]
         public async Task ToggleAging()
         {
-            var result = _ageService.ToggleAging();
+            var result = await _ageService.ToggleAging();
 
             await RespondAsync($"AgingEnabled set to {result}.");
         }
