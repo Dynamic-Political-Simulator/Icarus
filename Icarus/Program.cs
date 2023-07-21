@@ -130,7 +130,9 @@ namespace Icarus
 
 			_ = RunPythonScript();
 
-			await Task.Delay(-1);
+			_client.Ready -= OnReady;
+
+            await Task.Delay(-1);
 		}
 
 		private async Task RunPythonScript()
