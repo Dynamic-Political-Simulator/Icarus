@@ -31,9 +31,9 @@ namespace Icarus.Discord.Modules
         [RequireAdmin]
         public async Task ViewOldestAssignedStaffAction()
 		{
-            var sa = _staffActionService.GetOldestTodoStaffAction();
+            var sa = _staffActionService.GetMyOldestTodoStaffAction(Context.User.Id);
 
-			if (sa != null) 
+			if (sa == null) 
 			{
 				await RespondAsync("Could not find an SA assigned to you.", ephemeral: false);
 				return;
