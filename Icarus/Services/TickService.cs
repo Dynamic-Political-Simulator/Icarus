@@ -4,6 +4,7 @@ using Icarus.Utils;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace Icarus.Services
@@ -16,7 +17,7 @@ namespace Icarus.Services
 		/// <summary>
 		/// The function delegate for the TickEvent handler.
 		/// </summary>
-		public delegate void TickHandler();
+		public delegate Task TickHandler();
 
 		/// <summary>
 		/// This event is called every time a tick occurs.
@@ -50,7 +51,7 @@ namespace Icarus.Services
             var icarusConfig = ConfigFactory.GetConfig();
 
             var timer = new Timer(icarusConfig.TickResolution); // The timer will fire every N ms (defined in config)
-			timer.Elapsed += TickCheck;
+			timer.Elapsed += FireTickCheck;
 			timer.AutoReset = true; // Loop the timer once it elapses
 			timer.Enabled = true;
 		}
@@ -58,10 +59,14 @@ namespace Icarus.Services
 		/// <summary>
 		/// Fires the NextTickEvent event and clears all of its listeners.
 		/// </summary>
-		private void CallSingleTickHandlers()
+		private async Task CallSingleTickHandlers()
 		{
-			NextTickEvent?.Invoke();
+			await NextTickEvent?.Invoke();
 			NextTickEvent = null; // Clear all subscribers as the event has passed
+		}
+
+		private void FireTickCheck(object source, ElapsedEventArgs e) {
+			var _ = TickCheck();
 		}
 
 		/// <summary>
@@ -69,7 +74,7 @@ namespace Icarus.Services
 		/// </summary>
 		/// <param name="source"></param>
 		/// <param name="e"></param>
-		private void TickCheck(object source, ElapsedEventArgs e)
+		private async Task TickCheck()
 		{
 			using var db = new IcarusContext();
 			var state = db.GameStates.FirstOrDefault();
@@ -82,12 +87,12 @@ namespace Icarus.Services
 				// If the difference between current epoch and saved epoch exceeds the interval (defined in ms), a tick has ocurred.
 				if (currentEpoch - state.LastTickEpoch >= state.TickInterval)
 				{
-					TickEvent?.Invoke();
+					await TickEvent?.Invoke();
+					await db.GameStates.Update(state).ReloadAsync();
 					state.LastTickEpoch = currentEpoch;
 					GC.Collect();
 				}
 
-				db.GameStates.Update(state);
 				db.SaveChanges();
 			}
 		}
