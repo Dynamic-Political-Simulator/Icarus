@@ -34,9 +34,9 @@ namespace Icarus.Services
             await db.SaveChangesAsync();
         }
 
-        public void PrintTick()
+        public async Task PrintTick()
         {
-            _ = PrintToChannels("Tick occured.");
+            await PrintToChannels("Tick occured.");
         }
 
         public async Task PrintToChannels(string message)

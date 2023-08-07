@@ -79,7 +79,7 @@ namespace Icarus.Services
             return await db.GroupOfInterests.ToListAsync();
         }
 
-        public async void SyncAllGoiRoles()
+        public async Task SyncAllGoiRoles()
         {
             var settings = ConfigFactory.GetConfig();
 

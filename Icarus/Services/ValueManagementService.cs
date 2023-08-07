@@ -32,7 +32,7 @@ namespace Icarus.Services
         /// <summary>
         /// Wrapper Function which executes Tick Logic every Tick
         /// </summary>
-        public async void ValueTick()
+        public async Task ValueTick()
         {
             try
             {
