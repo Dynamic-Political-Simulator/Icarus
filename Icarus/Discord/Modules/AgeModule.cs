@@ -22,5 +22,13 @@ namespace Icarus.Discord.Modules
 
             await RespondAsync($"AgingEnabled set to {result}.");
         }
+
+        [SlashCommand("year", "Shows the current year.")]
+        public async Task ShowYear()
+        {
+            var result = _ageService.GetYear();
+
+            await RespondAsync($"The year is {result}", ephemeral: false);
+        }
     }
 }

@@ -28,6 +28,15 @@ namespace Icarus.Services
             _tickService.TickEvent += DoAging;
         }
 
+        public int GetYear()
+        {
+            using var db = new IcarusContext();
+
+            var gameState = db.GameStates.First();
+
+            return gameState.Year;
+        }
+
         public async void DoAging()
         {
             using var db = new IcarusContext();
