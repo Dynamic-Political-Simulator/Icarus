@@ -36,7 +36,7 @@ namespace Icarus.Services
             _tickService.TickEvent += CheckDeathTimer;
         }
 
-        public void CheckDeathTimer()
+        public Task CheckDeathTimer()
         {
             using var db = new IcarusContext();
 
@@ -46,6 +46,8 @@ namespace Icarus.Services
             {
                 _ = KillCharacterById(charId.CharacterId);
             }
+
+			return Task.CompletedTask;
         }
 
         public async Task OldAgeDeath(PlayerCharacter character)

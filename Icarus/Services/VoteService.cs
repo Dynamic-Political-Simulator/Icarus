@@ -46,8 +46,8 @@ namespace Icarus.Services
 			tickService.TickCheckEvent += DoVoteUpdate;
 		}
 
-		public void DoVoteUpdate() {
-			_ = VoteUpdate();
+		public async Task DoVoteUpdate() {
+			await VoteUpdate();
 		}
 
 		private async Task VoteUpdate()
