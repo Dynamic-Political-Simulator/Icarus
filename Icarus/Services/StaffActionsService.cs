@@ -219,7 +219,180 @@ namespace Icarus.Services
 			}
 
 		}
-    }
 
+		public async Task PreviousSAPage(SocketMessageComponent arg) {
+			SocketMessage msg = arg.Message;
+			if (msg.Embeds.Count < 1) {
+				await _debugService.PrintToChannels($"{arg.Data.CustomId} executed on a message with no embed!");
+				return;
+			}
+			Embed msgEmbed = msg.Embeds.First();
+			string type = msgEmbed.Title.Split(' ')[0]; // Since the type of list is in the title, we're basically doing advanced sleuthing here
+			string pageStr = msgEmbed.Footer.Value.Text.Split(' ')[1]; // Once again, sleuthing
 
+			using var db = new IcarusContext();
+
+			List<StaffAction> actions;
+			if (type == "Submitted") actions = await db.StaffActions.Where(sa => sa.SubmitterId == arg.User.Id.ToString()).OrderBy(sa => sa.StaffActionId).ToListAsync();
+			else if (type == "Assigned") actions = await db.StaffActions.Where(sa => sa.AssignedToId == arg.User.Id.ToString()).OrderBy(sa => sa.StaffActionId).ToListAsync();
+			else {
+				await _debugService.PrintToChannels($"Unknown SA list type \"{type}\"!");
+				return;
+			}
+
+			int length = actions.Count;
+
+			if (!int.TryParse(pageStr, System.Globalization.NumberStyles.Integer, null, out int page)) {
+				await _debugService.PrintToChannels($"Could not parse \"{pageStr}\" as int!");
+				return;
+			}
+
+			if (length < page * 20) {
+				await _debugService.PrintToChannels($"Back button was not disable for SA list on last page!");
+				return;
+			}
+			page += 1;
+			actions = actions.TakeLast(Math.Max(page * 20, length)).Take(Math.Min(20, length - (page - 1) * 20)).ToList(); // First 20 of page * 20 last items will be the 20 items we wish to display
+
+			var embedBuilder = new EmbedBuilder
+			{
+				Color = Color.Purple,
+				Title = "Submitted Actions"
+
+			};
+
+			var compoBuilder = new ComponentBuilder()
+				.WithButton("Older", "back-button", disabled: length < page * 20)
+				.WithButton("Newer", "next-button", disabled: page <= 1);
+
+			foreach (var sa in actions)
+			{
+				if (sa.AssignedToId == null)
+				{
+					var embedFieldBuilder = new EmbedFieldBuilder
+					{
+						Value = sa.ActionResponse == null ? "No response yet." : $"Response: {sa.ActionResponse}",
+						Name = sa.StaffActionId + " - " + sa.ActionTitle + " - " + sa.Status.ToString() + " - " + "Nobody",
+						IsInline = false
+					};
+
+					embedBuilder.AddField(embedFieldBuilder);
+				}
+				else
+				{
+					var staffAssignedTo = _client.GetUser(ulong.Parse(sa.AssignedToId));
+
+					var embedFieldBuilder = new EmbedFieldBuilder
+					{
+						Value = sa.ActionResponse == null ? "No response yet." : $"Response: {sa.ActionResponse}",
+						Name = sa.StaffActionId + " - " + sa.ActionTitle + " - " + sa.Status.ToString() + " - " + staffAssignedTo.Username,
+						IsInline = false
+					};
+
+					embedBuilder.AddField(embedFieldBuilder);
+				}
+			}
+
+			embedBuilder.WithFooter($"Page {page} of {(int)Math.Ceiling(length / 20f)}");
+
+			await arg.UpdateAsync(msg =>
+			{
+				Embed[] e = {
+					embedBuilder.Build()
+				};
+				msg.Embeds = e;
+				msg.Components = compoBuilder.Build();
+			});
+		}
+
+		public async Task NextSAPage(SocketMessageComponent arg)
+		{
+			SocketMessage msg = arg.Message;
+			if (msg.Embeds.Count < 1)
+			{
+				await _debugService.PrintToChannels($"{arg.Data.CustomId} executed on a message with no embed!");
+				return;
+			}
+			Embed msgEmbed = msg.Embeds.First();
+			string type = msgEmbed.Title.Split(' ')[0]; // Since the type of list is in the title, we're basically doing advanced sleuthing here
+			string pageStr = msgEmbed.Footer.Value.Text.Split(' ')[1]; // Once again, sleuthing
+
+			using var db = new IcarusContext();
+
+			List<StaffAction> actions;
+			if (type == "Submitted") actions = await db.StaffActions.Where(sa => sa.SubmitterId == arg.User.Id.ToString()).OrderBy(sa => sa.StaffActionId).ToListAsync();
+			else if (type == "Assigned") actions = await db.StaffActions.Where(sa => sa.AssignedToId == arg.User.Id.ToString()).OrderBy(sa => sa.StaffActionId).ToListAsync();
+			else
+			{
+				await _debugService.PrintToChannels($"Unknown SA list type \"{type}\"!");
+				return;
+			}
+
+			int length = actions.Count;
+
+			if (!int.TryParse(pageStr, System.Globalization.NumberStyles.Integer, null, out int page))
+			{
+				await _debugService.PrintToChannels($"Could not parse \"{pageStr}\" as int!");
+				return;
+			}
+
+			page -= 1;
+			if (page < 1)
+			{
+				await _debugService.PrintToChannels($"Next button was not disabled for SA list on first page!");
+				return;
+			}
+			actions = actions.TakeLast(Math.Max(page * 20, length)).Take(Math.Min(20, length - (page - 1) * 20)).ToList(); // First 20 of page * 20 last items will be the 20 items we wish to display
+
+			var embedBuilder = new EmbedBuilder
+			{
+				Color = Color.Purple,
+				Title = "Submitted Actions"
+
+			};
+
+			var compoBuilder = new ComponentBuilder()
+				.WithButton("Older", "back-button", disabled: length < page * 20)
+				.WithButton("Newer", "next-button", disabled: page <= 1);
+
+			foreach (var sa in actions)
+			{
+				if (sa.AssignedToId == null)
+				{
+					var embedFieldBuilder = new EmbedFieldBuilder
+					{
+						Value = sa.ActionResponse == null ? "No response yet." : $"Response: {sa.ActionResponse}",
+						Name = sa.StaffActionId + " - " + sa.ActionTitle + " - " + sa.Status.ToString() + " - " + "Nobody",
+						IsInline = false
+					};
+
+					embedBuilder.AddField(embedFieldBuilder);
+				}
+				else
+				{
+					var staffAssignedTo = _client.GetUser(ulong.Parse(sa.AssignedToId));
+
+					var embedFieldBuilder = new EmbedFieldBuilder
+					{
+						Value = sa.ActionResponse == null ? "No response yet." : $"Response: {sa.ActionResponse}",
+						Name = sa.StaffActionId + " - " + sa.ActionTitle + " - " + sa.Status.ToString() + " - " + staffAssignedTo.Username,
+						IsInline = false
+					};
+
+					embedBuilder.AddField(embedFieldBuilder);
+				}
+			}
+
+			embedBuilder.WithFooter($"Page {page} of {(int)Math.Ceiling(length / 20f)}");
+
+			await arg.UpdateAsync(msg =>
+			{
+				Embed[] e = {
+					embedBuilder.Build()
+				};
+				msg.Embeds = e;
+				msg.Components = compoBuilder.Build();
+			});
+		}
+	}
 }

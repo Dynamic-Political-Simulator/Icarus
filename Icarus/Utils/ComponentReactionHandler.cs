@@ -16,13 +16,15 @@ namespace Icarus.Utils
 
         private readonly CharacterService _characterService;
         private readonly DebugService _debugService;
+		private readonly StaffActionService _staffActionService;
 
-        public ComponentReactionHandlerService(DiscordSocketClient client, CharacterService characterService, DebugService debugService)
+		public ComponentReactionHandlerService(DiscordSocketClient client, CharacterService characterService, DebugService debugService, StaffActionService staffActionService)
         {
             _client = client;
 
             _characterService = characterService;
             _debugService = debugService;
+			_staffActionService = staffActionService;
 
             //_client.SelectMenuExecuted += HandleSelectMenu;
         }
@@ -38,5 +40,17 @@ namespace Icarus.Utils
                     break;
             }
         }
+
+		public async Task HandleButtonPress(SocketMessageComponent arg) {
+			switch (arg.Data.CustomId)
+			{
+				case "back-button":
+					await _staffActionService.PreviousSAPage(arg);
+					break;
+				case "next-button":
+					await _staffActionService.NextSAPage(arg);
+					break;
+			}
+		}
     }
 }

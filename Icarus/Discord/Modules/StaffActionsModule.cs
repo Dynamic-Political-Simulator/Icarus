@@ -28,7 +28,7 @@ namespace Icarus.Discord.Modules
 		}
 
         [SlashCommand("my-oldest", "Shows the oldest Staff Action assigned to you.")]
-        [RequireAdmin]
+        // [RequireAdmin]
         public async Task ViewOldestAssignedStaffAction()
 		{
             var sa = _staffActionService.GetMyOldestTodoStaffAction(Context.User.Id);
@@ -45,14 +45,27 @@ namespace Icarus.Discord.Modules
         }
 
         [SlashCommand("fetch", "Gets the SA by ID.")]
-        [RequireAdmin]
-        public async Task Fetch(int id)
+        // [RequireAdmin]
+        public async Task Fetch(int id, bool ephemeral = true)
 		{
             var sa = _staffActionService.GetStaffActionById(id);
 
+			using var db = new IcarusContext();
+			var runner = db.Users.SingleOrDefault(du => du.DiscordId == Context.User.Id.ToString());
+
+			if (!runner.CanUseAdminCommands && sa.AssignedToId != Context.User.Id.ToString()) {
+				await RespondAsync("You cannot view this Staff Action.", ephemeral: true);
+				return;
+			}
+
+			if (!runner.CanUseAdminCommands && !ephemeral) {
+				await RespondAsync("You can only run this command ephemerally.", ephemeral: true);
+				return;
+			}
+
             var embedBuilder = _staffActionService.BuildStaffActionMessage(sa);
 
-            await RespondAsync(embed: embedBuilder.Build(), ephemeral: false);
+            await RespondAsync(embed: embedBuilder.Build(), ephemeral: ephemeral);
         }
 
         [SlashCommand("oldest", "Shows the oldest Staff Action.")]
@@ -114,7 +127,7 @@ namespace Icarus.Discord.Modules
 		}
 
 		[SlashCommand("respond", "Responds to a staff action")]
-		[RequireAdmin]
+		// [RequireAdmin]
 		public async Task RespondToTask(
 			[Summary("ID", "The id of action")]
 			long id,
@@ -143,10 +156,17 @@ namespace Icarus.Discord.Modules
 				await RespondAsync("Not a valid attribute.", ephemeral: true);
 				return;
 			}
+			var runner = db.Users.SingleOrDefault(du => du.DiscordId == Context.User.Id.ToString());
+			if (!runner.CanUseAdminCommands && staffAction.AssignedTo.DiscordId != Context.User.Id.ToString())
+			{
+				await RespondAsync("You cannot respond to this Staff Action.", ephemeral: true);
+				return;
+			}
 
 
 			staffAction.Status = status;
 			staffAction.ActionResponse = response;
+			staffAction.AssignedTo ??= runner;
 
 			db.StaffActions.Update(staffAction);
 			await db.SaveChangesAsync();
@@ -196,11 +216,11 @@ namespace Icarus.Discord.Modules
 				return;
 			}
 
-			if (!mentionedUser.CanUseAdminCommands)
-			{
-				await RespondAsync("This user is not allowed to use staff commands.", ephemeral: true);
-				return;
-			}
+			// if (!mentionedUser.CanUseAdminCommands)
+			// {
+			// 	await RespondAsync("This user is not allowed to use staff commands.", ephemeral: true);
+			// 	return;
+			// }
 
 			staffAction.AssignedTo = mentionedUser;
 
@@ -299,12 +319,19 @@ namespace Icarus.Discord.Modules
 
 			using var db = new IcarusContext();
 			var activeActions = await db.StaffActions.Where(sa => sa.SubmitterId == Context.User.Id.ToString()).OrderBy(sa => sa.StaffActionId).ToListAsync();
+			var length = activeActions.Count;
 			activeActions = activeActions.TakeLast(20).ToList();
 
 			var embedBuilder = new EmbedBuilder
 			{
-				Color = Color.Purple
+				Color = Color.Purple,
+				Title = "Submitted Actions"
+
 			};
+
+			var compoBuilder = new ComponentBuilder()
+				.WithButton("Older", "back-button", disabled: length <= 20)
+				.WithButton("Newer", "next-button", disabled: true);
 
 			if (!activeActions.Any())
 			{
@@ -319,7 +346,7 @@ namespace Icarus.Discord.Modules
 					var embedFieldBuilder = new EmbedFieldBuilder
 					{
 						Value = sa.ActionResponse == null ? "No response yet." : $"Response: {sa.ActionResponse}",
-						Name = sa.StaffActionId + " - " + sa.ActionTitle + " - " + sa.Status.ToString(),
+						Name = sa.StaffActionId + " - " + sa.ActionTitle + " - " + sa.Status.ToString() + " - " + "Nobody",
 						IsInline = false
 					};
 
@@ -332,7 +359,7 @@ namespace Icarus.Discord.Modules
 					var embedFieldBuilder = new EmbedFieldBuilder
 					{
 						Value = sa.ActionResponse == null ? "No response yet." : $"Response: {sa.ActionResponse}",
-						Name = sa.ActionTitle + " - " + sa.Status.ToString() + " - " + staffAssignedTo.Username,
+						Name = sa.StaffActionId + " - " + sa.ActionTitle + " - " + sa.Status.ToString() + " - " + staffAssignedTo.Username,
 						IsInline = false
 					};
 
@@ -340,7 +367,68 @@ namespace Icarus.Discord.Modules
 				}
 			}
 
-			await FollowupAsync(embed: embedBuilder.Build(), ephemeral: true);
+			embedBuilder.WithFooter($"Page 1 of {(int) Math.Ceiling(length / 20f)}");
+
+			await FollowupAsync(embed: embedBuilder.Build(), ephemeral: true, components: compoBuilder.Build());
+		}
+
+		[SlashCommand("assigned", "Lists all the actions you are assigned to.")]
+		public async Task AssignedActions()
+		{
+			await DeferAsync(ephemeral: true);
+
+			using var db = new IcarusContext();
+			var assignedActions = await db.StaffActions.Where(sa => sa.AssignedToId == Context.User.Id.ToString()).OrderBy(sa => sa.StaffActionId).ToListAsync();
+			var length = assignedActions.Count;
+			assignedActions = assignedActions.TakeLast(20).ToList();
+
+			var embedBuilder = new EmbedBuilder
+			{
+				Color = Color.Purple,
+				Title = "Assigned Actions"
+			};
+
+			var compoBuilder = new ComponentBuilder()
+				.WithButton("Older", "back-button", disabled: length <= 20)
+				.WithButton("Newer", "next-button", disabled: true);
+
+			if (!assignedActions.Any())
+			{
+				await FollowupAsync("No actions found.", ephemeral: true);
+				return;
+			}
+
+			foreach (var sa in assignedActions)
+			{
+				if (sa.AssignedToId == null)
+				{
+					var embedFieldBuilder = new EmbedFieldBuilder
+					{
+						Value = sa.ActionResponse == null ? "No response yet." : $"Response: {sa.ActionResponse}",
+						Name = sa.StaffActionId + " - " + sa.ActionTitle + " - " + sa.Status.ToString() + " - " + "Nobody",
+						IsInline = false
+					};
+
+					embedBuilder.AddField(embedFieldBuilder);
+				}
+				else
+				{
+					var staffAssignedTo = _client.GetUser(ulong.Parse(sa.AssignedToId));
+
+					var embedFieldBuilder = new EmbedFieldBuilder
+					{
+						Value = sa.ActionResponse == null ? "No response yet." : $"Response: {sa.ActionResponse}",
+						Name = sa.StaffActionId +  " - " + sa.ActionTitle + " - " + sa.Status.ToString() + " - " + staffAssignedTo.Username,
+						IsInline = false
+					};
+
+					embedBuilder.AddField(embedFieldBuilder);
+				}
+			}
+
+			embedBuilder.WithFooter($"Page 1 of {(int)Math.Ceiling(length / 20f)}");
+
+			await FollowupAsync(embed: embedBuilder.Build(), ephemeral: true, components: compoBuilder.Build());
 		}
 	}
 }

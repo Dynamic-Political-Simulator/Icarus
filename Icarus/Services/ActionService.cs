@@ -15,10 +15,12 @@ namespace Icarus.Services
     public class ActionService
     {
         private readonly CharacterService _characterService;
+		private readonly DebugService _debugService;
 
-        public ActionService(CharacterService characterService)
+        public ActionService(CharacterService characterService, DebugService debugService)
         {
             _characterService = characterService;
+			_debugService = debugService;
         }
 
         public string ExampleAction(PlayerCharacter character)
@@ -72,6 +74,14 @@ namespace Icarus.Services
 
             db.Update(character);
             await db.SaveChangesAsync();
+
+			try
+			{
+				var dms = await Target.CreateDMChannelAsync();
+				await dms.SendMessageAsync($"You have {(amount >= 0 ? "gained" : "lost")} {Math.Abs(amount)} {tokenType}{(Math.Abs(amount) == 1 ? "" : "s")}!");
+			} catch {
+				await _debugService.PrintToChannels($"Failed to DM {Target.Username} ({Target.Id}), they likely have their DMs disabled.");
+			}
 
             return "Added favours.";
         }
