@@ -127,6 +127,7 @@ namespace Icarus
 			ComponentReactionHandlerService selectMenuHandler = (ComponentReactionHandlerService)_services.GetService(typeof(ComponentReactionHandlerService));
 
 			_client.SelectMenuExecuted += selectMenuHandler.HandleSelectMenu;
+			_client.ButtonExecuted += selectMenuHandler.HandleButtonPress;
 
 			_ = RunPythonScript();
 

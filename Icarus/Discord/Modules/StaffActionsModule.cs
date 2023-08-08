@@ -166,6 +166,7 @@ namespace Icarus.Discord.Modules
 
 			staffAction.Status = status;
 			staffAction.ActionResponse = response;
+			staffAction.AssignedTo ??= runner;
 
 			db.StaffActions.Update(staffAction);
 			await db.SaveChangesAsync();
@@ -318,13 +319,19 @@ namespace Icarus.Discord.Modules
 
 			using var db = new IcarusContext();
 			var activeActions = await db.StaffActions.Where(sa => sa.SubmitterId == Context.User.Id.ToString()).OrderBy(sa => sa.StaffActionId).ToListAsync();
+			var length = activeActions.Count;
 			activeActions = activeActions.TakeLast(20).ToList();
 
 			var embedBuilder = new EmbedBuilder
 			{
 				Color = Color.Purple,
 				Title = "Submitted Actions"
+
 			};
+
+			var compoBuilder = new ComponentBuilder()
+				.WithButton("Older", "back-button", disabled: length <= 20)
+				.WithButton("Newer", "next-button", disabled: true);
 
 			if (!activeActions.Any())
 			{
@@ -339,7 +346,7 @@ namespace Icarus.Discord.Modules
 					var embedFieldBuilder = new EmbedFieldBuilder
 					{
 						Value = sa.ActionResponse == null ? "No response yet." : $"Response: {sa.ActionResponse}",
-						Name = sa.StaffActionId + " - " + sa.ActionTitle + " - " + sa.Status.ToString(),
+						Name = sa.StaffActionId + " - " + sa.ActionTitle + " - " + sa.Status.ToString() + " - " + "Nobody",
 						IsInline = false
 					};
 
@@ -352,7 +359,7 @@ namespace Icarus.Discord.Modules
 					var embedFieldBuilder = new EmbedFieldBuilder
 					{
 						Value = sa.ActionResponse == null ? "No response yet." : $"Response: {sa.ActionResponse}",
-						Name = sa.ActionTitle + " - " + sa.Status.ToString() + " - " + staffAssignedTo.Username,
+						Name = sa.StaffActionId + " - " + sa.ActionTitle + " - " + sa.Status.ToString() + " - " + staffAssignedTo.Username,
 						IsInline = false
 					};
 
@@ -360,7 +367,9 @@ namespace Icarus.Discord.Modules
 				}
 			}
 
-			await FollowupAsync(embed: embedBuilder.Build(), ephemeral: true);
+			embedBuilder.WithFooter($"Page 1 of {(int) Math.Ceiling(length / 20f)}");
+
+			await FollowupAsync(embed: embedBuilder.Build(), ephemeral: true, components: compoBuilder.Build());
 		}
 
 		[SlashCommand("assigned", "Lists all the actions you are assigned to.")]
@@ -370,6 +379,7 @@ namespace Icarus.Discord.Modules
 
 			using var db = new IcarusContext();
 			var assignedActions = await db.StaffActions.Where(sa => sa.AssignedToId == Context.User.Id.ToString()).OrderBy(sa => sa.StaffActionId).ToListAsync();
+			var length = assignedActions.Count;
 			assignedActions = assignedActions.TakeLast(20).ToList();
 
 			var embedBuilder = new EmbedBuilder
@@ -377,6 +387,10 @@ namespace Icarus.Discord.Modules
 				Color = Color.Purple,
 				Title = "Assigned Actions"
 			};
+
+			var compoBuilder = new ComponentBuilder()
+				.WithButton("Older", "back-button", disabled: length <= 20)
+				.WithButton("Newer", "next-button", disabled: true);
 
 			if (!assignedActions.Any())
 			{
@@ -391,7 +405,7 @@ namespace Icarus.Discord.Modules
 					var embedFieldBuilder = new EmbedFieldBuilder
 					{
 						Value = sa.ActionResponse == null ? "No response yet." : $"Response: {sa.ActionResponse}",
-						Name = sa.StaffActionId + " - " + sa.ActionTitle + " - " + sa.Status.ToString(),
+						Name = sa.StaffActionId + " - " + sa.ActionTitle + " - " + sa.Status.ToString() + " - " + "Nobody",
 						IsInline = false
 					};
 
@@ -404,7 +418,7 @@ namespace Icarus.Discord.Modules
 					var embedFieldBuilder = new EmbedFieldBuilder
 					{
 						Value = sa.ActionResponse == null ? "No response yet." : $"Response: {sa.ActionResponse}",
-						Name = sa.ActionTitle + " - " + sa.Status.ToString() + " - " + staffAssignedTo.Username,
+						Name = sa.StaffActionId +  " - " + sa.ActionTitle + " - " + sa.Status.ToString() + " - " + staffAssignedTo.Username,
 						IsInline = false
 					};
 
@@ -412,7 +426,9 @@ namespace Icarus.Discord.Modules
 				}
 			}
 
-			await FollowupAsync(embed: embedBuilder.Build(), ephemeral: true);
+			embedBuilder.WithFooter($"Page 1 of {(int)Math.Ceiling(length / 20f)}");
+
+			await FollowupAsync(embed: embedBuilder.Build(), ephemeral: true, components: compoBuilder.Build());
 		}
 	}
 }
