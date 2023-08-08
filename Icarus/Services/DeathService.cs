@@ -40,12 +40,15 @@ namespace Icarus.Services
         {
             using var db = new IcarusContext();
 
-            var charIdsOnTimer = db.DeathTimer.Where(c => c.TimeKilled == null).ToList();
+            var charactersOnTimer = db.DeathTimer.Where(c => c.TimeKilled < DateTime.UtcNow.AddMinutes(-1435)).ToList();
 
-            foreach (var charId in charIdsOnTimer)
+            foreach (var character in charactersOnTimer)
             {
-                _ = KillCharacterById(charId.CharacterId);
+                _ = KillCharacterById(character.CharacterId);
+                db.DeathTimer.Remove(character);
             }
+
+            db.SaveChangesAsync();
 
 			return Task.CompletedTask;
         }
@@ -56,7 +59,8 @@ namespace Icarus.Services
 
             var newDeathTimer = new DeathTimer()
             {
-                CharacterId = character.CharacterId
+                CharacterId = character.CharacterId,
+                TimeKilled = DateTime.UtcNow
             };
 
             _ = _messagingService.SendMessageToUser(ulong.Parse(character.DiscordUserId), "You feel your life force waning.You are certain you only have 24 hours left, it is best to deal with everything undone now before it's too late.");
