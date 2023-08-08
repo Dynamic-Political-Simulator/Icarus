@@ -159,7 +159,7 @@ namespace Icarus.Discord.Modules
 			var runner = db.Users.SingleOrDefault(du => du.DiscordId == Context.User.Id.ToString());
 			if (!runner.CanUseAdminCommands && staffAction.AssignedTo.DiscordId != Context.User.Id.ToString())
 			{
-				await RespondAsync("You cannot respond to Staff Actions.", ephemeral: true);
+				await RespondAsync("You cannot respond to this Staff Action.", ephemeral: true);
 				return;
 			}
 
