@@ -44,7 +44,7 @@ namespace Icarus.Services
                 sheetContext.Update($"{province.Name}!H4:Q6", GenerateGoodTable(province, _valueManagementService));
 
                 //Next Modifiers
-                sheetContext.Update($"{province.Name}!H10:Q22", GenerateModifierTable(province, _valueManagementService));
+                sheetContext.Update($"{province.Name}!H10:Q60", GenerateModifierTable(province, _valueManagementService));
 
                 //Tax Mod
                 sheetContext.Update($"{province.Name}!F9:G21", GenerateTaxModTable(province, _valueManagementService));
@@ -120,7 +120,7 @@ namespace Icarus.Services
 
         public List<List<string>> GenerateModifierTable(Province province, ValueManagementService _valueManagementService)
         {
-            List<List<string>> modTable = GenEmpty(12, 10);
+            List<List<string>> modTable = GenEmpty(50, 10);
             int row = 0;
             foreach (Modifier Mod in province.Modifiers.Where(m => m.isGood == false))
             {
