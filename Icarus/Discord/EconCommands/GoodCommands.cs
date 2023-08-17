@@ -267,17 +267,15 @@ namespace Icarus.Discord.EconCommands
 
             int messageId = Random.Shared.Next(0, 9999);
             List<string> modifiers = new List<string>();
+            Province _province = null;
             if (province == null)
             {
-                foreach (Modifier modifier in db.Modifiers.Where(m => m.isGood == true))
-                {
-                    modifiers.Add(modifier.Name);
-                    Debug.WriteLine(modifier.Name);
-                }
+                await RespondAsync("Province not found!", ephemeral: true);
+                return;
             }
             else
             {
-                Province _province = db.Provinces.FirstOrDefault(p => p.Name == province);
+                _province = db.Provinces.FirstOrDefault(p => p.Name == province);
                 if (_province == null)
                 {
                     await RespondAsync("Province not found!", ephemeral: true);
@@ -317,7 +315,7 @@ namespace Icarus.Discord.EconCommands
 
             if (response == null) { return; }
 
-            Modifier Modifier = db.Modifiers.FirstOrDefault(m => m.Name == response.Data.Values.First());
+            Modifier Modifier = _province.Modifiers.FirstOrDefault(m => m.Name == response.Data.Values.First());
 
             if (Modifier == null)
             {
