@@ -462,6 +462,10 @@ namespace Icarus.Discord.EconCommands
                 {
                     modifiers.Add(modifier.Name);
                     Debug.WriteLine(modifier.Name);
+                    if (modifiers.Count() > 24)
+                    {
+                        break;
+                    }
                 }
 
                 if (modifiers.Count == 0)
@@ -478,6 +482,10 @@ namespace Icarus.Discord.EconCommands
                 {
                     modifiers.Add(modifier.Name);
                     Debug.WriteLine(modifier.Name);
+                    if (modifiers.Count() > 24)
+                    {
+                        break;
+                    }
                 }
 
                 if (modifiers.Count == 0)
@@ -574,6 +582,11 @@ namespace Icarus.Discord.EconCommands
                     {
                         modifiers.Add(modifier.Name);
                         Debug.WriteLine(modifier.Name);
+
+                        if (modifiers.Count() > 24)
+                        {
+                            break;
+                        }
                     }
                 }
                 else
@@ -590,6 +603,11 @@ namespace Icarus.Discord.EconCommands
                     {
                         modifiers.Add(modifier.Name);
                         Debug.WriteLine(modifier.Name);
+
+                        if (modifiers.Count() > 24)
+                        {
+                            break;
+                        }
                     }
                 }
             }

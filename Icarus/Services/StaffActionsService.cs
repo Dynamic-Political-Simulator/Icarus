@@ -257,7 +257,7 @@ namespace Icarus.Services
 			var embedBuilder = new EmbedBuilder
 			{
 				Color = Color.Purple,
-				Title = "Submitted Actions"
+				Title = $"{type} Actions"
 
 			};
 
@@ -347,7 +347,7 @@ namespace Icarus.Services
 			var embedBuilder = new EmbedBuilder
 			{
 				Color = Color.Purple,
-				Title = "Submitted Actions"
+				Title = $"{type} Actions"
 
 			};
 
