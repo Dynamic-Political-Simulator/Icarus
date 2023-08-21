@@ -10,7 +10,7 @@ namespace Icarus.Services
 {
     public class AgeService
     {
-        const int CHANCE_AGE_START = 60;
+        const int CHANCE_AGE_START = 65;
         const double DEATH_CHANCE = 0.05;
 
         const int YEARS_PER_DAY = 1;
