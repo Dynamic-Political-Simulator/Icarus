@@ -28,6 +28,14 @@ namespace Icarus.Discord.Modules
 			_valueManagementService = valueManagementService;
 		}
 
+        [SlashCommand("send-message", "Send message in current channel.")]
+        [RequireAdmin]
+        public async Task SendMessageInCurrentChannel(string message)
+		{
+			await Context.Channel.SendMessageAsync(message);
+            await RespondAsync($"Message sent.", ephemeral: true);
+        }
+
 		[SlashCommand("test", "Test command please ignore")]
 		public async Task GetTest()
 		{
