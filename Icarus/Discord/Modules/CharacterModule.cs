@@ -120,6 +120,24 @@ PG's must also not be overly powerful, you cannot create a PG which is canonical
         }
 
         [RequireProfile]
+        [SlashCommand("set-name", "Sets your own name.")]
+        public async Task SetName(string name)
+        {
+            SocketGuildUser user = (SocketGuildUser)Context.User;
+
+            try
+            {
+                await _characterService.UpdateCharacterName(user.Id.ToString(), name);
+            }
+            catch (ArgumentException)
+            {
+                await FollowupAsync($"Character names may not be longer than 64 characters.");
+            }
+
+            await RespondAsync($"Name updated.");
+        }
+
+        [RequireProfile]
         [SlashCommand("set-bio", "Sets your own bio.")]
         public async Task SetBio(string bio)
         {

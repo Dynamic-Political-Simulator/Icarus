@@ -96,6 +96,23 @@ namespace Icarus.Services
             
         }
 
+        public async Task UpdateCharacterName(string discordId, string name)
+        {
+            if (name.Length > 64)
+            {
+                throw new ArgumentException();
+            }
+
+            using var db = new IcarusContext();
+
+            var active = await GetActiveCharacter(discordId);
+
+            active.CharacterName = name;
+
+            db.Update(active);
+            await db.SaveChangesAsync();
+        }
+
         public async Task UpdateCharacterBio(string discordId, string bio)
         {
             if (bio.Length > 1000)
