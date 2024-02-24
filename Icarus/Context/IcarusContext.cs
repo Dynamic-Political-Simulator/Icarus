@@ -13,7 +13,7 @@ namespace Icarus.Context
         public IcarusContext() // Called for migrations
         {
             var configBuilder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
+                .AddJsonFile("appsettings.prod.json", optional: false, reloadOnChange: false);
 
             Configuration = configBuilder.Build();
         }

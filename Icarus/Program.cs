@@ -129,23 +129,11 @@ namespace Icarus
 			_client.SelectMenuExecuted += selectMenuHandler.HandleSelectMenu;
 			_client.ButtonExecuted += selectMenuHandler.HandleButtonPress;
 
-			_ = RunPythonScript();
-
 			_client.Ready -= OnReady;
 
             await Task.Delay(-1);
 		}
 
-		private async Task RunPythonScript()
-		{
-            ProcessStartInfo start = new ProcessStartInfo();
-            start.FileName = "/python/bin/python3";
-            start.Arguments = "ChartGen.py";
-            start.UseShellExecute = false;
-            start.CreateNoWindow = true;
-            start.RedirectStandardOutput = true;
-			Process.Start(start);
-        }
 
 		private Task LogAsync(LogMessage msg)
 		{

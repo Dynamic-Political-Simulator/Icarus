@@ -29,30 +29,7 @@ namespace Icarus.Services
 
         public async Task UpdateProvinceView(ValueManagementService _valueManagementService)
         {
-            var icarusConfig = ConfigFactory.GetConfig();
-            string sheetId = icarusConfig.ValueSheetId;
-            SheetContext sheetContext = _googleSheetsService.GenerateContext(sheetId);
 
-            using var db = new IcarusContext();
-
-            foreach(Province province in db.Provinces)
-            {
-                //First Values
-                sheetContext.Update($"{province.Name}!A8:D22", GenerateValueTable(province, _valueManagementService));
-
-                //Next Goods
-                sheetContext.Update($"{province.Name}!H4:Q6", GenerateGoodTable(province, _valueManagementService));
-
-                //Next Modifiers
-                sheetContext.Update($"{province.Name}!H10:Q60", GenerateModifierTable(province, _valueManagementService));
-
-                //Tax Mod
-                sheetContext.Update($"{province.Name}!F9:G21", GenerateTaxModTable(province, _valueManagementService));
-
-                //This province is donzo!
-            }
-
-            sheetContext.Update($"Nation!H10:Q110", GenerateGlobalModifierTable(db.Nations.First(), _valueManagementService));
         }
 
         public List<List<string>> GenEmpty(int row, int col)

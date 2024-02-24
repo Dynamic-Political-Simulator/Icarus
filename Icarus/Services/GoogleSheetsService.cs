@@ -30,17 +30,10 @@ namespace Icarus.Services
 		public GoogleSheetsService()
 		{
 			InitializeService();
-			_googleSheetValues = GoogleSheets.Spreadsheets.Values;
 		}
 
 		private void InitializeService()
 		{
-			var credential = GetCredentialsFromFile();
-			GoogleSheets = new SheetsService(new BaseClientService.Initializer()
-			{
-				HttpClientInitializer = credential,
-				ApplicationName = "tanb-test"
-			});
 		}
 
 		private GoogleCredential GetCredentialsFromFile()
